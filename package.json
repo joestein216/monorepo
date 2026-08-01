@@ -1,0 +1,12 @@
+{
+  "name": "monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "supabase": "^2.110.0",
+    "turbo": "^2.0.0"
+  }
+}

@@ -1,0 +1,35 @@
+# --- Dependencies & Package Managers ---
+node_modules/
+.pnpm-store/
+pnpm-lock.yaml.log
+
+# --- Next.js Build Outputs ---
+.next/
+out/
+build/
+
+# --- Turborepo & Build Tools ---
+.turbo/
+dist/
+coverage/
+
+# --- Local Secrets & Environments (CRUCIAL) ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env.local
+
+# --- Operating System Files ---
+.DS_Store
+Thumbs.db
+
+# --- IDE & Editor Specifics ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

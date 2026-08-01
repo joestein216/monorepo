@@ -1,7 +1,17 @@
-import { postSchema } from './schemas/post';
+import { defineType, defineField } from 'sanity'
 
-// This is your core array of schemas
-export const coreSchemas = [postSchema];
-
-// Export types or individual schemas if needed later
-export { postSchema };
+// Provide a default schema object array so the Studio can initialize safely
+export const coreSchemas = [
+  defineType({
+    name: 'samplePost',
+    title: 'Sample Post',
+    type: 'document',
+    fields: [
+      defineField({
+        name: 'title',
+        title: 'Title',
+        type: 'string',
+      }),
+    ],
+  }),
+]

@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
+import { type Database } from './database.types'; // Import the auto-generated types
 
-// Ensure runtime environment variables are present
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Pass the Database type token into the client builder
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
-// Export types cleanly for all apps to share
 export * from '@supabase/supabase-js';
+export type { Database };

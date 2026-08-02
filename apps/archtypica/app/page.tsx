@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@repo/ui/components/ui/button";
 import { supabase } from "@repo/database"
 
@@ -14,9 +15,9 @@ export default async function HomePage() {
         </p>
         <div className="flex gap-4">
           <Button>Shared UI Component</Button>
-          <a href="/studio" className="underline text-sm block mt-2 text-muted-foreground hover:text-primary">
+          <Link href="/studio" className="underline text-sm block mt-2 text-muted-foreground hover:text-primary">
             Open Sanity Admin Studio →
-          </a>
+          </Link>
         </div>
       </div>
     </main>

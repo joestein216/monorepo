@@ -1,5 +1,9 @@
 {
   "$schema": "https://turbo.build",
+  "globalEnv": [
+    "NEXT_PUBLIC_SANITY_PROJECT_ID",
+    "NEXT_PUBLIC_SANITY_DATASET"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -11,3 +15,5 @@
     }
   }
 }
+
+

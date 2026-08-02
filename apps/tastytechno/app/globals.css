@@ -1,28 +1,14 @@
 @import "tailwindcss";
-@source "../../../packages/ui/src/**/*.tsx";
-@import "../../../packages/ui/src/global.css";
+@import "@repo/ui/styles.css";
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
 
+/* Site-owned brand token overrides belong here. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.dark {
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
 }

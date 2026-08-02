@@ -1,15 +1,19 @@
 {
-    "name": "monorepo",
-    "private": true,
-    "scripts": {
-        "dev": "turbo run dev",
-        "build": "turbo run build",
-        "types:db": "pnpm supabase gen types typescript --project-id evjxcrhnmedyypjzpitn > packages/database/database.types.ts"
-    },
-    "devDependencies": {
-        "supabase": "^2.110.0",
-        "turbo": "^2.0.0"
-    },
-    "packageManager": "pnpm@11.18.0"
+  "name": "monorepo",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "types:db": "node scripts/generate-database-types.mjs"
+  },
+  "devDependencies": {
+    "supabase": "2.111.0",
+    "turbo": "2.10.8"
+  },
+  "packageManager": "pnpm@11.18.0"
 }
-

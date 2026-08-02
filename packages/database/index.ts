@@ -1,11 +1,35 @@
-import { createClient } from '@supabase/supabase-js';
-import { type Database } from './database.types'; // Import the auto-generated types
+import {
+  createClient,
+  type SupabaseClientOptions,
+} from "@supabase/supabase-js"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import type { Database } from "./database.types"
 
-// Pass the Database type token into the client builder
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export type DatabaseClientConfig = {
+  url: string | undefined
+  publishableKey: string | undefined
+  options?: SupabaseClientOptions<"public">
+}
 
-export * from '@supabase/supabase-js';
-export type { Database };
+export function createDatabaseClient({
+  url,
+  publishableKey,
+  options,
+}: DatabaseClientConfig) {
+  if (!url) {
+    throw new Error(
+      "Supabase URL is required. Set NEXT_PUBLIC_SUPABASE_URL in the consuming app.",
+    )
+  }
+
+  if (!publishableKey) {
+    throw new Error(
+      "Supabase publishable key is required. Set NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in the consuming app.",
+    )
+  }
+
+  return createClient<Database>(url, publishableKey, options)
+}
+
+export type DatabaseClient = ReturnType<typeof createDatabaseClient>
+export type { Database }

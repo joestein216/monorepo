@@ -1,0 +1,14 @@
+# Local Supabase stack configuration. The remote link is stored only in the
+# ignored supabase/.temp directory after running `supabase link`.
+project_id = "monorepo"
+
+[db]
+major_version = 17
+
+[db.migrations]
+enabled = true
+schema_paths = ["./schemas/*.sql"]
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]

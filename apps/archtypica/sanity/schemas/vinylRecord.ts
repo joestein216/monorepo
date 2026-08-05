@@ -82,6 +82,14 @@ export default defineType({
       type: 'string'
     },
     {
+      name: 'coverArt',
+      title: 'Cover Art',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+    },
+    {
       name: 'weight',
       title: 'weight',
       type: 'number'

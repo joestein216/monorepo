@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { urlFor } from '../../sanity/lib/image'
 
 interface VinylRecord {
   _id: string;
@@ -17,6 +18,13 @@ interface VinylRecord {
   sleeve_condition: string;
   external_id: string;
   weight: number;
+  coverArt: {
+    _type: 'image'
+    asset: {
+      _ref: string
+      _type: 'reference'
+    }
+  };
 }
 
 interface RecordsResponse {
@@ -30,12 +38,27 @@ interface RecordsResponse {
 const PAGE_LIMIT = 24;
 
 const VinylCard = memo(function VinylCard({ vinyl }: { vinyl: VinylRecord }) {
+  console.log(vinyl);
   return (
     <article className="rounded-3xl border border-border bg-background p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <div className="space-y-3">
         <div>
           <h2 className="text-lg font-semibold text-foreground">{vinyl.title}</h2>
           <p className="text-sm text-muted-foreground">{vinyl.artist}</p>
+          {/* Simple, non-dynamic image rendering */}
+          {vinyl.coverArt && (
+            <img 
+              src={urlFor(vinyl.coverArt).url()} 
+              alt={vinyl.title}
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
+          )}
+          {!vinyl.coverArt && (
+            <div className="flex h-48 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              No Cover Art
+            </div>
+          )}
+
         </div>
         <div className="grid gap-1 text-sm text-muted-foreground">
           <p>Label: {vinyl.label}</p>

@@ -16,6 +16,13 @@ interface VinylRecord {
   sleeve_condition: string;
   external_id: string;
   weight: number;
+  coverArt: {
+    _type: 'image'
+    asset: {
+      _ref: string
+      _type: 'reference'
+    }
+  };
 }
 
 const DEFAULT_LIMIT = 24;
@@ -66,7 +73,8 @@ export async function GET(request: NextRequest) {
         media_condition,
         sleeve_condition,
         external_id,
-        weight
+        weight,
+        coverArt
       }`,
     );
 

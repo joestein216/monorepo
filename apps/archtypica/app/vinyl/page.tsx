@@ -1,7 +1,9 @@
 "use client";
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { urlFor } from '../../sanity/lib/image'
+import { useCartStore } from '../store/useCartStore';
 
 interface VinylRecord {
   _id: string;
@@ -38,7 +40,7 @@ interface RecordsResponse {
 const PAGE_LIMIT = 24;
 
 const VinylCard = memo(function VinylCard({ vinyl }: { vinyl: VinylRecord }) {
-  console.log(vinyl);
+  const { addItem } = useCartStore();
   return (
     <article className="rounded-3xl border border-border bg-background p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <div className="space-y-3">
@@ -47,9 +49,11 @@ const VinylCard = memo(function VinylCard({ vinyl }: { vinyl: VinylRecord }) {
           <p className="text-sm text-muted-foreground">{vinyl.artist}</p>
           {/* Simple, non-dynamic image rendering */}
           {vinyl.coverArt && (
-            <img 
+            <Image 
               src={urlFor(vinyl.coverArt).url()} 
               alt={vinyl.title}
+              width={300}
+              height={300}
               style={{ maxWidth: '100%', height: 'auto' }}
             />
           )}
@@ -69,6 +73,12 @@ const VinylCard = memo(function VinylCard({ vinyl }: { vinyl: VinylRecord }) {
           <p>Media: {vinyl.media_condition} / Sleeve: {vinyl.sleeve_condition}</p>
           <p className="font-medium text-foreground">Price: ${vinyl.price.toFixed(2)}</p>
           {vinyl.comments ? <p className="text-xs text-muted-foreground">{vinyl.comments}</p> : null}
+          <button
+            onClick={() => addItem({ id: vinyl._id, name: vinyl.title, price: vinyl.price * 100, quantity: 1 })}
+            className="text-xs text-green-500 hover:underline mt-1"
+          >
+            Add to Cart
+          </button>
         </div>
       </div>
     </article>
@@ -114,8 +124,6 @@ export default function VinylPage() {
     [hasMore, loading],
   );
 
-
-
   useEffect(() => {
     if (!sentinelRef.current || loading || !hasMore) return;
 
@@ -136,40 +144,36 @@ export default function VinylPage() {
     return () => observer.disconnect();
   }, [hasMore, loadPage, loading, page]);
 
-  return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Our Vinyl Records</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Browse the collection with lazy-loading as you scroll; only visible records render in the viewport.
+  return (      
+      <section>
+        <h1 className="text-2xl tracking-tight mt-0">Our Vinyl Records</h1>
+        <p className="mt-2 mb-4 max-w-2xl text-medium text-muted-foreground">
+          Browse the the collection and become curator of some new sounds.
         </p>
-      </header>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {vinyls.map((vinyl) => (
+            <VinylCard key={vinyl._id} vinyl={vinyl} />
+          ))}
+          {initialLoad && !vinyls.length && !loading ? (
+            <div className="rounded-3xl border border-border bg-background p-8 text-center text-sm text-muted-foreground">
+              No records found.
+            </div>
+          ) : null}
 
-      <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {vinyls.map((vinyl) => (
-          <VinylCard key={vinyl._id} vinyl={vinyl} />
-        ))}
-      </section>
+          <div className="mt-10 flex flex-col items-center justify-center gap-2 py-6">
+            {loading ? (
+              <p className="text-sm text-muted-foreground">Loading more records…</p>
+            ) : error ? (
+              <p className="text-sm text-destructive">{error}</p>
+            ) : !hasMore ? (
+              <p className="text-sm text-muted-foreground">You’ve reached the end of the collection.</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Scroll for more records.</p>
+            )}
+          </div>
 
-      {initialLoad && !vinyls.length && !loading ? (
-        <div className="rounded-3xl border border-border bg-background p-8 text-center text-sm text-muted-foreground">
-          No records found.
+          <div ref={sentinelRef} className="h-1" aria-hidden="true" />
         </div>
-      ) : null}
-
-      <div className="mt-10 flex flex-col items-center justify-center gap-2 py-6">
-        {loading ? (
-          <p className="text-sm text-muted-foreground">Loading more records…</p>
-        ) : error ? (
-          <p className="text-sm text-destructive">{error}</p>
-        ) : !hasMore ? (
-          <p className="text-sm text-muted-foreground">You’ve reached the end of the collection.</p>
-        ) : (
-          <p className="text-sm text-muted-foreground">Scroll for more records.</p>
-        )}
-      </div>
-
-      <div ref={sentinelRef} className="h-1" aria-hidden="true" />
-    </main>
+      </section>
   );
 }

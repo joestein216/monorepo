@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     const client = getClient();
 
     const vinyls = await client.fetch<VinylRecord[]>(
-      `*[_type == "vinylRecord"] | order(listing_id asc)[${offset}...${offset + limit}] {
+      `*[_type == "vinylRecord" && defined(coverArt)] | order(listing_id asc)[${offset}...${offset + limit}] {
         _id,
         listing_id,
         artist,

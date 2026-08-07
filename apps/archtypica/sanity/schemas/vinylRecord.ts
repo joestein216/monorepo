@@ -90,6 +90,24 @@ export default defineType({
       },
     },
     {
+      name: 'coverArtSource',
+      title: 'Cover Art Source',
+      type: 'string',
+    },
+    {
+      name: 'musicBrainzId',
+      title: 'MusicBrainz ID',
+      type: 'string',
+    },
+    {
+      name: 'coverArtMusicBrainz',
+      title: 'Cover Art MusicBrainz',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+    },
+    {
       name: 'weight',
       title: 'weight',
       type: 'number'

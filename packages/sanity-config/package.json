@@ -5,7 +5,7 @@
   "exports": {
     ".": "./index.ts",
     "./cli": "./cli.ts",
-    "./schemas": "./schemas/index.ts"
+    "./schemas": "./schemas/index.ts" 
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

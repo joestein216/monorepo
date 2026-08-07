@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { cache } from "react";
 import { createClient } from "next-sanity";
 
@@ -102,12 +103,21 @@ export default async function HomePage() {
         ) : null}
 
         <p className="mt-8">
-          <a
+          <Link
             className="inline-flex min-h-10 items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
             href="/studio"
           >
             Launch Studio
-          </a>
+          </Link>
+        </p>
+
+        <p className="mt-8">
+          <Link
+            className="inline-flex min-h-10 items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            href="/gallery"
+          >
+            View Gallery
+          </Link>
         </p>
 
         {/* Replace these starter sections with site-specific content. */}

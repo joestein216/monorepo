@@ -27,6 +27,15 @@ interface VinylRecord {
       _type: 'reference'
     }
   };
+  coverArtSource: string;
+  musicbrainzId: string;
+  coverArtMusicBrainz: {
+    _type: 'image'
+    asset: {
+      _ref: string
+      _type: 'reference'
+    }
+  };
 }
 
 interface RecordsResponse {
@@ -51,18 +60,26 @@ const VinylCard = memo(function VinylCard({ vinyl }: { vinyl: VinylRecord }) {
           {vinyl.coverArt && (
             <Image 
               src={urlFor(vinyl.coverArt).url()} 
-              alt={vinyl.title}
+              alt={`discogs image ${vinyl.title}`}
               width={300}
               height={300}
               style={{ maxWidth: '100%', height: 'auto' }}
             />
           )}
-          {!vinyl.coverArt && (
+          {vinyl.coverArtMusicBrainz && (
+            <Image 
+              src={urlFor(vinyl.coverArtMusicBrainz).url()} 
+              alt={`musicbrainz image ${vinyl.title}`}
+              width={300}
+              height={300}
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
+          )}
+          {!vinyl.coverArt && !vinyl.coverArtMusicBrainz && (
             <div className="flex h-48 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-              No Cover Art
+              No Cover Art from Discogs or MusicBrainz
             </div>
           )}
-
         </div>
         <div className="grid gap-1 text-sm text-muted-foreground">
           <p>Label: {vinyl.label}</p>

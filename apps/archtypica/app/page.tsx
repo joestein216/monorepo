@@ -67,31 +67,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const { title, description } = await getSiteSettings();
-  const currentYear = new Date().getFullYear();
-
+  
   return (
     <>
-      {/* Main site navigation and branding */}
-      <header className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="site-logo text-lg font-semibold">{title}</p>
-        <nav aria-label="Primary navigation">
-          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-            <li>
-              <a className="underline-offset-4 hover:underline" href="#content">
-                Content
-              </a>
-            </li>
-            <li>
-              <a className="underline-offset-4 hover:underline" href="#about">
-                About
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </header>
-
-      {/* Main content area: keep a single h1 for the page topic. */}
-      <main className="mx-auto w-full max-w-5xl flex-1 border-y border-border px-6 py-16 sm:py-24">
         <h1 className="max-w-4xl text-4xl font-semibold tracking-tight sm:text-6xl">
           {title}
         </h1>
@@ -172,14 +150,6 @@ export default async function HomePage() {
             </p>
           </aside>
         </section>
-      </main>
-
-      {/* Footer for copyright and legal links */}
-      <footer className="mx-auto w-full max-w-5xl px-6 py-8 text-sm text-muted-foreground">
-        <p>
-          &copy; {currentYear} {title}. All rights reserved.
-        </p>
-      </footer>
     </>
   );
 }

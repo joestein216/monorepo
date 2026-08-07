@@ -23,7 +23,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="flex items-center justify-between pt-6 pb-2 border-b">
+      <nav className="flex items-center justify-between pt-6 pb-2">
         <Link href="/" className="text-4xl [font-variant-caps:small-caps]">
           ArchtypicA
         </Link>

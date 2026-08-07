@@ -95,7 +95,7 @@ export default defineType({
       type: 'string',
     },
     {
-      name: 'musicBrainzId',
+      name: 'musicbrainzId',
       title: 'MusicBrainz ID',
       type: 'string',
     },

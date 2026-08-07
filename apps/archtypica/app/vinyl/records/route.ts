@@ -23,6 +23,15 @@ interface VinylRecord {
       _type: 'reference'
     }
   };
+  coverArtSource: string;
+  musicbrainzId: string;
+  coverArtMusicBrainz: {
+    _type: 'image'
+    asset: {
+      _ref: string
+      _type: 'reference'
+    }
+  };
 }
 
 const DEFAULT_LIMIT = 24;
@@ -39,7 +48,7 @@ function getClient() {
   return createClient({
     projectId,
     dataset,
-    apiVersion: "2026-08-02",
+    apiVersion: "2026-08-07",
     perspective: "published",
     useCdn: true,
   });
@@ -59,7 +68,7 @@ export async function GET(request: NextRequest) {
     const client = getClient();
 
     const vinyls = await client.fetch<VinylRecord[]>(
-      `*[_type == "vinylRecord" && defined(coverArt)] | order(listing_id asc)[${offset}...${offset + limit}] {
+      `*[_type == "vinylRecord" && defined(coverArt) && defined(musicbrainzId)] | order(listing_id asc)[${offset}...${offset + limit}] {
         _id,
         listing_id,
         artist,
@@ -74,7 +83,10 @@ export async function GET(request: NextRequest) {
         sleeve_condition,
         external_id,
         weight,
-        coverArt
+        coverArt,
+        coverArtSource,
+        musicbrainzId,
+        coverArtMusicBrainz,
       }`,
     );
 

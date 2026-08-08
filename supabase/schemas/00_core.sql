@@ -1,0 +1,4 @@
+-- Shared database declarations belong in this file.
+--
+-- New objects in exposed schemas must include explicit grants and row-level
+-- security policies. Keep site-owned declarations in separate ordered files.

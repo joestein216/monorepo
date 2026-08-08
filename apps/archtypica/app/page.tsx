@@ -1,11 +1,7 @@
 import Link from "next/link";
 import { Button } from "@repo/ui/components/ui/button";
-import { supabase } from "@repo/database"
 
-export default async function HomePage() {
-  // Test out your shared Supabase client type safety instantly!
-  // const { data } = await supabase.from('your_table').select('*')
-
+export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-background text-foreground">
       <div className="z-10 max-w-5xl w-full items-center justify-between text-sm flex flex-col gap-6 text-center">

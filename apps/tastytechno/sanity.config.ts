@@ -1,23 +1,25 @@
-import { defineConfig } from 'sanity'
-import { structureTool } from 'sanity/structure'
-import { coreSchemas } from '@repo/sanity-config'
+'use client'
 
-export default defineConfig({
-  name: 'tasty-studio',
-  title: 'Tasty Techno Studio',
+import {
+  createStudioConfig,
+  requireEnvironmentVariable,
+} from "@repo/sanity-config"
 
-  // Use the unique keys provided via your local app env settings
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'evjxcrhnmedyypjzpitn',
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
+import { siteSchemas } from "./sanity/schemas"
 
-  // This matches your App Router dashboard folder path layout
-  basePath: '/studio',
+const projectId = requireEnvironmentVariable(
+  "NEXT_PUBLIC_SANITY_PROJECT_ID",
+  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+)
+const dataset = requireEnvironmentVariable(
+  "NEXT_PUBLIC_SANITY_DATASET",
+  process.env.NEXT_PUBLIC_SANITY_DATASET,
+)
 
-  // 1. Inherit your shared core structural schema definitions
-  schema: {
-    types: coreSchemas,
-  },
-
-  // 2. Add workflow plugins specific to just this site's editors
-  plugins: [structureTool()],
+export default createStudioConfig({
+  name: "tastytechno-studio",
+  title: "Tasty Techno Studio",
+  projectId,
+  dataset,
+  schemaTypes: siteSchemas,
 })

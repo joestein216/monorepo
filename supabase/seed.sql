@@ -1,0 +1,2 @@
+-- Local development seed data only.
+-- Keep production data, credentials, and personal data out of this file.

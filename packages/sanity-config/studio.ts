@@ -1,8 +1,8 @@
 import { defineConfig, type SchemaTypeDefinition } from "sanity"
+import { coreSchemas } from "./schemas"
 import { structureTool } from "sanity/structure"
 import { visionTool } from '@sanity/vision'
 import { presentationTool } from 'sanity/presentation'
-import { coreSchemas } from "./schemas"
 
 export type StudioConfigOptions = {
   name: string
@@ -10,8 +10,7 @@ export type StudioConfigOptions = {
   projectId: string
   dataset: string
   basePath?: string
-  schemaTypes?: SchemaTypeDefinition[], 
-  
+  schemaTypes?: SchemaTypeDefinition[],
 }
 
 export function createStudioConfig({
@@ -32,35 +31,24 @@ export function createStudioConfig({
       types: [...coreSchemas, ...schemaTypes],
     },
     plugins: [
-      structureTool({
-        structure: (structure) =>
-          structure
-            .list()
-            .title("Content")
-            .items([
-              structure
-                .listItem()
-                .id("siteSettings")
-                .title("Site Settings")
-                .child(
-                  structure
-                    .document()
-                    .schemaType("siteSettings")
-                    .documentId("siteSettings"),
-                ),
-              structure.divider(),
-              ...structure
-                .documentTypeListItems()
-                .filter((item) => item.getId() !== "siteSettings"),
-            ]),
+      structureTool(),
+      presentationTool({
+        previewUrl: {
+          initial: process.env.SANITY_STUDIO_PREVIEW_URL,
+          previewMode: {
+            enable: '/api/draft-mode/enable',
+            disable: '/api/draft-mode/disable',
+          },
+        },
+        allowOrigins: [
+          'http://localhost:*',
+          'https://staging.my-site.com',
+          'https://my-site.com',
+        ],
       }),
-      // VPresentation tool is typically included for developers to preview content in a presentation format
-      presentationTool,
-      // Vision tool is typically included for developers to test GROQ queries safely
       visionTool({
-        // Optional configuration: Restrict to specific datasets or default query
         defaultApiVersion: '2026-08-05',
-        defaultDataset: 'development'
+        defaultDataset: 'development',
       })
     ],
   })

@@ -1,6 +1,7 @@
 import { defineConfig, type SchemaTypeDefinition } from "sanity"
 import { structureTool } from "sanity/structure"
-
+import { visionTool } from '@sanity/vision'
+import { presentationTool } from 'sanity/presentation'
 import { coreSchemas } from "./schemas"
 
 export type StudioConfigOptions = {
@@ -9,7 +10,8 @@ export type StudioConfigOptions = {
   projectId: string
   dataset: string
   basePath?: string
-  schemaTypes?: SchemaTypeDefinition[]
+  schemaTypes?: SchemaTypeDefinition[], 
+  
 }
 
 export function createStudioConfig({
@@ -52,6 +54,14 @@ export function createStudioConfig({
                 .filter((item) => item.getId() !== "siteSettings"),
             ]),
       }),
+      // VPresentation tool is typically included for developers to preview content in a presentation format
+      presentationTool,
+      // Vision tool is typically included for developers to test GROQ queries safely
+      visionTool({
+        // Optional configuration: Restrict to specific datasets or default query
+        defaultApiVersion: '2026-08-05',
+        defaultDataset: 'development'
+      })
     ],
   })
 }

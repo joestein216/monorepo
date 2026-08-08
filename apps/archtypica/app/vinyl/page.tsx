@@ -4,6 +4,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { urlFor } from '../../sanity/lib/image'
 import { useCartStore } from '../store/useCartStore';
+import coverArtPlaceholder from '../assets/coverArtPlaceholder.png';
 
 interface VinylRecord {
   _id: string;
@@ -51,36 +52,39 @@ const PAGE_LIMIT = 24;
 const VinylCard = memo(function VinylCard({ vinyl }: { vinyl: VinylRecord }) {
   const { addItem } = useCartStore();
   return (
-    <article className="rounded-3xl border border-border bg-background p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <article className="rounded-xs border border-border bg-background p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <div className="space-y-3">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">{vinyl.title}</h2>
-          <p className="text-sm text-muted-foreground">{vinyl.artist}</p>
-          {/* Simple, non-dynamic image rendering */}
-          {vinyl.coverArt && (
-            <Image 
-              src={urlFor(vinyl.coverArt).url()} 
+        <div className="shadow-[0_4px_10px_-2px_rgba(0,0,0,0.70)]">
+          {vinyl.coverArt ? (
+            <Image
+              src={urlFor(vinyl.coverArt).url()}
               alt={`discogs image ${vinyl.title}`}
               width={300}
               height={300}
-              style={{ maxWidth: '100%', height: 'auto' }}
+              style={{ maxWidth: '100%', height: '100%' }}
             />
-          )}
-          {vinyl.coverArtMusicBrainz && (
-            <Image 
-              src={urlFor(vinyl.coverArtMusicBrainz).url()} 
-              alt={`musicbrainz image ${vinyl.title}`}
+          ) : vinyl.coverArtMusicBrainz ? (
+            <Image
+              src={urlFor(vinyl.coverArtMusicBrainz).url()}
+              alt={`cover art from MusicBrainz for ${vinyl.title}`}
               width={300}
               height={300}
               style={{ maxWidth: '100%', height: 'auto' }}
             />
-          )}
-          {!vinyl.coverArt && !vinyl.coverArtMusicBrainz && (
-            <div className="flex h-48 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-              No Cover Art from Discogs or MusicBrainz
+          ) : (
+            <div className="p-8">
+              <Image
+                src={coverArtPlaceholder}
+                alt="no cover art available"
+                width={300}
+                height={300}
+                style={{ maxWidth: '100%', height: 'auto' }}
+              />
             </div>
           )}
         </div>
+        <h2 className="text-lg font-semibold text-foreground">{vinyl.title}</h2>
+        <p className="text-sm text-muted-foreground">{vinyl.artist}</p>
         <div className="grid gap-1 text-sm text-muted-foreground">
           <p>Label: {vinyl.label}</p>
           <p>Cat No: {vinyl.catno}</p>
@@ -171,12 +175,11 @@ export default function VinylPage() {
           {vinyls.map((vinyl) => (
             <VinylCard key={vinyl._id} vinyl={vinyl} />
           ))}
-          {initialLoad && !vinyls.length && !loading ? (
+          {initialLoad && !vinyls.length && !loading && (
             <div className="rounded-3xl border border-border bg-background p-8 text-center text-sm text-muted-foreground">
               No records found.
             </div>
-          ) : null}
-
+          )}
           <div className="mt-10 flex flex-col items-center justify-center gap-2 py-6">
             {loading ? (
               <p className="text-sm text-muted-foreground">Loading more records…</p>

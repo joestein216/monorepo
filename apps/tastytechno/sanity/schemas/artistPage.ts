@@ -404,6 +404,12 @@ export const artistPage = defineType({
               validation: (rule) => rule.required(),
             }),
             defineField({ name: "format", title: "Format or note", type: "string" }),
+            defineField({
+              name: "image",
+              title: "Image asset",
+              type: "image",
+              description: "Use this for downloadable press photos and logos.",
+            }),
             defineField({ name: "file", title: "File", type: "file" }),
             defineField({
               name: "externalUrl",

@@ -149,7 +149,7 @@ const artistQuery = `*[_type == "artistPage" && slug.current == $slug][0]{
   pressAssets[]{
     label,
     format,
-    "url": coalesce(file.asset->url, externalUrl)
+    "url": coalesce(image.asset->url, file.asset->url, externalUrl)
   },
   technicalRider{
     summary,

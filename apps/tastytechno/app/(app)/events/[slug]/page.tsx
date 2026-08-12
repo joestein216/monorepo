@@ -3,10 +3,10 @@ import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { SiteFooter } from "../../../components/site/site-footer"
-import { SiteHeader } from "../../../components/site/site-header"
-import { getSiteImageUrl } from "../../../sanity/lib/image"
-import { getAlbums, getEventBySlug, getEventSlugs, getHomePage } from "../../../sanity/lib/site"
+import { SiteFooter } from "../../../../components/site/site-footer"
+import { SiteHeader } from "../../../../components/site/site-header"
+import { getSiteImageUrl } from "../../../../sanity/lib/image"
+import { getAlbums, getEventBySlug, getEventSlugs, getHomePage } from "../../../../sanity/lib/site"
 
 type EventPageProps = {
   params: Promise<{ slug: string }>

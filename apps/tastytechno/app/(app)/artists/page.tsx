@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 
-import { getArtistCards } from "../../sanity/lib/artists"
+import { getArtistCards } from "../../../sanity/lib/artists"
 
 export const metadata: Metadata = {
   title: "Artists | Tasty Techno",

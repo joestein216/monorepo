@@ -1,25 +1,18 @@
-'use client'
+import {defineConfig} from 'sanity'
+import {structureTool} from 'sanity/structure'
+import {visionTool} from '@sanity/vision'
+import {schema} from './schemaTypes'
 
-import {
-  createStudioConfig,
-  requireEnvironmentVariable,
-} from "@repo/sanity-config"
-
-import { siteSchemas } from "./sanity/schemas"
-
-const projectId = requireEnvironmentVariable(
-  "NEXT_PUBLIC_SANITY_PROJECT_ID",
-  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-)
-const dataset = requireEnvironmentVariable(
-  "NEXT_PUBLIC_SANITY_DATASET",
-  process.env.NEXT_PUBLIC_SANITY_DATASET,
-)
-
-export default createStudioConfig({
+export default defineConfig({
   name: "tastytechno-studio",
-  title: "Tasty Techno Studio",
-  projectId,
-  dataset,
-  schemaTypes: siteSchemas,
+  title: 'Tasty Techno',
+
+  projectId: '5sak3amq',
+  dataset: 'development',
+
+  basePath: "/studio2",
+
+  plugins: [structureTool(), visionTool()],
+
+  schema
 })

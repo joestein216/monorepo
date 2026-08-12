@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 
-import { EventCard } from "../../components/site/event-card"
-import { SiteFooter } from "../../components/site/site-footer"
-import { SiteHeader } from "../../components/site/site-header"
-import { getEvents, getHomePage } from "../../sanity/lib/site"
+import { EventCard } from "../../../components/site/event-card"
+import { SiteFooter } from "../../../components/site/site-footer"
+import { SiteHeader } from "../../../components/site/site-header"
+import { getEvents, getHomePage } from "../../../sanity/lib/site"
 
 export const metadata: Metadata = {
   title: "Events | Tasty Techno",

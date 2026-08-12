@@ -3,10 +3,10 @@ import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { SiteFooter } from "../../../components/site/site-footer"
-import { SiteHeader } from "../../../components/site/site-header"
-import { getSiteImageAspectRatio, getSiteImageUrl } from "../../../sanity/lib/image"
-import { getAlbumBySlug, getAlbumSlugs, getHomePage } from "../../../sanity/lib/site"
+import { SiteFooter } from "../../../../components/site/site-footer"
+import { SiteHeader } from "../../../../components/site/site-header"
+import { getSiteImageAspectRatio, getSiteImageUrl } from "../../../../sanity/lib/image"
+import { getAlbumBySlug, getAlbumSlugs, getHomePage } from "../../../../sanity/lib/site"
 
 type AlbumPageProps = {
   params: Promise<{ slug: string }>

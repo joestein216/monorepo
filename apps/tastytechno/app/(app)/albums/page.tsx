@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 
-import { AlbumCard } from "../../components/site/album-card"
-import { SiteFooter } from "../../components/site/site-footer"
-import { SiteHeader } from "../../components/site/site-header"
-import { getAlbums, getHomePage } from "../../sanity/lib/site"
+import { AlbumCard } from "../../../components/site/album-card"
+import { SiteFooter } from "../../../components/site/site-footer"
+import { SiteHeader } from "../../../components/site/site-header"
+import { getAlbums, getHomePage } from "../../../sanity/lib/site"
 
 export const metadata: Metadata = {
   title: "Photo Albums | Tasty Techno",

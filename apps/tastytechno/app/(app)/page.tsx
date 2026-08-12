@@ -2,13 +2,13 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 
-import { AlbumCard } from "../components/site/album-card"
-import { EventCard } from "../components/site/event-card"
-import { SiteFooter } from "../components/site/site-footer"
-import { SiteHeader } from "../components/site/site-header"
-import { getArtistCards } from "../sanity/lib/artists"
-import { getSiteImageUrl } from "../sanity/lib/image"
-import { getAlbums, getEvents, getHomePage, getSiteSettings } from "../sanity/lib/site"
+import { AlbumCard } from "../../components/site/album-card"
+import { EventCard } from "../../components/site/event-card"
+import { SiteFooter } from "../../components/site/site-footer"
+import { SiteHeader } from "../../components/site/site-header"
+import { getArtistCards } from "../../sanity/lib/artists"
+import { getSiteImageUrl } from "../../sanity/lib/image"
+import { getAlbums, getEvents, getHomePage, getSiteSettings } from "../../sanity/lib/site"
 
 export const revalidate = 300
 

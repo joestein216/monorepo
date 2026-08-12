@@ -1,11 +1,10 @@
+import { randomUUID } from "node:crypto"
 import { createReadStream } from "node:fs"
 import { basename, resolve } from "node:path"
 
 import { getCliClient } from "sanity/cli"
 
 const slug = "freaky-frank"
-const publishedId = "artistPage.freaky-frank"
-const draftId = `drafts.${publishedId}`
 const mediaDirectory = resolve(process.cwd(), "public/artists/freaky-frank")
 
 const client = getCliClient({
@@ -66,11 +65,8 @@ async function uploadFile(filename: string) {
 
 async function main() {
   const existing = await client.fetch<Array<{ _id: string }>>(
-    `*[
-      _id in [$draftId, $publishedId] ||
-      (_type == "artistPage" && slug.current == $slug)
-    ]{_id}`,
-    { draftId, publishedId, slug },
+    `*[_type == "artistPage" && slug.current == $slug]{_id}`,
+    { slug },
   )
 
   if (existing.length) {
@@ -80,6 +76,8 @@ async function main() {
         .join(", ")}).`,
     )
   }
+
+  const draftId = `drafts.${randomUUID()}`
 
   console.log("Uploading Freaky Frank media to Sanity…")
 
@@ -206,6 +204,7 @@ async function main() {
         title: "Live under the Verrazzano",
         file: file(verrazzanoVideo._id),
         caption: "A vertical live snapshot from beneath the Verrazzano-Narrows Bridge.",
+        loop: false,
       },
       {
         _key: "video-asylum",
@@ -213,6 +212,7 @@ async function main() {
         title: "Abandoned asylum, Shaolin",
         file: file(asylumVideo._id),
         caption: "A short piece of atmospheric live footage.",
+        loop: true,
       },
     ],
     gallery: [
@@ -225,7 +225,8 @@ async function main() {
       {
         _key: "event-bbq-and-beats",
         _type: "artistEvent",
-        title: "BBQ & Beats",
+        title: "Against the Grain",
+        organizer: "BBQ & Beats",
         status: "pending",
         dateDisplay: "August 15 · details pending",
         details: "Presented by Against the Grain. Confirm the year, venue, and set time before promotion.",
@@ -235,6 +236,7 @@ async function main() {
         _key: "event-camp-wonkru",
         _type: "artistEvent",
         title: "Camp Wonkru",
+        organizer: "Camp Wonkru",
         status: "pending",
         startsAt: "2026-08-28T12:00:00-04:00",
         endsAt: "2026-08-30T23:00:00-04:00",

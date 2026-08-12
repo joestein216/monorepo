@@ -112,6 +112,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
           preload="metadata"
           poster={poster ?? undefined}
           aria-label={video.title}
+          loop={video.loop}
         >
           <source src={localOrHostedFile} />
           Your browser does not support embedded video.
@@ -463,7 +464,8 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                       </div>
                       <div>
                         <h3 className="text-lg font-medium">{event.title}</h3>
-                        {venueLine ? <p className="mt-1 text-sm text-muted-foreground">{venueLine}</p> : null}
+                        {event.organizer ? <p className="mt-1 text-medium text-muted-foreground">{event.organizer}</p> : null}
+                        {venueLine ? <p className="mt-1 text-sm text-muted-foreground italic">{venueLine}</p> : null}
                         {event.details ? (
                           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{event.details}</p>
                         ) : null}

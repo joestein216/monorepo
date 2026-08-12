@@ -281,6 +281,12 @@ export const artistPage = defineType({
                 defineField({ name: "alt", title: "Alternative text", type: "string" }),
               ],
             }),
+            defineField({
+              name: "loop",
+              title: "Loop Video",
+              type: "boolean",
+              initialValue: false,
+            }),
           ],
           preview: {
             select: { title: "title", media: "poster" },
@@ -326,6 +332,11 @@ export const artistPage = defineType({
               title: "Event name",
               type: "string",
               validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "organizer",
+              title: "Organizer",
+              type: "string",
             }),
             defineField({
               name: "status",

@@ -30,10 +30,12 @@ export type ArtistVideo = {
   externalUrl?: string | null
   caption?: string | null
   poster?: ArtistImage | null
+  loop: boolean
 }
 
 export type ArtistEvent = {
   title: string
+  organizer: string
   status?: "confirmed" | "pending" | "past" | "cancelled" | null
   startsAt?: string | null
   endsAt?: string | null
@@ -139,10 +141,11 @@ const artistQuery = `*[_type == "artistPage" && slug.current == $slug][0]{
     "fileUrl": file.asset->url,
     externalUrl,
     caption,
-    "poster": poster ${imageProjection}
+    "poster": poster ${imageProjection},
+    loop
   },
   "gallery": gallery[] ${imageProjection},
-  events[]{title, status, startsAt, endsAt, dateDisplay, venue, location, details, url},
+  events[]{title, organizer, status, startsAt, endsAt, dateDisplay, venue, location, details, url},
   bookingEmail,
   bookingLabel,
   externalLinks[]{label, href, openInNewTab},
@@ -272,11 +275,13 @@ const freakyFrankFallback: ArtistEpk = {
       title: "Live under the Verrazzano",
       fileUrl: "/artists/freaky-frank/live-under-verrazzano.mp4",
       caption: "A vertical live snapshot from beneath the Verrazzano-Narrows Bridge.",
+      loop: false,
     },
     {
       title: "Abandoned asylum, Shaolin",
       fileUrl: "/artists/freaky-frank/live-abandoned-asylum-shaolin.mp4",
       caption: "A short piece of atmospheric live footage.",
+      loop: true,
     },
   ],
   gallery: [
@@ -290,6 +295,7 @@ const freakyFrankFallback: ArtistEpk = {
   events: [
     {
       title: "BBQ & Beats",
+      organizer: "Against the Grain",
       status: "pending",
       dateDisplay: "August 15 · details pending",
       details: "Presented by Against the Grain. Confirm the year, venue, and set time before promotion.",
@@ -297,6 +303,7 @@ const freakyFrankFallback: ArtistEpk = {
     },
     {
       title: "Camp Wonkru",
+      organizer: "Wonkru Collective",
       status: "pending",
       startsAt: "2026-08-28T12:00:00-04:00",
       endsAt: "2026-08-30T23:00:00-04:00",

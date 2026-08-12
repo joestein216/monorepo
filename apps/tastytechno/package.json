@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "sanity:import:freaky-frank": "sanity exec scripts/import-freaky-frank.ts --with-user-token",
+    "sanity:seed:site": "sanity exec scripts/seed-tasty-techno-site.ts --with-user-token",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

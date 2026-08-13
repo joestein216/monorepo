@@ -19,7 +19,7 @@ export function AlbumCard({ album, featured = false }: AlbumCardProps) {
     <article className="overflow-hidden rounded-2xl border border-border bg-card">
       {imageUrl && cover ? (
         <Link
-          className={`relative block bg-muted ${featured ? "aspect-[8/5]" : "aspect-[4/3]"}`}
+          className={`relative block bg-muted ${featured ? "aspect-[4/3]" : "aspect-[4/3]"}`}
           href={`/albums/${album.slug}`}
           aria-label={`View ${album.title}`}
         >
@@ -27,7 +27,7 @@ export function AlbumCard({ album, featured = false }: AlbumCardProps) {
             src={imageUrl}
             alt={cover.alt}
             fill
-            sizes={featured ? "(max-width: 1023px) 100vw, 66vw" : "(max-width: 767px) 100vw, 50vw"}
+            sizes={featured ? "(max-width: 767px) 100vw, 66vw" : "(max-width: 767px) 100vw, 50vw"}
             className="object-cover"
           />
         </Link>

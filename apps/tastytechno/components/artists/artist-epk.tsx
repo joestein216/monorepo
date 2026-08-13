@@ -103,7 +103,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
   const poster = video.poster ? safeHref(video.poster.src) : null
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-border bg-card">
+    <article className="overflow-hidden rounded-md shadow-sm border border-border bg-card">
       {localOrHostedFile ? (
         <video
           className="aspect-[9/16] max-h-[38rem] w-full bg-black object-contain"
@@ -244,7 +244,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
               {artist.genres?.length ? (
                 <ul className="mt-8 flex flex-wrap gap-2" aria-label="Genres">
                   {artist.genres.map((genre) => (
-                    <li key={genre} className="rounded-full border border-border px-3 py-1.5 text-sm">
+                    <li key={genre} className="rounded-md border border-border px-3 py-1.5 text-sm">
                       {genre}
                     </li>
                   ))}
@@ -273,7 +273,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
 
             {artist.heroImage ? (
               <figure>
-                <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-muted">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-md shadow-md border border-border bg-muted">
                   <ArtistImageFrame
                     image={artist.heroImage}
                     className="object-cover"
@@ -308,7 +308,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                   const sourceUrl = safeHref(audio.sourceUrl)
 
                   return (
-                    <article key={`${audio.provider}-${audio.title}`} className="rounded-2xl border border-border bg-card p-5">
+                    <article key={`${audio.provider}-${audio.title}`} className="rounded-md border border-border bg-card p-5 shadow-sm">
                       <div className="flex items-start justify-between gap-5">
                         <div>
                           <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
@@ -332,7 +332,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                       </div>
                       {embedUrl ? (
                         <iframe
-                          className="mt-5 h-44 w-full rounded-lg border-0"
+                          className="mt-5 h-44 w-full rounded-md border-0"
                           src={embedUrl}
                           title={audio.title}
                           loading="lazy"
@@ -376,7 +376,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
               <h2 id="history-heading" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
                 Selected history
               </h2>
-              <div className="mt-9 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2">
+              <div className="mt-9 grid gap-px overflow-hidden rounded-md border border-border bg-border shadow-sm sm:grid-cols-2">
                 {artist.careerHighlights.map((highlight) => (
                   <article key={`${highlight.label}-${highlight.title}`} className="bg-card p-6 sm:p-7">
                     {highlight.label ? (
@@ -421,7 +421,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
               <div className="mt-8 grid gap-6 md:grid-cols-2">
                 {artist.gallery.map((image) => (
                   <figure key={image.src}>
-                    <div className="relative aspect-[6/5] overflow-hidden rounded-2xl bg-muted">
+                    <div className="relative aspect-[6/5] overflow-hidden rounded-md shadow-md bg-muted">
                       <ArtistImageFrame
                         image={image}
                         className="object-cover"
@@ -532,7 +532,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
 
         <section aria-labelledby="booking-heading">
           <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-2 md:py-20">
-            <div className="rounded-2xl border border-border bg-card p-7 sm:p-9">
+            <div className="rounded-md border border-border bg-card shadow-sm p-7 sm:p-9">
               <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Contact</p>
               <h2 id="booking-heading" className="mt-3 text-3xl font-semibold tracking-tight">
                 Booking
@@ -570,7 +570,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
               ) : null}
             </div>
 
-            <div className="rounded-2xl border border-border bg-card p-7 sm:p-9">
+            <div className="rounded-md border border-border bg-card shadow-sm p-7 sm:p-9">
               <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Media</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight">Press assets</h2>
               {artist.pressAssets?.length ? (
@@ -606,7 +606,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
             </div>
 
             {hasTechnicalRider && artist.technicalRider ? (
-              <div className="rounded-2xl border border-border bg-card p-7 sm:col-span-2 sm:p-9">
+              <div className="rounded-md border border-border bg-card shadow-sm p-7 sm:col-span-2 sm:p-9">
                 <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Production</p>
                 <h2 className="mt-3 text-3xl font-semibold tracking-tight">Technical setup</h2>
                 {artist.technicalRider.summary ? (

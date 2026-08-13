@@ -5,4 +5,12 @@ export default defineCliConfig({
     projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '5sak3amq',
     dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'development',
   },
+  typegen: {
+    enabled: true,
+    path: [
+      './sanity/**/*.{ts,tsx,js,jsx}',
+      './app/**/*.{ts,tsx,js,jsx}',
+      './components/**/*.{ts,tsx,js,jsx}',
+    ],
+  }
 })

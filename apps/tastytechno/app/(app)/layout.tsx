@@ -1,25 +1,31 @@
-import type { Metadata } from "next";
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
-import "./globals.css";
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://www.tastytechno.com"),
-  title: "Tasty Techno",
-  description: "Tasty Techno artists, events, music, and underground culture.",
-};
+export { metadata, viewport } from 'next-sanity/studio'
+import React from 'react'
+import { draftMode } from 'next/headers'
+import {VisualEditing} from 'next-sanity/visual-editing'
+import {SanityLive} from '../../sanity/lib/live'
+import {DisableDraftMode} from '../../components/system/DisableDraftMode'
 
-export default function RootLayout({
+export default async function StudioLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
+  const { isEnabled: isDraftMode } = await draftMode()
+
   return (
-    <html
-      lang="en"
-      className={`${GeistSans.className} ${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en">
+      <body>
+        {children}
+
+        <SanityLive />
+        {isDraftMode && (
+          <>
+            <VisualEditing />
+            <DisableDraftMode />
+          </>
+        )}
+      </body>
     </html>
-  );
+  )
 }

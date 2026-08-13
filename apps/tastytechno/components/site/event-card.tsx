@@ -11,14 +11,14 @@ type EventCardProps = {
 
 export function EventCard({ event, featured = false }: EventCardProps) {
   const imageUrl = event.heroImage
-    ? getSiteImageUrl(event.heroImage, { width: featured ? 1600 : 1000, height: 700 })
+    ? getSiteImageUrl(event.heroImage, { width: featured ? 1000 : 1000, height: 700 })
     : null
 
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-card">
       {imageUrl && event.heroImage ? (
         <Link
-          className={`relative block bg-muted ${featured ? "aspect-[16/9]" : "aspect-[4/3]"}`}
+          className={`relative block bg-muted ${featured ? "aspect-[4/3]" : "aspect-[4/3]"}`}
           href={`/events/${event.slug}`}
           aria-label={`View ${event.chapterLabel ?? event.title}`}
         >
@@ -26,7 +26,7 @@ export function EventCard({ event, featured = false }: EventCardProps) {
             src={imageUrl}
             alt={event.heroImage.alt}
             fill
-            sizes={featured ? "(max-width: 1023px) 100vw, 66vw" : "(max-width: 767px) 100vw, 50vw"}
+            sizes={featured ? "(max-width: 1767px) 100vw, 66vw" : "(max-width: 767px) 100vw, 50vw"}
             className="object-cover"
           />
         </Link>

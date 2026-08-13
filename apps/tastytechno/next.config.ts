@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Instructs Next.js to safely parse internal client submodules inside Sanity
+  transpilePackages: ["sanity", "next-sanity"],
 };
 
 export default nextConfig;

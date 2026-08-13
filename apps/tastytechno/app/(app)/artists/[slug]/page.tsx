@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-import { ArtistEpk } from "../../../components/artists/artist-epk"
-import { getArtistBySlug, getArtistSlugs } from "../../../sanity/lib/artists"
+import { ArtistEpk } from "../../../../components/artists/artist-epk"
+import { getArtistBySlug, getArtistSlugs } from "../../../../sanity/lib/artists"
 
 type ArtistPageProps = {
   params: Promise<{ slug: string }>

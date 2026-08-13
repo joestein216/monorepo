@@ -2,13 +2,13 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 
-import { AlbumCard } from "../components/site/album-card"
-import { EventCard } from "../components/site/event-card"
-import { SiteFooter } from "../components/site/site-footer"
-import { SiteHeader } from "../components/site/site-header"
-import { getArtistCards } from "../sanity/lib/artists"
-import { getSiteImageUrl } from "../sanity/lib/image"
-import { getAlbums, getEvents, getHomePage, getSiteSettings } from "../sanity/lib/site"
+import { AlbumCard } from "../../components/site/album-card"
+import { EventCard } from "../../components/site/event-card"
+import { SiteFooter } from "../../components/site/site-footer"
+import { SiteHeader } from "../../components/site/site-header"
+import { getArtistCards } from "../../sanity/lib/artists"
+import { getSiteImageUrl } from "../../sanity/lib/image"
+import { getAlbums, getEvents, getHomePage, getSiteSettings } from "../../sanity/lib/site"
 
 export const revalidate = 300
 
@@ -142,21 +142,6 @@ export default async function HomePage() {
 
             <div className="mt-10 grid gap-6 lg:grid-cols-[2fr_1fr]">
               {featuredEvent ? <EventCard event={featuredEvent} featured /> : null}
-              <article className="flex min-h-72 flex-col justify-between rounded-2xl border border-border bg-muted/40 p-7">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                    {home.nextChapterLabel}
-                  </p>
-                  <h3 className="mt-3 text-3xl font-semibold tracking-tight">{home.nextChapterTitle}</h3>
-                  <p className="mt-4 leading-7 text-muted-foreground">{home.nextChapterCopy}</p>
-                </div>
-                <a
-                  className="mt-8 inline-flex text-sm font-medium underline underline-offset-4"
-                  href={`mailto:${home.inquiryEmail}?subject=Tasty%20Techno%20Chapter%20Two`}
-                >
-                  Start a conversation
-                </a>
-              </article>
             </div>
           </div>
         </section>

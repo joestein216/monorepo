@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import type { SiteLink } from "../../sanity/lib/site"
+import type { SiteLink } from "../../sanity/queries/site"
 
 type SiteFooterProps = {
   inquiryEmail?: string | null

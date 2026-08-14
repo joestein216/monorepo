@@ -1,32 +1,44 @@
 import Image from "next/image"
 import Link from "next/link"
+import { type EventBySlugQueryResult } from "../../sanity.types"
 
-import { getSiteImageUrl } from "../../sanity/lib/image"
-import type { SiteEvent } from "../../sanity/lib/site"
+import { getSiteImageUrl } from "../../sanity/queries/image"
 
-type EventCardProps = {
-  event: SiteEvent
-  featured?: boolean
+type SiteImage = {
+  _type?: "image"
+  asset?: { _type?: "reference"; _ref?: string } | null
+  crop?: { top: number; bottom: number; left: number; right: number } | null
+  hotspot?: { x: number; y: number; width: number; height: number } | null
+  alt: string
+  caption?: string | null
+  credit?: string | null
+  width?: number | null
+  height?: number | null
+  fallbackSrc?: string | null
 }
 
-export function EventCard({ event, featured = false }: EventCardProps) {
-  const imageUrl = event.heroImage
-    ? getSiteImageUrl(event.heroImage, { width: featured ? 1000 : 1000, height: 700 })
+type EventCardProps = {
+  event: EventBySlugQueryResult
+}
+
+export function EventCard({ event }: EventCardProps) {
+  const imageUrl = event && event.heroImage
+    ? getSiteImageUrl(event.heroImage as SiteImage, { width: 1000, height: 700 })
     : null
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-border bg-card">
+    event && <article className="overflow-hidden rounded-2xl border border-border bg-card">
       {imageUrl && event.heroImage ? (
         <Link
-          className={`relative block bg-muted ${featured ? "aspect-[4/3]" : "aspect-[4/3]"}`}
+          className="relative block bg-muted aspect-[4/3]"
           href={`/events/${event.slug}`}
           aria-label={`View ${event.chapterLabel ?? event.title}`}
         >
           <Image
             src={imageUrl}
-            alt={event.heroImage.alt}
+            alt={event.heroImage.alt || "event image"}
             fill
-            sizes={featured ? "(max-width: 1767px) 100vw, 66vw" : "(max-width: 767px) 100vw, 50vw"}
+            sizes="(max-width: 767px) 100vw, 50vw"
             className="object-cover"
           />
         </Link>

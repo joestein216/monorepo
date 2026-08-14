@@ -575,7 +575,7 @@ export type AllSanitySchemaTypes =
   | SanityImageAsset
   | Geopoint;
 
-// Source: sanity/lib/artists.ts
+// Source: sanity/queries/artists.ts
 // Variable: imageProjection
 // Query: {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}
 export type ImageProjectionResult = {
@@ -587,7 +587,7 @@ export type ImageProjectionResult = {
   height: never;
 };
 
-// Source: sanity/lib/artists.ts
+// Source: sanity/queries/artists.ts
 // Variable: artistQuery
 // Query: *[_type == "artistPage" && slug.current == $slug][0]{  "id": _id,  name,  realName,  "slug": slug.current,  positioning,  tagline,  location,  activeSince,  genres,  "heroImage": heroImage {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  "primaryLogo": primaryLogo {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  "wordmark": wordmark {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  shortBio,  "biography": pt::text(biography),  careerHighlights[]{label, title, description},  collaborations[]{name, with, description, url},  audioEmbeds[]{title, provider, sourceUrl, embedUrl, details},  videos[]{    title,    "fileUrl": file.asset->url,    externalUrl,    caption,    "poster": poster {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},    loop  },  "gallery": gallery[] {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  events[]{title, organizer, status, startsAt, endsAt, dateDisplay, venue, location, details, url},  bookingEmail,  bookingLabel,  externalLinks[]{label, href, openInNewTab},  pressAssets[]{    label,    format,    "url": coalesce(image.asset->url, file.asset->url, externalUrl)  },  technicalRider{    summary,    preferredSetup,    boothMonitors,    mediaFormats,    "fileUrl": file.asset->url  },  showOnArtistIndex,  sortOrder,  seo{    metaTitle,    metaDescription,    "openGraphImage": openGraphImage {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}  }}
 export type ArtistQueryResult = {
@@ -715,7 +715,7 @@ export type ArtistQueryResult = {
   } | null;
 } | null;
 
-// Source: sanity/lib/artists.ts
+// Source: sanity/queries/artists.ts
 // Variable: artistCardsQuery
 // Query: *[  _type == "artistPage" &&  defined(slug.current) &&  showOnArtistIndex != false] | order(sortOrder asc, name asc){  name,  "slug": slug.current,  positioning,  shortBio,  "heroImage": heroImage {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  showOnArtistIndex,  sortOrder}
 export type ArtistCardsQueryResult = Array<{
@@ -735,12 +735,12 @@ export type ArtistCardsQueryResult = Array<{
   sortOrder: number | null;
 }>;
 
-// Source: sanity/lib/artists.ts
+// Source: sanity/queries/artists.ts
 // Variable: artistSlugsQuery
 // Query: *[_type == "artistPage" && defined(slug.current)].slug.current
 export type ArtistSlugsQueryResult = Array<string | null>;
 
-// Source: sanity/lib/site.ts
+// Source: sanity/queries/site.ts
 // Variable: siteSettingsQuery
 // Query: *[_type == "siteSettings"] | order(_updatedAt desc)[0]{  siteTitle,  siteDescription}
 export type SiteSettingsQueryResult = {
@@ -748,7 +748,7 @@ export type SiteSettingsQueryResult = {
   siteDescription: string | null;
 } | null;
 
-// Source: sanity/lib/site.ts
+// Source: sanity/queries/site.ts
 // Variable: homePageQuery
 // Query: *[_type == "homePage"] | order(_updatedAt desc)[0]{  eyebrow,  heading,  introduction,  "featuredEventSlug": featuredEvent->slug.current,  "featuredAlbumSlug": featuredAlbum->slug.current,  nextChapterLabel,  nextChapterTitle,  nextChapterCopy,  inquiryEmail,  artistBookingEmail,  socialLinks[]{label, href, openInNewTab},  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}}
 export type HomePageQueryResult = {
@@ -784,7 +784,7 @@ export type HomePageQueryResult = {
   } | null;
 } | null;
 
-// Source: sanity/lib/site.ts
+// Source: sanity/queries/site.ts
 // Variable: eventsQuery
 // Query: *[_type == "event" && defined(slug.current)]  | order(sortOrder asc, coalesce(startsAt, eventDate, "1900-01-01") desc, title asc) {  "id": _id,  title,  chapterLabel,  "slug": slug.current,  organizer,  status,  eventDate,  startsAt,  endsAt,  dateDisplay,  venue,  location,  summary,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},  eventUrl,  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}}
 export type EventsQueryResult = Array<{
@@ -838,7 +838,7 @@ export type EventsQueryResult = Array<{
   } | null;
 }>;
 
-// Source: sanity/lib/site.ts
+// Source: sanity/queries/site.ts
 // Variable: eventBySlugQuery
 // Query: *[_type == "event" && slug.current == $slug][0] {  "id": _id,  title,  chapterLabel,  "slug": slug.current,  organizer,  status,  eventDate,  startsAt,  endsAt,  dateDisplay,  venue,  location,  summary,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},  eventUrl,  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}}
 export type EventBySlugQueryResult = {
@@ -892,12 +892,12 @@ export type EventBySlugQueryResult = {
   } | null;
 } | null;
 
-// Source: sanity/lib/site.ts
+// Source: sanity/queries/site.ts
 // Variable: eventSlugsQuery
 // Query: *[_type == "event" && defined(slug.current)].slug.current
 export type EventSlugsQueryResult = Array<string | null>;
 
-// Source: sanity/lib/site.ts
+// Source: sanity/queries/site.ts
 // Variable: albumsQuery
 // Query: *[_type == "photoAlbum" && defined(slug.current)]  | order(sortOrder asc, title asc) {  "id": _id,  title,  "slug": slug.current,  summary,  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},  "coverPhoto": coverPhoto->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}},  photos[]{    "key": _key,    captionOverride,    "photo": photo->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}  },  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}}
 export type AlbumsQueryResult = Array<{
@@ -963,7 +963,7 @@ export type AlbumsQueryResult = Array<{
   } | null;
 }>;
 
-// Source: sanity/lib/site.ts
+// Source: sanity/queries/site.ts
 // Variable: albumBySlugQuery
 // Query: *[_type == "photoAlbum" && slug.current == $slug][0] {  "id": _id,  title,  "slug": slug.current,  summary,  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},  "coverPhoto": coverPhoto->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}},  photos[]{    "key": _key,    captionOverride,    "photo": photo->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}  },  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}}
 export type AlbumBySlugQueryResult = {
@@ -1029,7 +1029,7 @@ export type AlbumBySlugQueryResult = {
   } | null;
 } | null;
 
-// Source: sanity/lib/site.ts
+// Source: sanity/queries/site.ts
 // Variable: albumSlugsQuery
 // Query: *[_type == "photoAlbum" && defined(slug.current)].slug.current
 export type AlbumSlugsQueryResult = Array<string | null>;

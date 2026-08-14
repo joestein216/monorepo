@@ -1,8 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import { getSiteImageUrl } from "../../sanity/lib/image"
-import type { SitePhotoAlbum } from "../../sanity/lib/site"
+import { getSiteImageUrl } from "../../sanity/queries/image"
+import type { SitePhotoAlbum } from "../../sanity/queries/site"
 
 type AlbumCardProps = {
   album: SitePhotoAlbum

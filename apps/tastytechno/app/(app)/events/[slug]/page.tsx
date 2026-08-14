@@ -5,11 +5,25 @@ import { notFound } from "next/navigation"
 
 import { SiteFooter } from "../../../../components/site/site-footer"
 import { SiteHeader } from "../../../../components/site/site-header"
-import { getSiteImageUrl } from "../../../../sanity/lib/image"
-import { getAlbums, getEventBySlug, getEventSlugs, getHomePage } from "../../../../sanity/lib/site"
+import { getSiteImageUrl } from "../../../../sanity/queries/image"
+import { getAlbums, getEventBySlug, getEventSlugs, getHomePage } from "../../../../sanity/queries/site"
+import { EventBySlugQueryResult } from "../../../../sanity.types"
 
 type EventPageProps = {
   params: Promise<{ slug: string }>
+}
+
+type SiteImage = {
+  _type?: "image"
+  asset?: { _type?: "reference"; _ref?: string } | null
+  crop?: { top: number; bottom: number; left: number; right: number } | null
+  hotspot?: { x: number; y: number; width: number; height: number } | null
+  alt: string
+  caption?: string | null
+  credit?: string | null
+  width?: number | null
+  height?: number | null
+  fallbackSrc?: string | null
 }
 
 export const revalidate = 300
@@ -20,14 +34,15 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
   const { slug } = await params
-  const event = await getEventBySlug(slug)
-  if (!event) return { title: "Event not found | Tasty Techno" }
+  const { data } = await getEventBySlug(slug)
+  if (!data) return { title: "Event not found | Tasty Techno" }
 
+  const event = data
   const title = event.seo?.metaTitle?.trim() || `${event.chapterLabel ?? event.title} | Tasty Techno`
-  const description = event.seo?.metaDescription?.trim() || event.summary
+  const description = event.seo?.metaDescription?.trim() || event.summary || undefined
   const socialImage = event.seo?.openGraphImage ?? event.heroImage
   const socialImageUrl = socialImage
-    ? getSiteImageUrl(socialImage, { width: 1200, height: 630, quality: 88 })
+    ? getSiteImageUrl(socialImage as SiteImage, { width: 1200, height: 630, quality: 88 })
     : null
 
   return {
@@ -39,18 +54,20 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
       description,
       type: "article",
       url: `/events/${event.slug}`,
-      images: socialImageUrl && socialImage ? [{ url: socialImageUrl, alt: socialImage.alt }] : undefined,
+      images: socialImageUrl && socialImage ? [{ url: socialImageUrl, alt: socialImage.alt ?? "" }] : undefined,
     },
   }
 }
 
 export default async function EventPage({ params }: EventPageProps) {
   const { slug } = await params
-  const [event, home, albums] = await Promise.all([getEventBySlug(slug), getHomePage(), getAlbums()])
+  const [eventPromise, home, albums] = await Promise.all([getEventBySlug(slug), getHomePage(), getAlbums()])
+  
+  const event = eventPromise.data as EventBySlugQueryResult
   if (!event) notFound()
 
   const heroUrl = event.heroImage
-    ? getSiteImageUrl(event.heroImage, { width: 1800, height: 1100, quality: 86 })
+    ? getSiteImageUrl(event.heroImage as SiteImage, { width: 1800, height: 1100, quality: 86 })
     : null
   const album = albums.find((candidate) => candidate.relatedEvent?.id === event.id || candidate.relatedEvent?.slug === event.slug)
   const structuredData = event.startsAt || event.eventDate
@@ -122,7 +139,7 @@ export default async function EventPage({ params }: EventPageProps) {
               <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-muted">
                 <Image
                   src={heroUrl}
-                  alt={event.heroImage.alt}
+                  alt="photo"
                   fill
                   priority
                   sizes="(max-width: 1151px) 100vw, 1152px"
@@ -187,7 +204,7 @@ export default async function EventPage({ params }: EventPageProps) {
           </div>
         </article>
       </main>
-      <SiteFooter inquiryEmail={home.inquiryEmail} socialLinks={home.socialLinks} />
+      <SiteFooter inquiryEmail={home?.inquiryEmail} socialLinks={home?.socialLinks} />
       {structuredData ? (
         <script
           type="application/ld+json"

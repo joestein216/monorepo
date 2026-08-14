@@ -3,7 +3,8 @@ import type { Metadata } from "next"
 import { EventCard } from "../../../components/site/event-card"
 import { SiteFooter } from "../../../components/site/site-footer"
 import { SiteHeader } from "../../../components/site/site-header"
-import { getEvents, getHomePage } from "../../../sanity/lib/site"
+import { getEvents, getHomePage } from "../../../sanity/queries/site"
+import { EventBySlugQueryResult } from "../../../sanity.types"
 
 export const metadata: Metadata = {
   title: "Events | Tasty Techno",
@@ -16,7 +17,7 @@ export const revalidate = 300
 export default async function EventsPage() {
   const [events, home] = await Promise.all([getEvents(), getHomePage()])
 
-  return (
+  return home && (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <main id="main-content" className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
@@ -36,7 +37,7 @@ export default async function EventsPage() {
           </h2>
           <div className="grid gap-7 lg:grid-cols-2">
             {events.map((event) => (
-              <EventCard key={event.slug} event={event} />
+              <EventCard key={event.slug} event={event as EventBySlugQueryResult} />
             ))}
             <article className="flex min-h-72 flex-col justify-between rounded-2xl border border-border bg-muted/40 p-7">
               <div>

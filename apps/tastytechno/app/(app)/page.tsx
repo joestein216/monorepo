@@ -6,11 +6,24 @@ import { AlbumCard } from "../../components/site/album-card"
 import { EventCard } from "../../components/site/event-card"
 import { SiteFooter } from "../../components/site/site-footer"
 import { SiteHeader } from "../../components/site/site-header"
-import { getArtistCards } from "../../sanity/lib/artists"
-import { getSiteImageUrl } from "../../sanity/lib/image"
-import { getAlbums, getEvents, getHomePage, getSiteSettings } from "../../sanity/lib/site"
+import { getArtistCards } from "../../sanity/queries/artists"
+import { getSiteImageUrl } from "../../sanity/queries/image"
+import { getAlbums, getEvents, getHomePage, getSiteSettings } from "../../sanity/queries/site"
 
 export const revalidate = 300
+
+type SiteImage = {
+  _type?: "image"
+  asset?: { _type?: "reference"; _ref?: string } | null
+  crop?: { top: number; bottom: number; left: number; right: number } | null
+  hotspot?: { x: number; y: number; width: number; height: number } | null
+  alt: string
+  caption?: string | null
+  credit?: string | null
+  width?: number | null
+  height?: number | null
+  fallbackSrc?: string | null
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const [settings, home, albums] = await Promise.all([
@@ -18,14 +31,15 @@ export async function generateMetadata(): Promise<Metadata> {
     getHomePage(),
     getAlbums(),
   ])
-  const title = home.seo?.metaTitle?.trim() || `${settings.title} | Artists, Events & Underground Culture`
-  const description = home.seo?.metaDescription?.trim() || settings.description
+
+  const title = home?.seo?.metaTitle?.trim() || `${settings?.siteTitle} | Artists, Events & Underground Culture`
+  const description = home?.seo?.metaDescription?.trim() || settings?.siteDescription
   const featuredAlbum =
-    albums.find((album) => album.slug === home.featuredAlbumSlug) ??
+    albums.find((album) => album.slug === home?.featuredAlbumSlug) ??
     albums.find((album) => album.showOnHome === true)
-  const socialImage = home.seo?.openGraphImage ?? featuredAlbum?.coverPhoto?.image
+  const socialImage = home?.seo?.openGraphImage ?? featuredAlbum?.coverPhoto?.image
   const socialImageUrl = socialImage
-    ? getSiteImageUrl(socialImage, { width: 1200, height: 630, quality: 88 })
+    ? getSiteImageUrl(socialImage as SiteImage, { width: 1200, height: 630, quality: 88 })
     : null
 
   return {
@@ -58,11 +72,11 @@ export default async function HomePage() {
     getArtistCards(),
   ])
   const featuredEvent =
-    events.find((event) => event.slug === home.featuredEventSlug) ??
+    events.find((event) => event.slug === home?.featuredEventSlug) ??
     events.find((event) => event.showOnHome === true) ??
     events[0]
   const featuredAlbum =
-    albums.find((album) => album.slug === home.featuredAlbumSlug) ??
+    albums.find((album) => album.slug === home?.featuredAlbumSlug) ??
     albums.find((album) => album.showOnHome === true) ??
     albums[0]
   const featuredArtists = artists.slice(0, 3)
@@ -72,17 +86,17 @@ export default async function HomePage() {
       {
         "@type": "Organization",
         "@id": "https://www.tastytechno.com/#organization",
-        name: settings.title,
+        name: settings?.siteTitle,
         url: "https://www.tastytechno.com",
-        email: home.inquiryEmail,
-        sameAs: home.socialLinks.map((link) => link.href),
+        email: home?.inquiryEmail,
+        sameAs: home && home.socialLinks?.length ? home.socialLinks.map((link) => link.href) : '',
       },
       {
         "@type": "WebSite",
         "@id": "https://www.tastytechno.com/#website",
         url: "https://www.tastytechno.com",
-        name: settings.title,
-        description: settings.description,
+        name: settings?.siteTitle,
+        description: settings?.siteDescription,
         publisher: { "@id": "https://www.tastytechno.com/#organization" },
       },
     ],
@@ -96,16 +110,16 @@ export default async function HomePage() {
         <section aria-labelledby="home-heading" className="border-b border-border">
           <div className="mx-auto w-full max-w-6xl px-6 py-20 sm:py-28 lg:py-32">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              {home.eyebrow}
+              {home?.eyebrow}
             </p>
             <h1
               id="home-heading"
               className="mt-4 max-w-5xl text-5xl font-semibold tracking-tight sm:text-7xl lg:text-8xl"
             >
-              {home.heading}
+              {home?.heading}
             </h1>
             <p className="mt-7 max-w-3xl text-lg leading-8 text-muted-foreground sm:text-xl">
-              {home.introduction}
+              {home?.introduction}
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link
@@ -252,29 +266,29 @@ export default async function HomePage() {
                 <div>
                   <dt className="text-sm text-muted-foreground">Tasty Techno inquiries</dt>
                   <dd className="mt-1 text-lg">
-                    <a className="underline underline-offset-4" href={`mailto:${home.inquiryEmail}`}>
-                      {home.inquiryEmail}
+                    <a className="underline underline-offset-4" href={`mailto:${home?.inquiryEmail}`}>
+                      {home?.inquiryEmail}
                     </a>
                   </dd>
                 </div>
-                {home.artistBookingEmail ? (
+                {home?.artistBookingEmail ? (
                   <div>
                     <dt className="text-sm text-muted-foreground">Freaky Frank bookings</dt>
                     <dd className="mt-1 text-lg">
                       <a className="underline underline-offset-4" href={`mailto:${home.artistBookingEmail}`}>
-                        {home.artistBookingEmail}
+                        {home?.artistBookingEmail}
                       </a>
                     </dd>
                   </div>
                 ) : null}
               </dl>
-              {home.socialLinks.length ? (
+              {home?.socialLinks?.length ? (
                 <ul className="mt-8 flex flex-wrap gap-4">
                   {home.socialLinks.map((link) => (
                     <li key={link.href}>
                       <a
                         className="text-sm font-medium underline underline-offset-4"
-                        href={link.href}
+                        href={link.href || undefined}
                         target={link.openInNewTab ? "_blank" : undefined}
                         rel={link.openInNewTab ? "noreferrer" : undefined}
                       >
@@ -289,7 +303,7 @@ export default async function HomePage() {
         </section>
       </main>
 
-      <SiteFooter inquiryEmail={home.inquiryEmail} socialLinks={home.socialLinks} />
+      <SiteFooter inquiryEmail={home?.inquiryEmail} socialLinks={home?.socialLinks} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}

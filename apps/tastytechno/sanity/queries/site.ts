@@ -1,4 +1,4 @@
-import { sanityFetch } from './live';
+import { sanityFetch } from '../lib/live';
 import { defineQuery } from 'next-sanity';
 
 const imageProjection = `{
@@ -96,33 +96,67 @@ const albumBySlugQuery = defineQuery(`*[_type == "photoAlbum" && slug.current ==
 const albumSlugsQuery = defineQuery(`*[_type == "photoAlbum" && defined(slug.current)].slug.current`);
 
 export const getSiteSettings = async () => {
-  return await sanityFetch({ query: siteSettingsQuery });
+  const { data } = await sanityFetch({ 
+    query: siteSettingsQuery 
+  });
+
+  return data
 }
 
 export const getHomePage = async () => {
-  return await sanityFetch({ query: homePageQuery })
+  const { data } = await sanityFetch({ 
+    query: homePageQuery, 
+  })
+
+  return data
 }
 
 export const getEvents = async () => {
-  return await sanityFetch({ query: eventsQuery })
+  const { data } = await sanityFetch({
+    query: eventsQuery,
+  })
+
+  return data
 }
 
 export const getEventBySlug = async (slug: string) => {
-  return await sanityFetch({ query: eventBySlugQuery, params: { slug }, })
+  const data = await sanityFetch({ 
+    query: eventBySlugQuery, 
+    params: { slug }, 
+  })
+
+  return data
 }
 
 export const getEventSlugs = async () => {
-  return await sanityFetch({ query: eventSlugsQuery })
+  const { data } = await sanityFetch({ 
+    query: eventSlugsQuery 
+  })
+
+  return data
 }
 
 export const getAlbums = async () => {
-  return await sanityFetch({ query: albumsQuery })
+  const { data } = await sanityFetch({ 
+    query: albumsQuery 
+  })
+
+  return data
 }
 
 export const getAlbumBySlug = async (slug: string) => {
-  return await sanityFetch({ query: albumBySlugQuery, params: { slug }, })
+  const { data } = await sanityFetch({ 
+    query: albumBySlugQuery, 
+    params: { slug },
+  })
+
+  return data
 }
 
 export const getAlbumSlugs = async () => {
-  return await sanityFetch({ query: albumSlugsQuery })
+  const { data } = await sanityFetch({ 
+    query: albumSlugsQuery 
+  })
+
+  return data
 }

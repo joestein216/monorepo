@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 
-import { getArtistCards } from "../../../sanity/lib/artists"
+import { getArtistCards } from "../../../sanity/queries/artists"
 
 export const metadata: Metadata = {
   title: "Artists | Tasty Techno",
@@ -39,11 +39,11 @@ export default async function ArtistsPage() {
           <div className="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
             {artists.map((artist) => (
               <article key={artist.slug} className="overflow-hidden rounded-2xl border border-border bg-card">
-                {artist.heroImage ? (
+                {artist.heroImage?.src ? (
                   <div className="relative aspect-[4/5] bg-muted">
                     <Image
                       src={artist.heroImage.src}
-                      alt={artist.heroImage.alt}
+                      alt="image"
                       fill
                       sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 50vw, 33vw"
                       className="object-cover"

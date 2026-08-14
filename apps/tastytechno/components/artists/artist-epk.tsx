@@ -1,15 +1,32 @@
 import Image from "next/image"
 import Link from "next/link"
-
-import type {
-  ArtistEpk,
-  ArtistEvent,
-  ArtistImage,
-  ArtistVideo,
-} from "../../sanity/lib/artists"
+import { ArtistQueryResult, EventBySlugQueryResult } from "../../sanity.types"
+import { getSiteImageUrl } from "../../sanity/queries/image"
 
 type ArtistEpkProps = {
-  artist: ArtistEpk
+  artist: ArtistQueryResult
+}
+
+export type ArtistVideo = {
+  title: string
+  fileUrl?: string | null
+  externalUrl?: string | null
+  caption?: string | null
+  poster?: SiteImage | null
+  loop: boolean
+}
+
+type SiteImage = {
+  _type?: "image"
+  asset?: { _type?: "reference"; _ref?: string } | null
+  crop?: { top: number; bottom: number; left: number; right: number } | null
+  hotspot?: { x: number; y: number; width: number; height: number } | null
+  alt: string
+  caption?: string | null
+  credit?: string | null
+  width?: number | null
+  height?: number | null
+  fallbackSrc?: string | null
 }
 
 const trustedEmbedHosts = new Set([
@@ -56,7 +73,8 @@ function isExternalHref(href: string) {
   return href.startsWith("http://") || href.startsWith("https://")
 }
 
-function formatEventDate(event: ArtistEvent) {
+function formatEventDate(event: EventBySlugQueryResult) {
+  if (!event) return null
   if (event.dateDisplay) return event.dateDisplay
   if (!event.startsAt) return "Date to be announced"
 
@@ -79,14 +97,14 @@ function ArtistImageFrame({
   sizes,
   preload = false,
 }: {
-  image: ArtistImage
+  image: SiteImage
   className: string
   sizes: string
   preload?: boolean
 }) {
   return (
     <Image
-      src={image.src}
+      src={getSiteImageUrl(image, { width: 300, height: 600})}
       alt={image.alt}
       fill
       sizes={sizes}
@@ -100,7 +118,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
   const localOrHostedFile = safeHref(video.fileUrl)
   const embedUrl = safeEmbedUrl(video.externalUrl)
   const externalUrl = safeHref(video.externalUrl)
-  const poster = video.poster ? safeHref(video.poster.src) : null
+  const poster = video.poster || null
 
   return (
     <article className="overflow-hidden rounded-md shadow-sm border border-border bg-card">
@@ -110,7 +128,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
           controls
           playsInline
           preload="metadata"
-          poster={poster ?? undefined}
+          poster={poster?.alt ?? undefined}
           aria-label={video.title}
           loop={video.loop}
         >
@@ -150,6 +168,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
 }
 
 export function ArtistEpk({ artist }: ArtistEpkProps) {
+  if (!artist) { return null }
   const biography = artist.biography
     ?.split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
@@ -201,8 +220,8 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
             <div>
               {artist.primaryLogo ? (
                 <Image
-                  src={artist.primaryLogo.src}
-                  alt={artist.primaryLogo.alt}
+                  src={artist.primaryLogo.src || ''}
+                  alt={artist.primaryLogo.alt || ''}
                   width={112}
                   height={112}
                   sizes="112px"
@@ -271,11 +290,11 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
               </div>
             </div>
 
-            {artist.heroImage ? (
+            {artist?.heroImage ? (
               <figure>
                 <div className="relative aspect-[3/4] overflow-hidden rounded-md shadow-md border border-border bg-muted">
                   <ArtistImageFrame
-                    image={artist.heroImage}
+                    image={artist.heroImage as SiteImage}
                     className="object-cover"
                     sizes="(max-width: 767px) calc(100vw - 3rem), 40vw"
                     preload
@@ -334,7 +353,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                         <iframe
                           className="mt-5 h-44 w-full rounded-md border-0"
                           src={embedUrl}
-                          title={audio.title}
+                          title={audio.title || undefined}
                           loading="lazy"
                           allow="autoplay"
                           referrerPolicy="strict-origin-when-cross-origin"
@@ -404,7 +423,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
               </h2>
               <div className="mt-8 grid gap-6 md:grid-cols-2">
                 {artist.videos.map((video) => (
-                  <VideoCard key={video.title} video={video} />
+                  <VideoCard key={video.title} video={video as ArtistVideo} />
                 ))}
               </div>
             </div>
@@ -423,7 +442,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                   <figure key={image.src}>
                     <div className="relative aspect-[6/5] overflow-hidden rounded-md shadow-md bg-muted">
                       <ArtistImageFrame
-                        image={image}
+                        image={image as SiteImage}
                         className="object-cover"
                         sizes="(max-width: 767px) calc(100vw - 3rem), 50vw"
                       />
@@ -455,7 +474,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                   return (
                     <article key={`${index}-${event.title}-${event.dateDisplay || event.startsAt}`} className="grid gap-4 py-6 sm:grid-cols-[12rem_1fr_auto] sm:items-start">
                       <div>
-                        <p className="font-medium">{formatEventDate(event)}</p>
+                        <p className="font-medium">xxxx</p>
                         {event.status === "pending" ? (
                           <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
                             Details pending

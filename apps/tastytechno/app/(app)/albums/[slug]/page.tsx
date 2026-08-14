@@ -5,11 +5,24 @@ import { notFound } from "next/navigation"
 
 import { SiteFooter } from "../../../../components/site/site-footer"
 import { SiteHeader } from "../../../../components/site/site-header"
-import { getSiteImageAspectRatio, getSiteImageUrl } from "../../../../sanity/lib/image"
-import { getAlbumBySlug, getAlbumSlugs, getHomePage } from "../../../../sanity/lib/site"
+import { getSiteImageAspectRatio, getSiteImageUrl } from "../../../../sanity/queries/image"
+import { getAlbumBySlug, getAlbumSlugs, getHomePage } from "../../../../sanity/queries/site"
 
 type AlbumPageProps = {
   params: Promise<{ slug: string }>
+}
+
+type SiteImage = {
+  _type?: "image"
+  asset?: { _type?: "reference"; _ref?: string } | null
+  crop?: { top: number; bottom: number; left: number; right: number } | null
+  hotspot?: { x: number; y: number; width: number; height: number } | null
+  alt: string
+  caption?: string | null
+  credit?: string | null
+  width?: number | null
+  height?: number | null
+  fallbackSrc?: string | null
 }
 
 export const revalidate = 300
@@ -24,10 +37,10 @@ export async function generateMetadata({ params }: AlbumPageProps): Promise<Meta
   if (!album) return { title: "Album not found | Tasty Techno" }
 
   const title = album.seo?.metaTitle?.trim() || `${album.title} | Tasty Techno`
-  const description = album.seo?.metaDescription?.trim() || album.summary
+  const description = album.seo?.metaDescription?.trim() || album.summary || undefined
   const socialImage = album.seo?.openGraphImage ?? album.coverPhoto?.image
   const socialImageUrl = socialImage
-    ? getSiteImageUrl(socialImage, { width: 1200, height: 630, quality: 88 })
+    ? getSiteImageUrl(socialImage as SiteImage, { width: 1200, height: 630, quality: 88 })
     : null
 
   return {
@@ -39,7 +52,7 @@ export async function generateMetadata({ params }: AlbumPageProps): Promise<Meta
       description,
       type: "article",
       url: `/albums/${album.slug}`,
-      images: socialImageUrl && socialImage ? [{ url: socialImageUrl, alt: socialImage.alt }] : undefined,
+      images: socialImageUrl && socialImage ? [{ url: socialImageUrl, alt: socialImage.alt || "" }] : undefined,
     },
   }
 }
@@ -50,7 +63,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
   if (!album) notFound()
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    home && <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <main id="main-content">
         <header className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
@@ -81,8 +94,8 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
           {album.photos?.length ? (
             <div className="columns-1 gap-6 md:columns-2">
               {album.photos.map((placement) => {
-                const { image } = placement.photo
-                const imageUrl = getSiteImageUrl(image, { width: 1600, quality: 86 })
+                const image = placement.photo?.image as SiteImage
+                const imageUrl = image && getSiteImageUrl(image, { width: 1600, quality: 86 })
                 const aspectRatio = getSiteImageAspectRatio(image) ?? 4 / 5
                 const height = Math.round(1600 / aspectRatio)
                 if (!imageUrl) return null

@@ -1,7 +1,7 @@
-import Image from "next/image"
 import Link from "next/link"
-import { ArtistQueryResult, EventBySlugQueryResult } from "../../sanity.types"
-import { getSiteImageUrl } from "../../sanity/queries/image"
+import { ArtistQueryResult } from "../../sanity.types"
+import { type SanityImageValue, getSiteImageUrl } from "../../sanity/queries/image"
+import { SanityImage } from "../site/sanity-image"
 
 type ArtistEpkProps = {
   artist: ArtistQueryResult
@@ -12,21 +12,8 @@ export type ArtistVideo = {
   fileUrl?: string | null
   externalUrl?: string | null
   caption?: string | null
-  poster?: SiteImage | null
+  poster?: SanityImageValue | null
   loop: boolean
-}
-
-type SiteImage = {
-  _type?: "image"
-  asset?: { _type?: "reference"; _ref?: string } | null
-  crop?: { top: number; bottom: number; left: number; right: number } | null
-  hotspot?: { x: number; y: number; width: number; height: number } | null
-  alt: string
-  caption?: string | null
-  credit?: string | null
-  width?: number | null
-  height?: number | null
-  fallbackSrc?: string | null
 }
 
 const trustedEmbedHosts = new Set([
@@ -73,52 +60,14 @@ function isExternalHref(href: string) {
   return href.startsWith("http://") || href.startsWith("https://")
 }
 
-function formatEventDate(event: EventBySlugQueryResult) {
-  if (!event) return null
-  if (event.dateDisplay) return event.dateDisplay
-  if (!event.startsAt) return "Date to be announced"
 
-  const start = new Date(event.startsAt)
-  const end = event.endsAt ? new Date(event.endsAt) : null
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "America/New_York",
-  })
-
-  if (!end) return formatter.format(start)
-  return `${formatter.format(start)} – ${formatter.format(end)}`
-}
-
-function ArtistImageFrame({
-  image,
-  className,
-  sizes,
-  preload = false,
-}: {
-  image: SiteImage
-  className: string
-  sizes: string
-  preload?: boolean
-}) {
-  return (
-    <Image
-      src={getSiteImageUrl(image, { width: 300, height: 600})}
-      alt={image.alt}
-      fill
-      sizes={sizes}
-      preload={preload}
-      className={className}
-    />
-  )
-}
 
 function VideoCard({ video }: { video: ArtistVideo }) {
   const localOrHostedFile = safeHref(video.fileUrl)
   const embedUrl = safeEmbedUrl(video.externalUrl)
   const externalUrl = safeHref(video.externalUrl)
   const poster = video.poster || null
+  const posterUrl = poster ? getSiteImageUrl(poster, { width: 1280, height: 720 }) : undefined
 
   return (
     <article className="overflow-hidden rounded-md shadow-sm border border-border bg-card">
@@ -128,7 +77,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
           controls
           playsInline
           preload="metadata"
-          poster={poster?.alt ?? undefined}
+          poster={posterUrl}
           aria-label={video.title}
           loop={video.loop}
         >
@@ -219,14 +168,15 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
           <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-12 md:grid-cols-[minmax(0,1fr)_minmax(20rem,0.72fr)] md:items-center md:py-20">
             <div>
               {artist.primaryLogo ? (
-                <Image
-                  src={artist.primaryLogo.src || ''}
-                  alt={artist.primaryLogo.alt || ''}
-                  width={112}
-                  height={112}
-                  sizes="112px"
-                  className="mb-8 h-24 w-24 object-contain"
-                />
+                <div className="mb-8 h-24 w-24">
+                  <SanityImage
+                    image={artist.primaryLogo}
+                    alt={artist.primaryLogo.alt || `${artist.name} logo`}
+                    width={112}
+                    height={112}
+                    className="h-24 w-24 object-contain"
+                  />
+                </div>
               ) : null}
               {artist.positioning ? (
                 <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
@@ -293,11 +243,13 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
             {artist?.heroImage ? (
               <figure>
                 <div className="relative aspect-[3/4] overflow-hidden rounded-md shadow-md border border-border bg-muted">
-                  <ArtistImageFrame
-                    image={artist.heroImage as SiteImage}
+                  <SanityImage
+                    image={artist.heroImage}
+                    alt={artist.heroImage.alt || artist.name}
                     className="object-cover"
                     sizes="(max-width: 767px) calc(100vw - 3rem), 40vw"
-                    preload
+                    priority
+                    fill
                   />
                 </div>
                 {artist.heroImage.caption || artist.heroImage.credit ? (
@@ -438,13 +390,15 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                 In the room
               </h2>
               <div className="mt-8 grid gap-6 md:grid-cols-2">
-                {artist.gallery.map((image) => (
-                  <figure key={image.src}>
+                {artist.gallery.map((image, index) => (
+                  <figure key={image.asset?._ref || image.src || index}>
                     <div className="relative aspect-[6/5] overflow-hidden rounded-md shadow-md bg-muted">
-                      <ArtistImageFrame
-                        image={image as SiteImage}
+                      <SanityImage
+                        image={image}
+                        alt={image.alt || `${artist.name} gallery image`}
                         className="object-cover"
                         sizes="(max-width: 767px) calc(100vw - 3rem), 50vw"
+                        fill
                       />
                     </div>
                     {image.caption || image.credit ? (

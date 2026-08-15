@@ -1,4 +1,5 @@
 import { sanityFetch } from '../lib/live';
+import { client } from '../lib/client';
 import { defineQuery } from 'next-sanity';
 
 const imageProjection = `{
@@ -10,7 +11,9 @@ const imageProjection = `{
   caption,
   credit,
   "width": asset->metadata.dimensions.width,
-  "height": asset->metadata.dimensions.height
+  "height": asset->metadata.dimensions.height,
+  "lqip": asset->metadata.lqip,
+  "src": asset->url
 }`
 
 const seoProjection = `{
@@ -129,11 +132,7 @@ export const getEventBySlug = async (slug: string) => {
 }
 
 export const getEventSlugs = async () => {
-  const { data } = await sanityFetch({ 
-    query: eventSlugsQuery 
-  })
-
-  return data
+  return client.fetch(eventSlugsQuery)
 }
 
 export const getAlbums = async () => {
@@ -154,9 +153,12 @@ export const getAlbumBySlug = async (slug: string) => {
 }
 
 export const getAlbumSlugs = async () => {
-  const { data } = await sanityFetch({ 
-    query: albumSlugsQuery 
-  })
-
-  return data
+  return client.fetch(albumSlugsQuery)
 }
+
+export type SiteSettings = Awaited<ReturnType<typeof getSiteSettings>>
+export type SiteHomePage = NonNullable<Awaited<ReturnType<typeof getHomePage>>>
+export type SiteEvent = NonNullable<Awaited<ReturnType<typeof getEvents>>>[number]
+export type SitePhotoAlbum = NonNullable<Awaited<ReturnType<typeof getAlbums>>>[number]
+export type SiteLink = NonNullable<SiteHomePage["socialLinks"]>[number]
+

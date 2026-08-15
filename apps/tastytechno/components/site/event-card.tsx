@@ -1,44 +1,45 @@
-import Image from "next/image"
 import Link from "next/link"
-import { type EventBySlugQueryResult } from "../../sanity.types"
+import { SanityImage } from "./sanity-image"
+import type { SanityImageValue } from "../../sanity/queries/image"
 
-import { getSiteImageUrl } from "../../sanity/queries/image"
-
-type SiteImage = {
-  _type?: "image"
-  asset?: { _type?: "reference"; _ref?: string } | null
-  crop?: { top: number; bottom: number; left: number; right: number } | null
-  hotspot?: { x: number; y: number; width: number; height: number } | null
-  alt: string
-  caption?: string | null
-  credit?: string | null
-  width?: number | null
-  height?: number | null
-  fallbackSrc?: string | null
+export type EventCardItem = {
+  title?: string | null
+  slug?: string | null
+  chapterLabel?: string | null
+  status?: string | null
+  dateDisplay?: string | null
+  startsAt?: string | null
+  venue?: string | null
+  location?: string | null
+  summary?: string | null
+  heroImage?: SanityImageValue | null
 }
 
-type EventCardProps = {
-  event: EventBySlugQueryResult
+export type EventCardProps = {
+  event: EventCardItem | null | undefined
+  featured?: boolean
 }
 
-export function EventCard({ event }: EventCardProps) {
-  const imageUrl = event && event.heroImage
-    ? getSiteImageUrl(event.heroImage as SiteImage, { width: 1000, height: 700 })
-    : null
+export function EventCard({ event, featured }: EventCardProps) {
+  if (!event) return null
 
   return (
-    event && <article className="overflow-hidden rounded-2xl border border-border bg-card">
-      {imageUrl && event.heroImage ? (
+    <article className="overflow-hidden rounded-2xl border border-border bg-card">
+      {event.heroImage ? (
         <Link
           className="relative block bg-muted aspect-[4/3]"
           href={`/events/${event.slug}`}
           aria-label={`View ${event.chapterLabel ?? event.title}`}
         >
-          <Image
-            src={imageUrl}
-            alt={event.heroImage.alt || "event image"}
+          <SanityImage
+            image={event.heroImage}
+            alt={event.heroImage.alt || event.title || "event image"}
             fill
-            sizes="(max-width: 767px) 100vw, 50vw"
+            sizes={
+              featured
+                ? "(max-width: 767px) 100vw, 66vw"
+                : "(max-width: 767px) 100vw, 50vw"
+            }
             className="object-cover"
           />
         </Link>

@@ -576,20 +576,8 @@ export type AllSanitySchemaTypes =
   | Geopoint;
 
 // Source: sanity/queries/artists.ts
-// Variable: imageProjection
-// Query: {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}
-export type ImageProjectionResult = {
-  alt: never;
-  caption: never;
-  credit: never;
-  src: never;
-  width: never;
-  height: never;
-};
-
-// Source: sanity/queries/artists.ts
 // Variable: artistQuery
-// Query: *[_type == "artistPage" && slug.current == $slug][0]{  "id": _id,  name,  realName,  "slug": slug.current,  positioning,  tagline,  location,  activeSince,  genres,  "heroImage": heroImage {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  "primaryLogo": primaryLogo {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  "wordmark": wordmark {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  shortBio,  "biography": pt::text(biography),  careerHighlights[]{label, title, description},  collaborations[]{name, with, description, url},  audioEmbeds[]{title, provider, sourceUrl, embedUrl, details},  videos[]{    title,    "fileUrl": file.asset->url,    externalUrl,    caption,    "poster": poster {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},    loop  },  "gallery": gallery[] {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  events[]{title, organizer, status, startsAt, endsAt, dateDisplay, venue, location, details, url},  bookingEmail,  bookingLabel,  externalLinks[]{label, href, openInNewTab},  pressAssets[]{    label,    format,    "url": coalesce(image.asset->url, file.asset->url, externalUrl)  },  technicalRider{    summary,    preferredSetup,    boothMonitors,    mediaFormats,    "fileUrl": file.asset->url  },  showOnArtistIndex,  sortOrder,  seo{    metaTitle,    metaDescription,    "openGraphImage": openGraphImage {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}  }}
+// Query: *[_type == "artistPage" && slug.current == $slug][0]{  "id": _id,  name,  realName,  "slug": slug.current,  positioning,  tagline,  location,  activeSince,  genres,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url},  "primaryLogo": primaryLogo {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url},  "wordmark": wordmark {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url},  shortBio,  "biography": pt::text(biography),  careerHighlights[]{label, title, description},  collaborations[]{name, with, description, url},  audioEmbeds[]{title, provider, sourceUrl, embedUrl, details},  videos[]{    title,    "fileUrl": file.asset->url,    externalUrl,    caption,    "poster": poster {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url},    loop  },  "gallery": gallery[] {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url},  events[]{title, organizer, status, startsAt, endsAt, dateDisplay, venue, location, details, url},  bookingEmail,  bookingLabel,  externalLinks[]{label, href, openInNewTab},  pressAssets[]{    label,    format,    "url": coalesce(image.asset->url, file.asset->url, externalUrl)  },  technicalRider{    summary,    preferredSetup,    boothMonitors,    mediaFormats,    "fileUrl": file.asset->url  },  showOnArtistIndex,  sortOrder,  seo{    metaTitle,    metaDescription,    "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}  }}
 export type ArtistQueryResult = {
   id: string;
   name: string | null;
@@ -601,28 +589,43 @@ export type ArtistQueryResult = {
   activeSince: string | null;
   genres: Array<string> | null;
   heroImage: {
+    _type: "image";
+    asset: SanityImageAssetReference | null;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
     alt: string | null;
     caption: string | null;
     credit: string | null;
-    src: string | null;
     width: number | null;
     height: number | null;
+    lqip: string | null;
+    src: string | null;
   } | null;
   primaryLogo: {
+    _type: "image";
+    asset: SanityImageAssetReference | null;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
     alt: string | null;
     caption: null;
     credit: null;
-    src: string | null;
     width: number | null;
     height: number | null;
+    lqip: string | null;
+    src: string | null;
   } | null;
   wordmark: {
+    _type: "image";
+    asset: SanityImageAssetReference | null;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
     alt: string | null;
     caption: null;
     credit: null;
-    src: string | null;
     width: number | null;
     height: number | null;
+    lqip: string | null;
+    src: string | null;
   } | null;
   shortBio: string | null;
   biography: string;
@@ -651,22 +654,32 @@ export type ArtistQueryResult = {
     externalUrl: string | null;
     caption: string | null;
     poster: {
+      _type: "image";
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
       alt: string | null;
       caption: null;
       credit: null;
-      src: string | null;
       width: number | null;
       height: number | null;
+      lqip: string | null;
+      src: string | null;
     } | null;
     loop: boolean | null;
   }> | null;
   gallery: Array<{
+    _type: "image";
+    asset: SanityImageAssetReference | null;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
     alt: string | null;
     caption: string | null;
     credit: string | null;
-    src: string | null;
     width: number | null;
     height: number | null;
+    lqip: string | null;
+    src: string | null;
   }> | null;
   events: Array<{
     title: string | null;
@@ -705,31 +718,41 @@ export type ArtistQueryResult = {
     metaTitle: string | null;
     metaDescription: string | null;
     openGraphImage: {
+      _type: "image";
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
       alt: string | null;
       caption: null;
       credit: null;
-      src: string | null;
       width: number | null;
       height: number | null;
+      lqip: string | null;
+      src: string | null;
     } | null;
   } | null;
 } | null;
 
 // Source: sanity/queries/artists.ts
 // Variable: artistCardsQuery
-// Query: *[  _type == "artistPage" &&  defined(slug.current) &&  showOnArtistIndex != false] | order(sortOrder asc, name asc){  name,  "slug": slug.current,  positioning,  shortBio,  "heroImage": heroImage {  alt,  caption,  credit,  "src": asset->url,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  showOnArtistIndex,  sortOrder}
+// Query: *[  _type == "artistPage" &&  defined(slug.current) &&  showOnArtistIndex != false] | order(sortOrder asc, name asc){  name,  "slug": slug.current,  positioning,  shortBio,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url},  showOnArtistIndex,  sortOrder}
 export type ArtistCardsQueryResult = Array<{
   name: string | null;
   slug: string | null;
   positioning: string | null;
   shortBio: string | null;
   heroImage: {
+    _type: "image";
+    asset: SanityImageAssetReference | null;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
     alt: string | null;
     caption: string | null;
     credit: string | null;
-    src: string | null;
     width: number | null;
     height: number | null;
+    lqip: string | null;
+    src: string | null;
   } | null;
   showOnArtistIndex: boolean | null;
   sortOrder: number | null;
@@ -750,7 +773,7 @@ export type SiteSettingsQueryResult = {
 
 // Source: sanity/queries/site.ts
 // Variable: homePageQuery
-// Query: *[_type == "homePage"] | order(_updatedAt desc)[0]{  eyebrow,  heading,  introduction,  "featuredEventSlug": featuredEvent->slug.current,  "featuredAlbumSlug": featuredAlbum->slug.current,  nextChapterLabel,  nextChapterTitle,  nextChapterCopy,  inquiryEmail,  artistBookingEmail,  socialLinks[]{label, href, openInNewTab},  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}}
+// Query: *[_type == "homePage"] | order(_updatedAt desc)[0]{  eyebrow,  heading,  introduction,  "featuredEventSlug": featuredEvent->slug.current,  "featuredAlbumSlug": featuredAlbum->slug.current,  nextChapterLabel,  nextChapterTitle,  nextChapterCopy,  inquiryEmail,  artistBookingEmail,  socialLinks[]{label, href, openInNewTab},  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}}
 export type HomePageQueryResult = {
   eyebrow: string | null;
   heading: string | null;
@@ -780,13 +803,15 @@ export type HomePageQueryResult = {
       credit: null;
       width: number | null;
       height: number | null;
+      lqip: string | null;
+      src: string | null;
     } | null;
   } | null;
 } | null;
 
 // Source: sanity/queries/site.ts
 // Variable: eventsQuery
-// Query: *[_type == "event" && defined(slug.current)]  | order(sortOrder asc, coalesce(startsAt, eventDate, "1900-01-01") desc, title asc) {  "id": _id,  title,  chapterLabel,  "slug": slug.current,  organizer,  status,  eventDate,  startsAt,  endsAt,  dateDisplay,  venue,  location,  summary,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},  eventUrl,  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}}
+// Query: *[_type == "event" && defined(slug.current)]  | order(sortOrder asc, coalesce(startsAt, eventDate, "1900-01-01") desc, title asc) {  "id": _id,  title,  chapterLabel,  "slug": slug.current,  organizer,  status,  eventDate,  startsAt,  endsAt,  dateDisplay,  venue,  location,  summary,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url},  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},  eventUrl,  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}}
 export type EventsQueryResult = Array<{
   id: string;
   title: string | null;
@@ -811,6 +836,8 @@ export type EventsQueryResult = Array<{
     credit: string | null;
     width: number | null;
     height: number | null;
+    lqip: string | null;
+    src: string | null;
   } | null;
   lineup: Array<{
     key: string;
@@ -834,13 +861,15 @@ export type EventsQueryResult = Array<{
       credit: null;
       width: number | null;
       height: number | null;
+      lqip: string | null;
+      src: string | null;
     } | null;
   } | null;
 }>;
 
 // Source: sanity/queries/site.ts
 // Variable: eventBySlugQuery
-// Query: *[_type == "event" && slug.current == $slug][0] {  "id": _id,  title,  chapterLabel,  "slug": slug.current,  organizer,  status,  eventDate,  startsAt,  endsAt,  dateDisplay,  venue,  location,  summary,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height},  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},  eventUrl,  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}}
+// Query: *[_type == "event" && slug.current == $slug][0] {  "id": _id,  title,  chapterLabel,  "slug": slug.current,  organizer,  status,  eventDate,  startsAt,  endsAt,  dateDisplay,  venue,  location,  summary,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url},  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},  eventUrl,  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}}
 export type EventBySlugQueryResult = {
   id: string;
   title: string | null;
@@ -865,6 +894,8 @@ export type EventBySlugQueryResult = {
     credit: string | null;
     width: number | null;
     height: number | null;
+    lqip: string | null;
+    src: string | null;
   } | null;
   lineup: Array<{
     key: string;
@@ -888,6 +919,8 @@ export type EventBySlugQueryResult = {
       credit: null;
       width: number | null;
       height: number | null;
+      lqip: string | null;
+      src: string | null;
     } | null;
   } | null;
 } | null;
@@ -899,7 +932,7 @@ export type EventSlugsQueryResult = Array<string | null>;
 
 // Source: sanity/queries/site.ts
 // Variable: albumsQuery
-// Query: *[_type == "photoAlbum" && defined(slug.current)]  | order(sortOrder asc, title asc) {  "id": _id,  title,  "slug": slug.current,  summary,  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},  "coverPhoto": coverPhoto->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}},  photos[]{    "key": _key,    captionOverride,    "photo": photo->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}  },  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}}
+// Query: *[_type == "photoAlbum" && defined(slug.current)]  | order(sortOrder asc, title asc) {  "id": _id,  title,  "slug": slug.current,  summary,  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},  "coverPhoto": coverPhoto->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}},  photos[]{    "key": _key,    captionOverride,    "photo": photo->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}  },  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}}
 export type AlbumsQueryResult = Array<{
   id: string;
   title: string | null;
@@ -923,6 +956,8 @@ export type AlbumsQueryResult = Array<{
       credit: string | null;
       width: number | null;
       height: number | null;
+      lqip: string | null;
+      src: string | null;
     } | null;
   } | null;
   photos: Array<{
@@ -941,6 +976,8 @@ export type AlbumsQueryResult = Array<{
         credit: string | null;
         width: number | null;
         height: number | null;
+        lqip: string | null;
+        src: string | null;
       } | null;
     } | null;
   }> | null;
@@ -959,13 +996,15 @@ export type AlbumsQueryResult = Array<{
       credit: null;
       width: number | null;
       height: number | null;
+      lqip: string | null;
+      src: string | null;
     } | null;
   } | null;
 }>;
 
 // Source: sanity/queries/site.ts
 // Variable: albumBySlugQuery
-// Query: *[_type == "photoAlbum" && slug.current == $slug][0] {  "id": _id,  title,  "slug": slug.current,  summary,  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},  "coverPhoto": coverPhoto->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}},  photos[]{    "key": _key,    captionOverride,    "photo": photo->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}  },  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height}}}
+// Query: *[_type == "photoAlbum" && slug.current == $slug][0] {  "id": _id,  title,  "slug": slug.current,  summary,  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},  "coverPhoto": coverPhoto->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}},  photos[]{    "key": _key,    captionOverride,    "photo": photo->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}  },  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}}
 export type AlbumBySlugQueryResult = {
   id: string;
   title: string | null;
@@ -989,6 +1028,8 @@ export type AlbumBySlugQueryResult = {
       credit: string | null;
       width: number | null;
       height: number | null;
+      lqip: string | null;
+      src: string | null;
     } | null;
   } | null;
   photos: Array<{
@@ -1007,6 +1048,8 @@ export type AlbumBySlugQueryResult = {
         credit: string | null;
         width: number | null;
         height: number | null;
+        lqip: string | null;
+        src: string | null;
       } | null;
     } | null;
   }> | null;
@@ -1025,6 +1068,8 @@ export type AlbumBySlugQueryResult = {
       credit: null;
       width: number | null;
       height: number | null;
+      lqip: string | null;
+      src: string | null;
     } | null;
   } | null;
 } | null;
@@ -1038,17 +1083,16 @@ export type AlbumSlugsQueryResult = Array<string | null>;
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '{\n  alt,\n  caption,\n  credit,\n  "src": asset->url,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n}': ImageProjectionResult;
-    '*[_type == "artistPage" && slug.current == $slug][0]{\n  "id": _id,\n  name,\n  realName,\n  "slug": slug.current,\n  positioning,\n  tagline,\n  location,\n  activeSince,\n  genres,\n  "heroImage": heroImage {\n  alt,\n  caption,\n  credit,\n  "src": asset->url,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n},\n  "primaryLogo": primaryLogo {\n  alt,\n  caption,\n  credit,\n  "src": asset->url,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n},\n  "wordmark": wordmark {\n  alt,\n  caption,\n  credit,\n  "src": asset->url,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n},\n  shortBio,\n  "biography": pt::text(biography),\n  careerHighlights[]{label, title, description},\n  collaborations[]{name, with, description, url},\n  audioEmbeds[]{title, provider, sourceUrl, embedUrl, details},\n  videos[]{\n    title,\n    "fileUrl": file.asset->url,\n    externalUrl,\n    caption,\n    "poster": poster {\n  alt,\n  caption,\n  credit,\n  "src": asset->url,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n},\n    loop\n  },\n  "gallery": gallery[] {\n  alt,\n  caption,\n  credit,\n  "src": asset->url,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n},\n  events[]{title, organizer, status, startsAt, endsAt, dateDisplay, venue, location, details, url},\n  bookingEmail,\n  bookingLabel,\n  externalLinks[]{label, href, openInNewTab},\n  pressAssets[]{\n    label,\n    format,\n    "url": coalesce(image.asset->url, file.asset->url, externalUrl)\n  },\n  technicalRider{\n    summary,\n    preferredSetup,\n    boothMonitors,\n    mediaFormats,\n    "fileUrl": file.asset->url\n  },\n  showOnArtistIndex,\n  sortOrder,\n  seo{\n    metaTitle,\n    metaDescription,\n    "openGraphImage": openGraphImage {\n  alt,\n  caption,\n  credit,\n  "src": asset->url,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n}\n  }\n}': ArtistQueryResult;
-    '*[\n  _type == "artistPage" &&\n  defined(slug.current) &&\n  showOnArtistIndex != false\n] | order(sortOrder asc, name asc){\n  name,\n  "slug": slug.current,\n  positioning,\n  shortBio,\n  "heroImage": heroImage {\n  alt,\n  caption,\n  credit,\n  "src": asset->url,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n},\n  showOnArtistIndex,\n  sortOrder\n}': ArtistCardsQueryResult;
+    '*[_type == "artistPage" && slug.current == $slug][0]{\n  "id": _id,\n  name,\n  realName,\n  "slug": slug.current,\n  positioning,\n  tagline,\n  location,\n  activeSince,\n  genres,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  "primaryLogo": primaryLogo {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  "wordmark": wordmark {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  shortBio,\n  "biography": pt::text(biography),\n  careerHighlights[]{label, title, description},\n  collaborations[]{name, with, description, url},\n  audioEmbeds[]{title, provider, sourceUrl, embedUrl, details},\n  videos[]{\n    title,\n    "fileUrl": file.asset->url,\n    externalUrl,\n    caption,\n    "poster": poster {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n    loop\n  },\n  "gallery": gallery[] {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  events[]{title, organizer, status, startsAt, endsAt, dateDisplay, venue, location, details, url},\n  bookingEmail,\n  bookingLabel,\n  externalLinks[]{label, href, openInNewTab},\n  pressAssets[]{\n    label,\n    format,\n    "url": coalesce(image.asset->url, file.asset->url, externalUrl)\n  },\n  technicalRider{\n    summary,\n    preferredSetup,\n    boothMonitors,\n    mediaFormats,\n    "fileUrl": file.asset->url\n  },\n  showOnArtistIndex,\n  sortOrder,\n  seo{\n    metaTitle,\n    metaDescription,\n    "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n  }\n}': ArtistQueryResult;
+    '*[\n  _type == "artistPage" &&\n  defined(slug.current) &&\n  showOnArtistIndex != false\n] | order(sortOrder asc, name asc){\n  name,\n  "slug": slug.current,\n  positioning,\n  shortBio,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  showOnArtistIndex,\n  sortOrder\n}': ArtistCardsQueryResult;
     '*[_type == "artistPage" && defined(slug.current)].slug.current': ArtistSlugsQueryResult;
     '*[_type == "siteSettings"] | order(_updatedAt desc)[0]{\n  siteTitle,\n  siteDescription\n}': SiteSettingsQueryResult;
-    '*[_type == "homePage"] | order(_updatedAt desc)[0]{\n  eyebrow,\n  heading,\n  introduction,\n  "featuredEventSlug": featuredEvent->slug.current,\n  "featuredAlbumSlug": featuredAlbum->slug.current,\n  nextChapterLabel,\n  nextChapterTitle,\n  nextChapterCopy,\n  inquiryEmail,\n  artistBookingEmail,\n  socialLinks[]{label, href, openInNewTab},\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n}\n}\n}': HomePageQueryResult;
-    '*[_type == "event" && defined(slug.current)]\n  | order(sortOrder asc, coalesce(startsAt, eventDate, "1900-01-01") desc, title asc) {\n  "id": _id,\n  title,\n  chapterLabel,\n  "slug": slug.current,\n  organizer,\n  status,\n  eventDate,\n  startsAt,\n  endsAt,\n  dateDisplay,\n  venue,\n  location,\n  summary,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n},\n  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},\n  eventUrl,\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n}\n}\n}': EventsQueryResult;
-    '*[_type == "event" && slug.current == $slug][0] {\n  "id": _id,\n  title,\n  chapterLabel,\n  "slug": slug.current,\n  organizer,\n  status,\n  eventDate,\n  startsAt,\n  endsAt,\n  dateDisplay,\n  venue,\n  location,\n  summary,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n},\n  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},\n  eventUrl,\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n}\n}\n}': EventBySlugQueryResult;
+    '*[_type == "homePage"] | order(_updatedAt desc)[0]{\n  eyebrow,\n  heading,\n  introduction,\n  "featuredEventSlug": featuredEvent->slug.current,\n  "featuredAlbumSlug": featuredAlbum->slug.current,\n  nextChapterLabel,\n  nextChapterTitle,\n  nextChapterCopy,\n  inquiryEmail,\n  artistBookingEmail,\n  socialLinks[]{label, href, openInNewTab},\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': HomePageQueryResult;
+    '*[_type == "event" && defined(slug.current)]\n  | order(sortOrder asc, coalesce(startsAt, eventDate, "1900-01-01") desc, title asc) {\n  "id": _id,\n  title,\n  chapterLabel,\n  "slug": slug.current,\n  organizer,\n  status,\n  eventDate,\n  startsAt,\n  endsAt,\n  dateDisplay,\n  venue,\n  location,\n  summary,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},\n  eventUrl,\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': EventsQueryResult;
+    '*[_type == "event" && slug.current == $slug][0] {\n  "id": _id,\n  title,\n  chapterLabel,\n  "slug": slug.current,\n  organizer,\n  status,\n  eventDate,\n  startsAt,\n  endsAt,\n  dateDisplay,\n  venue,\n  location,\n  summary,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},\n  eventUrl,\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': EventBySlugQueryResult;
     '*[_type == "event" && defined(slug.current)].slug.current': EventSlugsQueryResult;
-    '*[_type == "photoAlbum" && defined(slug.current)]\n  | order(sortOrder asc, title asc) {\n  "id": _id,\n  title,\n  "slug": slug.current,\n  summary,\n  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},\n  "coverPhoto": coverPhoto->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n}\n},\n  photos[]{\n    "key": _key,\n    captionOverride,\n    "photo": photo->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n}\n}\n  },\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n}\n}\n}': AlbumsQueryResult;
-    '*[_type == "photoAlbum" && slug.current == $slug][0] {\n  "id": _id,\n  title,\n  "slug": slug.current,\n  summary,\n  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},\n  "coverPhoto": coverPhoto->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n}\n},\n  photos[]{\n    "key": _key,\n    captionOverride,\n    "photo": photo->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n}\n}\n  },\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height\n}\n}\n}': AlbumBySlugQueryResult;
+    '*[_type == "photoAlbum" && defined(slug.current)]\n  | order(sortOrder asc, title asc) {\n  "id": _id,\n  title,\n  "slug": slug.current,\n  summary,\n  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},\n  "coverPhoto": coverPhoto->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n},\n  photos[]{\n    "key": _key,\n    captionOverride,\n    "photo": photo->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n  },\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': AlbumsQueryResult;
+    '*[_type == "photoAlbum" && slug.current == $slug][0] {\n  "id": _id,\n  title,\n  "slug": slug.current,\n  summary,\n  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},\n  "coverPhoto": coverPhoto->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n},\n  photos[]{\n    "key": _key,\n    captionOverride,\n    "photo": photo->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n  },\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': AlbumBySlugQueryResult;
     '*[_type == "photoAlbum" && defined(slug.current)].slug.current': AlbumSlugsQueryResult;
   }
 }

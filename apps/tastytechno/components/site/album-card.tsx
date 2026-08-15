@@ -1,8 +1,6 @@
-import Image from "next/image"
 import Link from "next/link"
-
-import { getSiteImageUrl } from "../../sanity/queries/image"
 import type { SitePhotoAlbum } from "../../sanity/queries/site"
+import { SanityImage } from "./sanity-image"
 
 type AlbumCardProps = {
   album: SitePhotoAlbum
@@ -11,23 +9,24 @@ type AlbumCardProps = {
 
 export function AlbumCard({ album, featured = false }: AlbumCardProps) {
   const cover = album.coverPhoto?.image
-  const imageUrl = cover
-    ? getSiteImageUrl(cover, { width: featured ? 1600 : 1000, height: featured ? 1000 : 750 })
-    : null
 
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-card">
-      {imageUrl && cover ? (
+      {cover ? (
         <Link
-          className={`relative block bg-muted ${featured ? "aspect-[4/3]" : "aspect-[4/3]"}`}
+          className="relative block aspect-[4/3] bg-muted"
           href={`/albums/${album.slug}`}
           aria-label={`View ${album.title}`}
         >
-          <Image
-            src={imageUrl}
-            alt={cover.alt}
+          <SanityImage
+            image={cover}
+            alt={cover.alt || album.title}
             fill
-            sizes={featured ? "(max-width: 767px) 100vw, 66vw" : "(max-width: 767px) 100vw, 50vw"}
+            sizes={
+              featured
+                ? "(max-width: 767px) 100vw, 66vw"
+                : "(max-width: 767px) 100vw, 50vw"
+            }
             className="object-cover"
           />
         </Link>

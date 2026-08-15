@@ -1,29 +1,16 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 
 import { AlbumCard } from "../../components/site/album-card"
 import { EventCard } from "../../components/site/event-card"
+import { SanityImage } from "../../components/site/sanity-image"
 import { SiteFooter } from "../../components/site/site-footer"
 import { SiteHeader } from "../../components/site/site-header"
 import { getArtistCards } from "../../sanity/queries/artists"
-import { getSiteImageUrl } from "../../sanity/queries/image"
+import { getOpenGraphImageUrl } from "../../sanity/lib/image"
 import { getAlbums, getEvents, getHomePage, getSiteSettings } from "../../sanity/queries/site"
 
 export const revalidate = 300
-
-type SiteImage = {
-  _type?: "image"
-  asset?: { _type?: "reference"; _ref?: string } | null
-  crop?: { top: number; bottom: number; left: number; right: number } | null
-  hotspot?: { x: number; y: number; width: number; height: number } | null
-  alt: string
-  caption?: string | null
-  credit?: string | null
-  width?: number | null
-  height?: number | null
-  fallbackSrc?: string | null
-}
 
 export async function generateMetadata(): Promise<Metadata> {
   const [settings, home, albums] = await Promise.all([
@@ -38,26 +25,24 @@ export async function generateMetadata(): Promise<Metadata> {
     albums.find((album) => album.slug === home?.featuredAlbumSlug) ??
     albums.find((album) => album.showOnHome === true)
   const socialImage = home?.seo?.openGraphImage ?? featuredAlbum?.coverPhoto?.image
-  const socialImageUrl = socialImage
-    ? getSiteImageUrl(socialImage as SiteImage, { width: 1200, height: 630, quality: 88 })
-    : null
+  const socialImageUrl = getOpenGraphImageUrl(socialImage)
 
   return {
     title,
-    description,
+    description: description || undefined,
     alternates: { canonical: "/" },
     openGraph: {
       title,
-      description,
+      description: description || undefined,
       type: "website",
       url: "/",
-      siteName: settings.title,
-      images: socialImageUrl && socialImage ? [{ url: socialImageUrl, alt: socialImage.alt }] : undefined,
+      siteName: settings?.siteTitle || "Tasty Techno",
+      images: socialImageUrl && socialImage ? [{ url: socialImageUrl, alt: socialImage.alt || undefined }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title,
-      description,
+      description: description || undefined,
       images: socialImageUrl ? [socialImageUrl] : undefined,
     },
   }
@@ -215,9 +200,9 @@ export default async function HomePage() {
                         href={`/artists/${artist.slug}`}
                         aria-label={`View ${artist.name} press kit`}
                       >
-                        <Image
-                          src={artist.heroImage.src}
-                          alt={artist.heroImage.alt}
+                        <SanityImage
+                          image={artist.heroImage}
+                          alt={artist.heroImage.alt || artist.name}
                           fill
                           sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
                           className="object-cover"

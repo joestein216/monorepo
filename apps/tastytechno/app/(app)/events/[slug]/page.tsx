@@ -1,29 +1,16 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import { SanityImage } from "../../../../components/site/sanity-image"
 import { SiteFooter } from "../../../../components/site/site-footer"
 import { SiteHeader } from "../../../../components/site/site-header"
-import { getSiteImageUrl } from "../../../../sanity/queries/image"
+import { getOpenGraphImageUrl } from "../../../../sanity/lib/image"
 import { getAlbums, getEventBySlug, getEventSlugs, getHomePage } from "../../../../sanity/queries/site"
 import { EventBySlugQueryResult } from "../../../../sanity.types"
 
 type EventPageProps = {
   params: Promise<{ slug: string }>
-}
-
-type SiteImage = {
-  _type?: "image"
-  asset?: { _type?: "reference"; _ref?: string } | null
-  crop?: { top: number; bottom: number; left: number; right: number } | null
-  hotspot?: { x: number; y: number; width: number; height: number } | null
-  alt: string
-  caption?: string | null
-  credit?: string | null
-  width?: number | null
-  height?: number | null
-  fallbackSrc?: string | null
 }
 
 export const revalidate = 300
@@ -41,9 +28,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
   const title = event.seo?.metaTitle?.trim() || `${event.chapterLabel ?? event.title} | Tasty Techno`
   const description = event.seo?.metaDescription?.trim() || event.summary || undefined
   const socialImage = event.seo?.openGraphImage ?? event.heroImage
-  const socialImageUrl = socialImage
-    ? getSiteImageUrl(socialImage as SiteImage, { width: 1200, height: 630, quality: 88 })
-    : null
+  const socialImageUrl = getOpenGraphImageUrl(socialImage)
 
   return {
     title,
@@ -66,9 +51,8 @@ export default async function EventPage({ params }: EventPageProps) {
   const event = eventPromise.data as EventBySlugQueryResult
   if (!event) notFound()
 
-  const heroUrl = event.heroImage
-    ? getSiteImageUrl(event.heroImage as SiteImage, { width: 1800, height: 1100, quality: 86 })
-    : null
+  const socialImage = event.seo?.openGraphImage ?? event.heroImage
+  const ogImageUrl = getOpenGraphImageUrl(socialImage)
   const album = albums.find((candidate) => candidate.relatedEvent?.id === event.id || candidate.relatedEvent?.slug === event.slug)
   const structuredData = event.startsAt || event.eventDate
     ? {
@@ -97,7 +81,7 @@ export default async function EventPage({ params }: EventPageProps) {
           url: "https://www.tastytechno.com",
         },
         performer: event.lineup?.map((artist) => ({ "@type": "MusicGroup", name: artist.name })),
-        image: heroUrl || undefined,
+        image: ogImageUrl || undefined,
         url: `https://www.tastytechno.com/events/${event.slug}`,
       }
     : null
@@ -134,12 +118,12 @@ export default async function EventPage({ params }: EventPageProps) {
             ) : null}
           </header>
 
-          {heroUrl && event.heroImage ? (
+          {event.heroImage ? (
             <figure className="mx-auto w-full max-w-6xl px-6">
               <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-muted">
-                <Image
-                  src={heroUrl}
-                  alt="photo"
+                <SanityImage
+                  image={event.heroImage}
+                  alt={event.heroImage.alt || event.title}
                   fill
                   priority
                   sizes="(max-width: 1151px) 100vw, 1152px"

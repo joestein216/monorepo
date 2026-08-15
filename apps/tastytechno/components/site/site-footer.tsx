@@ -28,10 +28,10 @@ export function SiteFooter({ inquiryEmail, socialLinks }: SiteFooterProps) {
           {socialLinks?.length ? (
             <ul className="mt-3 flex flex-wrap gap-4 text-muted-foreground sm:justify-end">
               {socialLinks.map((link) => (
-                <li key={link.href}>
+                <li key={link.href || link.label}>
                   <a
                     className="transition-colors hover:text-foreground"
-                    href={link.href}
+                    href={link.href || "#"}
                     target={link.openInNewTab ? "_blank" : undefined}
                     rel={link.openInNewTab ? "noreferrer" : undefined}
                   >

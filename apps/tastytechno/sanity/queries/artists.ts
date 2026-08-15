@@ -1,14 +1,20 @@
 import { sanityFetch } from '../lib/live';
+import { client } from '../lib/client';
 import { defineQuery } from 'next-sanity';
 
-const imageProjection = defineQuery(`{
+const imageProjection = `{
+  _type,
+  asset,
+  crop,
+  hotspot,
   alt,
   caption,
   credit,
-  "src": asset->url,
   "width": asset->metadata.dimensions.width,
-  "height": asset->metadata.dimensions.height
-}`)
+  "height": asset->metadata.dimensions.height,
+  "lqip": asset->metadata.lqip,
+  "src": asset->url
+}`
 
 const artistQuery = defineQuery(`*[_type == "artistPage" && slug.current == $slug][0]{
   "id": _id,
@@ -91,7 +97,5 @@ export const getArtistCards = async () => {
 }
 
 export const getArtistSlugs = async () => {
-  const { data } = await sanityFetch({ query: artistSlugsQuery })
-
-  return data
+  return client.fetch(artistSlugsQuery)
 }

@@ -1,28 +1,15 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import { SanityImage } from "../../../../components/site/sanity-image"
 import { SiteFooter } from "../../../../components/site/site-footer"
 import { SiteHeader } from "../../../../components/site/site-header"
-import { getSiteImageAspectRatio, getSiteImageUrl } from "../../../../sanity/queries/image"
+import { getOpenGraphImageUrl } from "../../../../sanity/lib/image"
 import { getAlbumBySlug, getAlbumSlugs, getHomePage } from "../../../../sanity/queries/site"
 
 type AlbumPageProps = {
   params: Promise<{ slug: string }>
-}
-
-type SiteImage = {
-  _type?: "image"
-  asset?: { _type?: "reference"; _ref?: string } | null
-  crop?: { top: number; bottom: number; left: number; right: number } | null
-  hotspot?: { x: number; y: number; width: number; height: number } | null
-  alt: string
-  caption?: string | null
-  credit?: string | null
-  width?: number | null
-  height?: number | null
-  fallbackSrc?: string | null
 }
 
 export const revalidate = 300
@@ -39,9 +26,7 @@ export async function generateMetadata({ params }: AlbumPageProps): Promise<Meta
   const title = album.seo?.metaTitle?.trim() || `${album.title} | Tasty Techno`
   const description = album.seo?.metaDescription?.trim() || album.summary || undefined
   const socialImage = album.seo?.openGraphImage ?? album.coverPhoto?.image
-  const socialImageUrl = socialImage
-    ? getSiteImageUrl(socialImage as SiteImage, { width: 1200, height: 630, quality: 88 })
-    : null
+  const socialImageUrl = getOpenGraphImageUrl(socialImage)
 
   return {
     title,
@@ -94,19 +79,14 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
           {album.photos?.length ? (
             <div className="columns-1 gap-6 md:columns-2">
               {album.photos.map((placement) => {
-                const image = placement.photo?.image as SiteImage
-                const imageUrl = image && getSiteImageUrl(image, { width: 1600, quality: 86 })
-                const aspectRatio = getSiteImageAspectRatio(image) ?? 4 / 5
-                const height = Math.round(1600 / aspectRatio)
-                if (!imageUrl) return null
+                const image = placement.photo?.image
+                if (!image) return null
 
                 return (
                   <figure key={placement.key} className="mb-6 break-inside-avoid">
-                    <Image
-                      src={imageUrl}
-                      alt={image.alt}
-                      width={1600}
-                      height={height}
+                    <SanityImage
+                      image={image}
+                      alt={image.alt || album.title}
                       sizes="(max-width: 767px) 100vw, 50vw"
                       className="h-auto w-full rounded-2xl"
                     />

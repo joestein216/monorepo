@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 
+import { SanityImage } from "../../../components/site/sanity-image"
 import { getArtistCards } from "../../../sanity/queries/artists"
 
 export const metadata: Metadata = {
@@ -39,11 +39,11 @@ export default async function ArtistsPage() {
           <div className="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
             {artists.map((artist) => (
               <article key={artist.slug} className="overflow-hidden rounded-2xl border border-border bg-card">
-                {artist.heroImage?.src ? (
+                {artist.heroImage ? (
                   <div className="relative aspect-[4/5] bg-muted">
-                    <Image
-                      src={artist.heroImage.src}
-                      alt="image"
+                    <SanityImage
+                      image={artist.heroImage}
+                      alt={artist.heroImage.alt || artist.name}
                       fill
                       sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 50vw, 33vw"
                       className="object-cover"

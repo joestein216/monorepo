@@ -1,10 +1,9 @@
 
-export { metadata, viewport } from 'next-sanity/studio'
 import React from 'react'
 import { draftMode } from 'next/headers'
-import {VisualEditing} from 'next-sanity/visual-editing'
-import {SanityLive} from '../../sanity/lib/live'
-import {DisableDraftMode} from '../../components/system/DisableDraftMode'
+import { VisualEditing } from 'next-sanity/visual-editing'
+import { SanityLive } from '../../sanity/lib/live'
+import { DisableDraftMode } from '../../components/system/DisableDraftMode'
 
 export default async function StudioLayout({
   children,

@@ -21,7 +21,7 @@ export function SanityImage({
   height,
   fill,
   aspectRatio,
-  quality = 80,
+  quality = 75,
   className,
   priority,
   sizes,
@@ -45,7 +45,7 @@ export function SanityImage({
       return imageObj?.fallbackSrc || imageObj?.src || fallbackSrc || ""
     }
 
-    const resolvedQuality = requestedQuality ?? (quality ? Number(quality) : 80)
+    const resolvedQuality = requestedQuality ?? (quality ? Number(quality) : 75)
     let request = builder
       .width(requestedWidth)
       .quality(resolvedQuality)

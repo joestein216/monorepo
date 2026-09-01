@@ -5,7 +5,11 @@ export default defineType({
   title: 'VinylRecord',
   type: 'document',
   fields: [
-
+    {
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug'
+    },
     {
       name: 'listing_id',
       title: 'listing_id',

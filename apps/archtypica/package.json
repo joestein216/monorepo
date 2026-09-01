@@ -14,6 +14,7 @@
     "@repo/sanity-config": "workspace:*",
     "@repo/ui": "workspace:*",
     "@sanity/asset-utils": "^2.3.0",
+    "@sanity/client": "^8.0.0",
     "@sanity/image-url": "^2.1.1",
     "@sanity/vision": "^6.9.0",
     "@stripe/react-stripe-js": "^6.8.0",
@@ -24,6 +25,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "sanity": "6.8.0",
+    "slugify": "^1.6.9",
     "stripe": "^22.4.0",
     "styled-components": "^6.4.4",
     "zustand": "^5.0.14"

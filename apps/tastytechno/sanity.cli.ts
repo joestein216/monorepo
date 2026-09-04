@@ -2,7 +2,15 @@ import {defineCliConfig} from 'sanity/cli'
 
 export default defineCliConfig({
   api: {
-    projectId: '5sak3amq',
-    dataset: 'development'
+    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
+  },
+  typegen: {
+    enabled: true,
+    schema: 'schema.json',
+    path: './sanity/queries/*.ts',
+    generates: 'sanity.types.ts',
+    formatGeneratedCode: true,
+    overloadClientMethods: true,
   },
 })

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next"
 
-import { getArtistSlugs } from "../../sanity/lib/artists"
-import { getAlbumSlugs, getEventSlugs } from "../../sanity/lib/site"
+import { getArtistSlugs } from "../../sanity/queries/artists"
+import { getAlbumSlugs, getEventSlugs } from "../../sanity/queries/site"
 
 const baseUrl = "https://www.tastytechno.com"
 

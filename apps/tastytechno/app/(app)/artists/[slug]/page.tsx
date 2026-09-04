@@ -2,7 +2,8 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { ArtistEpk } from "../../../../components/artists/artist-epk"
-import { getArtistBySlug, getArtistSlugs } from "../../../../sanity/lib/artists"
+import { getArtistBySlug, getArtistSlugs } from "../../../../sanity/queries/artists"
+import { ArtistQueryResult } from "../../../../sanity.types"
 
 type ArtistPageProps = {
   params: Promise<{ slug: string }>
@@ -28,15 +29,15 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   }
 
   const title = artist.seo?.metaTitle || `${artist.name} | Tasty Techno`
-  const description = artist.seo?.metaDescription || artist.shortBio
+  const description = artist.seo?.metaDescription || artist.shortBio || undefined
   const socialImage = artist.seo?.openGraphImage || artist.heroImage
-  const images = socialImage
+  const images = socialImage && socialImage.src
     ? [
         {
-          url: socialImage.src,
+          url: String(socialImage.src),
           width: socialImage.width ?? 1200,
           height: socialImage.height ?? 630,
-          alt: socialImage.alt,
+          alt: String(socialImage.alt || ""),
         },
       ]
     : undefined
@@ -63,9 +64,9 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
 
 export default async function ArtistPage({ params }: ArtistPageProps) {
   const { slug } = await params
-  const artist = await getArtistBySlug(slug)
+  const artist= await getArtistBySlug(slug)
 
   if (!artist) notFound()
 
-  return <ArtistEpk artist={artist} />
+  return <ArtistEpk artist={artist as ArtistQueryResult} />
 }

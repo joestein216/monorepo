@@ -1,40 +1,95 @@
 import { createImageUrlBuilder, type SanityImageSource } from "@sanity/image-url"
+import { dataset, projectId } from "../env"
 
-import type { SiteImage } from "./site"
+export const imageBuilder = projectId && dataset
+  ? createImageUrlBuilder({ projectId, dataset })
+  : null
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID?.trim()
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET?.trim()
-const builder = projectId && dataset ? createImageUrlBuilder({ projectId, dataset }) : null
-
-type ImageUrlOptions = {
-  width: number
-  height?: number
-  quality?: number
+export function urlForImage(source: SanityImageSource) {
+  if (!imageBuilder) return null
+  return imageBuilder.image(source).auto("format")
 }
 
-export function getSiteImageUrl(image: SiteImage, options: ImageUrlOptions): string | null {
-  if (builder && image.asset?._ref) {
-    let request = builder
-      .image(image as SanityImageSource)
-      .width(options.width)
-      .quality(options.quality ?? 82)
-      .auto("format")
+export function getOpenGraphImageUrl(
+  source: SanityImageSource | null | undefined,
+  options?: { width?: number; height?: number; quality?: number }
+): string | null {
+  if (!source) return null
+  const builder = urlForImage(source)
+  if (!builder) return null
 
-    if (options.height) request = request.height(options.height).fit("crop")
+  return builder
+    .width(options?.width ?? 1200)
+    .height(options?.height ?? 630)
+    .quality(options?.quality ?? 85)
+    .fit("crop")
+    .url()
+}
 
-    return request.url()
+/**
+ * Extracts dimensions and aspect ratio from Sanity image asset reference ID
+ * (e.g. "image-75a7c20c42289f664a7812f866415bf3c39ebc57-1920x1080-jpg")
+ * or fallback properties.
+ */
+export function getSanityImageDimensions(
+  image: unknown
+): {
+  width: number
+  height: number
+  aspectRatio: number
+} | null {
+  if (!image) return null
+
+  let ref: string | null = null
+
+  if (typeof image === "string") {
+    ref = image
+  } else if (typeof image === "object") {
+    const record = image as Record<string, unknown>
+    if (typeof record._ref === "string") {
+      ref = record._ref
+    } else if (typeof record._id === "string") {
+      ref = record._id
+    } else if (record.asset && typeof record.asset === "object") {
+      const asset = record.asset as Record<string, unknown>
+      if (typeof asset._ref === "string") {
+        ref = asset._ref
+      } else if (typeof asset._id === "string") {
+        ref = asset._id
+      }
+    }
+
+    if (
+      !ref &&
+      typeof record.width === "number" &&
+      typeof record.height === "number" &&
+      record.width > 0 &&
+      record.height > 0
+    ) {
+      return {
+        width: record.width,
+        height: record.height,
+        aspectRatio: record.width / record.height,
+      }
+    }
   }
 
-  return image.fallbackSrc ?? null
-}
+  if (ref) {
+    const parts = ref.split("-")
+    if (parts.length >= 3) {
+      const dimensions = parts[2]
+      const [widthStr, heightStr] = dimensions.split("x")
+      const width = Number(widthStr)
+      const height = Number(heightStr)
+      if (width && height) {
+        return {
+          width,
+          height,
+          aspectRatio: width / height,
+        }
+      }
+    }
+  }
 
-export function getSiteImageAspectRatio(image: SiteImage): number | null {
-  if (!image.width || !image.height) return null
-
-  const horizontalCrop = (image.crop?.left ?? 0) + (image.crop?.right ?? 0)
-  const verticalCrop = (image.crop?.top ?? 0) + (image.crop?.bottom ?? 0)
-  const width = image.width * Math.max(0.01, 1 - horizontalCrop)
-  const height = image.height * Math.max(0.01, 1 - verticalCrop)
-
-  return width / height
+  return null
 }

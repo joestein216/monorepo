@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  allowedDevOrigins: ['fondue-germicide-coronary.ngrok-free.dev'],
 };
 
 export default nextConfig;

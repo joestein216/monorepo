@@ -65,7 +65,7 @@ export const homePage = defineType({
     }),
     defineField({
       name: "inquiryEmail",
-      title: "Tasty Techno inquiry email",
+      title: "Freaky Frank inquiry email",
       type: "email",
       group: "contact",
       validation: (rule) => rule.required(),

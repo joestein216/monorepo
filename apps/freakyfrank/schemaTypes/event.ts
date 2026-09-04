@@ -37,7 +37,7 @@ export const event = defineType({
       title: "Organizer",
       type: "string",
       group: "overview",
-      initialValue: "Tasty Techno",
+      initialValue: "Freaky Frank",
     }),
     defineField({
       name: "status",

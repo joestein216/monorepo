@@ -1,12 +1,13 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import { SanityImage } from "../../../../components/site/sanity-image"
 import { SiteFooter } from "../../../../components/site/site-footer"
 import { SiteHeader } from "../../../../components/site/site-header"
-import { getSiteImageUrl } from "../../../../sanity/lib/image"
-import { getAlbums, getEventBySlug, getEventSlugs, getHomePage } from "../../../../sanity/lib/site"
+import { getOpenGraphImageUrl } from "../../../../sanity/lib/image"
+import { getAlbums, getEventBySlug, getEventSlugs, getHomePage } from "../../../../sanity/queries/site"
+import { EventBySlugQueryResult } from "../../../../sanity.types"
 
 type EventPageProps = {
   params: Promise<{ slug: string }>
@@ -20,15 +21,14 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
   const { slug } = await params
-  const event = await getEventBySlug(slug)
-  if (!event) return { title: "Event not found | Tasty Techno" }
+  const { data } = await getEventBySlug(slug)
+  if (!data) return { title: "Event not found | Tasty Techno" }
 
+  const event = data
   const title = event.seo?.metaTitle?.trim() || `${event.chapterLabel ?? event.title} | Tasty Techno`
-  const description = event.seo?.metaDescription?.trim() || event.summary
+  const description = event.seo?.metaDescription?.trim() || event.summary || undefined
   const socialImage = event.seo?.openGraphImage ?? event.heroImage
-  const socialImageUrl = socialImage
-    ? getSiteImageUrl(socialImage, { width: 1200, height: 630, quality: 88 })
-    : null
+  const socialImageUrl = getOpenGraphImageUrl(socialImage)
 
   return {
     title,
@@ -39,19 +39,20 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
       description,
       type: "article",
       url: `/events/${event.slug}`,
-      images: socialImageUrl && socialImage ? [{ url: socialImageUrl, alt: socialImage.alt }] : undefined,
+      images: socialImageUrl && socialImage ? [{ url: socialImageUrl, alt: socialImage.alt ?? "" }] : undefined,
     },
   }
 }
 
 export default async function EventPage({ params }: EventPageProps) {
   const { slug } = await params
-  const [event, home, albums] = await Promise.all([getEventBySlug(slug), getHomePage(), getAlbums()])
+  const [eventPromise, home, albums] = await Promise.all([getEventBySlug(slug), getHomePage(), getAlbums()])
+  
+  const event = eventPromise.data as EventBySlugQueryResult
   if (!event) notFound()
 
-  const heroUrl = event.heroImage
-    ? getSiteImageUrl(event.heroImage, { width: 1800, height: 1100, quality: 86 })
-    : null
+  const socialImage = event.seo?.openGraphImage ?? event.heroImage
+  const ogImageUrl = getOpenGraphImageUrl(socialImage)
   const album = albums.find((candidate) => candidate.relatedEvent?.id === event.id || candidate.relatedEvent?.slug === event.slug)
   const structuredData = event.startsAt || event.eventDate
     ? {
@@ -80,7 +81,7 @@ export default async function EventPage({ params }: EventPageProps) {
           url: "https://www.tastytechno.com",
         },
         performer: event.lineup?.map((artist) => ({ "@type": "MusicGroup", name: artist.name })),
-        image: heroUrl || undefined,
+        image: ogImageUrl || undefined,
         url: `https://www.tastytechno.com/events/${event.slug}`,
       }
     : null
@@ -117,12 +118,12 @@ export default async function EventPage({ params }: EventPageProps) {
             ) : null}
           </header>
 
-          {heroUrl && event.heroImage ? (
+          {event.heroImage ? (
             <figure className="mx-auto w-full max-w-6xl px-6">
               <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-muted">
-                <Image
-                  src={heroUrl}
-                  alt={event.heroImage.alt}
+                <SanityImage
+                  image={event.heroImage}
+                  alt={event.heroImage.alt || event.title}
                   fill
                   priority
                   sizes="(max-width: 1151px) 100vw, 1152px"
@@ -187,7 +188,7 @@ export default async function EventPage({ params }: EventPageProps) {
           </div>
         </article>
       </main>
-      <SiteFooter inquiryEmail={home.inquiryEmail} socialLinks={home.socialLinks} />
+      <SiteFooter inquiryEmail={home?.inquiryEmail} socialLinks={home?.socialLinks} />
       {structuredData ? (
         <script
           type="application/ld+json"

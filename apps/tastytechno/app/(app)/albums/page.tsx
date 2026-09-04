@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { AlbumCard } from "../../../components/site/album-card"
 import { SiteFooter } from "../../../components/site/site-footer"
 import { SiteHeader } from "../../../components/site/site-header"
-import { getAlbums, getHomePage } from "../../../sanity/lib/site"
+import { getAlbums, getHomePage } from "../../../sanity/queries/site"
 
 export const metadata: Metadata = {
   title: "Photo Albums | Tasty Techno",
@@ -17,7 +17,7 @@ export default async function AlbumsPage() {
   const [albums, home] = await Promise.all([getAlbums(), getHomePage()])
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    home && <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <main id="main-content" className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
         <header className="max-w-3xl">

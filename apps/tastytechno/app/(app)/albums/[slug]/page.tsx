@@ -1,12 +1,12 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import { SanityImage } from "../../../../components/site/sanity-image"
 import { SiteFooter } from "../../../../components/site/site-footer"
 import { SiteHeader } from "../../../../components/site/site-header"
-import { getSiteImageAspectRatio, getSiteImageUrl } from "../../../../sanity/lib/image"
-import { getAlbumBySlug, getAlbumSlugs, getHomePage } from "../../../../sanity/lib/site"
+import { getOpenGraphImageUrl } from "../../../../sanity/lib/image"
+import { getAlbumBySlug, getAlbumSlugs, getHomePage } from "../../../../sanity/queries/site"
 
 type AlbumPageProps = {
   params: Promise<{ slug: string }>
@@ -24,11 +24,9 @@ export async function generateMetadata({ params }: AlbumPageProps): Promise<Meta
   if (!album) return { title: "Album not found | Tasty Techno" }
 
   const title = album.seo?.metaTitle?.trim() || `${album.title} | Tasty Techno`
-  const description = album.seo?.metaDescription?.trim() || album.summary
+  const description = album.seo?.metaDescription?.trim() || album.summary || undefined
   const socialImage = album.seo?.openGraphImage ?? album.coverPhoto?.image
-  const socialImageUrl = socialImage
-    ? getSiteImageUrl(socialImage, { width: 1200, height: 630, quality: 88 })
-    : null
+  const socialImageUrl = getOpenGraphImageUrl(socialImage)
 
   return {
     title,
@@ -39,7 +37,7 @@ export async function generateMetadata({ params }: AlbumPageProps): Promise<Meta
       description,
       type: "article",
       url: `/albums/${album.slug}`,
-      images: socialImageUrl && socialImage ? [{ url: socialImageUrl, alt: socialImage.alt }] : undefined,
+      images: socialImageUrl && socialImage ? [{ url: socialImageUrl, alt: socialImage.alt || "" }] : undefined,
     },
   }
 }
@@ -50,7 +48,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
   if (!album) notFound()
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    home && <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <main id="main-content">
         <header className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
@@ -81,19 +79,14 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
           {album.photos?.length ? (
             <div className="columns-1 gap-6 md:columns-2">
               {album.photos.map((placement) => {
-                const { image } = placement.photo
-                const imageUrl = getSiteImageUrl(image, { width: 1600, quality: 86 })
-                const aspectRatio = getSiteImageAspectRatio(image) ?? 4 / 5
-                const height = Math.round(1600 / aspectRatio)
-                if (!imageUrl) return null
+                const image = placement.photo?.image
+                if (!image) return null
 
                 return (
                   <figure key={placement.key} className="mb-6 break-inside-avoid">
-                    <Image
-                      src={imageUrl}
-                      alt={image.alt}
-                      width={1600}
-                      height={height}
+                    <SanityImage
+                      image={image}
+                      alt={image.alt || album.title}
                       sizes="(max-width: 767px) 100vw, 50vw"
                       className="h-auto w-full rounded-2xl"
                     />

@@ -1,0 +1,21 @@
+import {defineCliConfig} from 'sanity/cli'
+
+export default defineCliConfig({
+  api: {
+    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
+  },
+  autoUpdates: true,
+  // 1. Automates the generation of your schema.json
+  schemaExtraction: {
+    enabled: true,
+  },
+  typegen: {
+    enabled: true,
+    schema: 'schema.json',
+    path: './sanity/queries/*.ts',
+    generates: 'sanity.types.ts',
+    formatGeneratedCode: true,
+    overloadClientMethods: true,
+  },
+})

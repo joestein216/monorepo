@@ -8,9 +8,9 @@ import {resolve} from './sanity/presentation/resolve'
 export default defineConfig({
   name: "tastytechno-studio",
   title: 'Tasty Techno',
+  basePath: "/studio",
   projectId: process.env.SANITY_STUDIO_PROJECT_ID || '5sak3amq',
   dataset: process.env.SANITY_STUDIO_DATASET || 'development',
-  basePath: "/studio",
   plugins: [
     structureTool(),
     presentationTool({

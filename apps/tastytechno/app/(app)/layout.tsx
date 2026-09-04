@@ -3,7 +3,7 @@ import React from 'react'
 import { draftMode } from 'next/headers'
 import { VisualEditing } from 'next-sanity/visual-editing'
 import { SanityLive } from '../../sanity/lib/live'
-import { DisableDraftMode } from '../../components/system/DisableDraftMode'
+import { DisableDraftMode } from "../../components/system/DisableDraftMode"
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 

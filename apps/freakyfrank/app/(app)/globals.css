@@ -6,6 +6,18 @@
 :root {
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
+  
+  /* Freaky Frank EPK Theme */
+  --bg-dark: oklch(0.18 0.01 60);         /* Dark charcoal for cap sections */
+  --bg-light: oklch(0.96 0.01 75);        /* Crisp off-white for middle sections */
+  --text-dark: oklch(0.15 0.02 60);       /* Deep text color for light sections */
+  --text-light: oklch(0.98 0 0);          /* White text for dark sections */
+  
+  /* Subtle contextual accents for section titles/icons */
+  --accent-primary: oklch(0.60 0.12 40);  /* Muted rust/terracotta */
+  
+  --line-dark: oklch(0.30 0.01 60);       /* Borders on dark sections */
+  --line-light: oklch(0.85 0.01 60);      /* Borders on light sections */
 }
 
 .dark {

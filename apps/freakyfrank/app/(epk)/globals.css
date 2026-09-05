@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --ink: #11110f;
+  --paper: #f3f1ea;
+  --desk: #3c3c3c;
+  --chrome: #272727;
+  --chrome-line: #454545;
+  --white: #ffffff;
+  --white-muted: #b8b8b8;
+  --white-subtle: #929292;
+  --white-faint: #6f6f6f;
+  --cover: #1b1b18;
+  --cover-inner: #252520;
+  --button-hover: #393934;
+  --scrollbar: #4a4a45;
+  --line: #c8c5ba;
+  --muted: #6c6b64;
+  --signal: #e3ff3f;
+  --anchor-section: #262522;
+}
+
+* { 
+  box-sizing: border-box; 
+}
+html { 
+  scroll-behavior: auto; 
+}
+body { 
+  margin: 0; background: var(--desk); color: var(--paper); font-family: 'DM Sans', sans-serif; 
+}
+button, input { 
+  font: inherit; 
+}
+a { 
+  color: inherit; 
+} 
+
+.epk-frame { 
+  width: 100%; min-height: 100dvh; margin: 0 auto; background: var(--ink); box-shadow: 0 0 0 1px var(--chrome-line); 
+}
+
+.epk-section { 
+  min-height: 100dvh; 
+}
+.reader-chrome { 
+  position: fixed; 
+  inset-inline: 0; 
+  z-index: 20; 
+  display: flex; 
+  align-items: center; 
+  background: var(--chrome); 
+  padding-inline: 20px; 
+  color: var(--white); 
+  font-size: 11px; 
+  text-transform: uppercase; 
+  letter-spacing: 0.16em;
+}
+.reader-header { 
+  top: 0; 
+  height: 48px; 
+  justify-content: space-between; 
+  border-bottom: 1px solid var(--chrome-line); 
+}
+.reader-footer { 
+  bottom: 0; 
+  height: 56px; 
+  justify-content: space-between; 
+  border-top: 1px solid var(--chrome-line); 
+}
+.mono { 
+  font-family: 'DM Mono', monospace; 
+}
+.focus-ring:focus-visible { 
+  outline: 2px solid var(--signal); 
+  outline-offset: 4px; 
+}
+
+/* Clearfix utility engine rule for layout parent container stability */
+.flow-root {
+  display: flow-root;
+}
+
+/* 
+  Updated Vector Mapping Matrix:
+  1. Starts at the top right header space.
+  2. Drops left to touch the crown of his hair (45%).
+  3. Traces down his left cheek/jawline (42%).
+  4. Follows the slope of the red hood (32% -> 25%).
+  5. Cuts out tightly along the leather sleeve contour down to the elbow flare (10% width, 65% height).
+  6. Sweeps instantly back to 100% width, forcing text underneath the elbow line.
+*/
+.wrapped-photo-container {
+  /* Fluid width: takes up exactly 40% of the screen on mobile, 35% on desktop */
+  float: right;
+  shape-outside: polygon(100% 0%,
+    100% 0%,
+    41% 1%,
+    35% 8%,
+    32% 13%,
+    31% 15%,
+    28% 18%,
+    23% 25%,
+    23% 28%,
+    12% 32%,
+    0% 51%,
+    0% 59%,
+    0% 69%,
+    15% 73%,
+    39% 80%,
+    49% 83%,
+    100% 100%
+  );
+  /* Buffer spacing between typography and the leather jacket edges */
+  shape-margin:8px;
+  /* 
+    The Bottom Fade Engine:
+    Keeps the profile crisp and solid past his head, chest, and shoulder.
+    Begins the smooth linear opacity drop exactly at the 60% height mark (right above the elbow) 
+    and vanishes entirely into the #1b1b18 background color by the 85% height mark.
+  */
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 85%);
+  mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 85%);
+}
+
+@media (min-width: 768px) {
+  .epk-frame { max-width: 800px; }
+  .epk-section { padding: 10px; }
+  .epk-frame > header,
+  .epk-frame > footer { left: 50%; right: auto; width: 100%; max-width: 800px; transform: translateX(-50%); }
+  .reader-chrome { padding: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

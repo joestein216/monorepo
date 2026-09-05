@@ -10,8 +10,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Instructs Next.js to safely parse internal client submodules inside Sanity
-  transpilePackages: ["sanity", "next-sanity"],
+  allowedDevOrigins: ['fondue-germicide-coronary.ngrok-free.dev'],
+  devIndicators: false,
 };
 
 export default nextConfig;

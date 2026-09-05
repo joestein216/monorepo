@@ -398,6 +398,13 @@ export const artistPage = defineType({
       of: [defineArrayMember({ type: "link" })],
     }),
     defineField({
+      name: "epkPackage",
+      title: "EPK Package (ZIP/PDF)",
+      type: "file",
+      group: "booking",
+      description: "The complete press kit package for download.",
+    }),
+    defineField({
       name: "pressAssets",
       title: "Press downloads",
       type: "array",

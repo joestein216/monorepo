@@ -1,10 +1,21 @@
-import Link from "next/link"
+"use client"
+
+import React, { useEffect, useState } from "react"
 import { ArtistQueryResult } from "../../../sanity.types"
 import { type SanityImageValue, getSiteImageUrl } from "../../../sanity/queries/image"
 import { SanityImage } from "../site/sanity-image"
+import { Download, Headphones, Calendar, Video, ArrowDown, ArrowUp } from "lucide-react"
 
 type ArtistEpkProps = {
   artist: ArtistQueryResult
+}
+
+export type ArtistAudio = {
+  title: string | null
+  provider: "hearthis" | "mixcloud" | "soundcloud" | "spotify" | "youtube" | null
+  sourceUrl: string | null
+  embedUrl: string | null
+  details: string | null
 }
 
 export type ArtistVideo = {
@@ -29,7 +40,6 @@ const trustedEmbedHosts = new Set([
 function safeHref(value?: string | null) {
   if (!value) return null
   if (value.startsWith("/") && !value.startsWith("//")) return value
-
   try {
     const url = new URL(value)
     return ["http:", "https:", "mailto:"].includes(url.protocol) ? url.toString() : null
@@ -40,7 +50,6 @@ function safeHref(value?: string | null) {
 
 function safeEmbedUrl(value?: string | null) {
   if (!value) return null
-
   try {
     const url = new URL(value)
     if (url.protocol !== "https:" || !trustedEmbedHosts.has(url.hostname)) return null
@@ -49,18 +58,41 @@ function safeEmbedUrl(value?: string | null) {
       return null
     }
     if (url.hostname === "open.spotify.com" && !url.pathname.startsWith("/embed/")) return null
-
     return url.toString()
   } catch {
     return null
   }
 }
 
-function isExternalHref(href: string) {
-  return href.startsWith("http://") || href.startsWith("https://")
-}
-
-
+function AudioCard({ audio }: { audio: ArtistAudio }) {
+  const embedUrl = audio.embedUrl //safeEmbedUrl(audio.embedUrl)
+  return (
+    <article className="bg-[var(--anchor-section)] text-[var(--white-muted)]">
+      {embedUrl ? (
+        <div className="w-full bg-[var(--bg-light)] p-2 border border-[var(--line-light)] shadow-inner">
+          <iframe
+            className="w-full h-40"
+            src={embedUrl}
+            title={audio.title || undefined}
+            loading="lazy"
+            allow="autoplay"
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        </div>
+      ) : (
+        <div className="w-full h-40 bg-[var(--bg-light)] border border-[var(--line-light)] flex items-center justify-center mono text-[10px] uppercase tracking-widest opacity-50">
+          Player Unavailable
+        </div>
+      )}
+      <div className="flex justify-between items-start mb-8">
+        <div>
+          <h3 className="text-lg font-semibold tracking-tight">{audio.title}</h3>
+          {audio.details && <p className="text-sm opacity-70 mt-2">{audio.details}</p>}
+        </div>
+      </div>
+    </article>
+  )
+} 
 
 function VideoCard({ video }: { video: ArtistVideo }) {
   const localOrHostedFile = safeHref(video.fileUrl)
@@ -70,569 +102,326 @@ function VideoCard({ video }: { video: ArtistVideo }) {
   const posterUrl = poster ? getSiteImageUrl(poster, { width: 1280, height: 720 }) : undefined
 
   return (
-    <article className="overflow-hidden rounded-md shadow-sm border border-border bg-card">
-      {localOrHostedFile ? (
-        <video
-          className="aspect-[9/16] max-h-[38rem] w-full bg-black object-contain"
-          controls
-          playsInline
-          preload="metadata"
-          poster={posterUrl}
-          aria-label={video.title}
-          loop={video.loop}
-        >
-          <source src={localOrHostedFile} />
-          Your browser does not support embedded video.
-        </video>
-      ) : embedUrl ? (
-        <iframe
-          className="aspect-video w-full bg-black"
-          src={embedUrl}
-          title={video.title}
-          loading="lazy"
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowFullScreen
-          referrerPolicy="strict-origin-when-cross-origin"
-        />
-      ) : null}
-
-      <div className="p-5">
-        <h3 className="font-medium">{video.title}</h3>
-        {video.caption ? (
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">{video.caption}</p>
-        ) : null}
-        {!localOrHostedFile && !embedUrl && externalUrl ? (
-          <a
-            className="mt-3 inline-flex text-sm font-medium underline underline-offset-4"
-            href={externalUrl}
-            target="_blank"
-            rel="noreferrer"
+    <article className="overflow-hidden mx-4">
+      <div className="relative">
+        {localOrHostedFile ? (
+          <video
+            className="w-full h-full object-contain"
+            controls
+            playsInline
+            preload="metadata"
+            poster={posterUrl}
+            aria-label={video.title}
+            loop={video.loop}
           >
-            Watch video ↗
+            <source src={localOrHostedFile} />
+            Your browser does not support embedded video.
+          </video>
+        ) : embedUrl ? (
+          <iframe
+            className="w-full h-full"
+            src={embedUrl}
+            title={video.title}
+            loading="lazy"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        ) : externalUrl ? (
+          <a href={externalUrl} target="_blank" rel="noreferrer" className="absolute inset-0 flex items-center justify-center text-white underline mono text-xs uppercase tracking-widest hover:text-[var(--accent-primary)] transition-colors">
+            Watch Video ↗
           </a>
         ) : null}
+      </div>
+      <div className="mb-6">
+        <h3 className="font-semibold text-xl tracking-tight">{video.title}</h3>
+        {video.caption && <p className="text-sm text-[var(--text-dark)] opacity-70 mt-2">{video.caption}</p>}
       </div>
     </article>
   )
 }
 
+type SectionId = 'bio' | 'audio' | 'video' | 'events' | 'connect';
+
+type Section = {
+  id: SectionId;
+  label: string;
+  icon: string;
+  previous: SectionId | null;
+  previousLabel: string | null;
+  next: SectionId | null;
+  nextLabel: string | null;
+};
+
+const sections: Section[] = [
+  { id: 'bio', label: 'PROFILE', icon: '◼', previous: null, previousLabel: null, next: 'audio', nextLabel: 'MUSIC' },
+  { id: 'audio', label: 'AUDIO', icon: '◉', previous: 'bio', previousLabel: 'BIO', next: 'video', nextLabel: 'VIDEO' },
+  { id: 'video', label: 'VIDEO', icon: '◷', previous: 'audio', previousLabel: 'AUDIO', next: 'events', nextLabel: 'EVENTS' },
+  { id: 'events', label: 'EVENTS', icon: '◷', previous: 'video', previousLabel: 'VIDEO', next: 'connect', nextLabel: 'CONNECT' },
+  { id: 'connect', label: 'CONNECT | BOOK ', icon: '⌁', previous: 'events', previousLabel: 'EVENTS', next: null, nextLabel: null },
+];
+
+function TopHeader({ section }: { section: Section }) {
+  const previousSection = section.previous;
+  return previousSection && (
+    <header className="reader-chrome reader-header">
+      <span className="reader-content">
+        <span className="mr-3 text-[16px] text-[var(--signal)]">{section.icon}</span>
+        <span className="mono text-[var(--white-muted)]">{section.label}</span>
+      </span>
+      {previousSection && (
+        <a className="reader-content focus-ring flex items-center gap-2 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href={`#${previousSection}`}>
+          <span className="inline mono text-[10px]">{section.previousLabel}</span>
+          <span className="text-lg text-[var(--signal)]">↑</span>
+        </a>
+      )}
+    </header>
+  );
+}
+
+function BottomTray({ section }: { section: Section }) {
+  const nextSection = section.next;
+  return (
+    <footer className="reader-chrome reader-footer">
+      <nav className="reader-content flex items-center gap-4 mono">
+        <a className="focus-ring transition-colors hover:text-[var(--signal)]" href="#bio">▧ <span className="underline underline-offset-4">EPK</span></a>
+        <span className="text-[var(--white-faint)]">/</span>
+        <a className="focus-ring transition-colors hover:text-[var(--signal)]" href="mailto:connect@freakyfrank.com">◫ <span className="underline underline-offset-4">BOOK</span></a>
+      </nav>
+      {nextSection && (
+        <a className="reader-content focus-ring mono flex items-center gap-3 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href={`#${nextSection}`}>
+          <span className="inline">{section.nextLabel}</span><span className="text-lg text-[var(--signal)]">↓</span>
+        </a>
+      )}
+    </footer>
+  );
+}
+
 export function ArtistEpk({ artist }: ArtistEpkProps) {
+  const [activeSection, setActiveSection] = useState<SectionId>('bio');
+
+  useEffect(() => {
+    const latestEntries = new Map<SectionId, IntersectionObserverEntry>();
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const id = entry.target.id as SectionId;
+        if (sections.some((section) => section.id === id)) latestEntries.set(id, entry);
+      });
+
+      const upperViewport = window.innerHeight * (2 / 3);
+      const visible = sections
+        .map(({ id }) => {
+          const entry = latestEntries.get(id);
+          if (!entry || !entry.isIntersecting) return null;
+          const bounds = entry.boundingClientRect;
+          const upperVisibleHeight = Math.max(0, Math.min(bounds.bottom, upperViewport) - Math.max(bounds.top, 0));
+          return { id, upperVisibleRatio: upperVisibleHeight / bounds.height, topDistance: Math.abs(bounds.top) };
+        })
+        .filter((section): section is { id: SectionId; upperVisibleRatio: number; topDistance: number } => section !== null)
+        .sort((a, b) => b.upperVisibleRatio - a.upperVisibleRatio || a.topDistance - b.topDistance)[0];
+
+      if (visible) {
+        setActiveSection((currentSection) => visible.id === currentSection ? currentSection : visible.id);
+      }
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+    sections.forEach(({ id }) => {
+      const element = document.getElementById(id);
+      if (element) observer.observe(element);
+    });
+    return () => observer.disconnect();
+  }, []);
+
   if (!artist) { return null }
-  const biography = artist.biography
-    ?.split(/\n{2,}/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean)
-  const bookingHref = artist.bookingEmail
-    ? `mailto:${encodeURIComponent(artist.bookingEmail)}?subject=${encodeURIComponent(
-        `Booking inquiry for ${artist.name}`,
-      )}`
-    : null
-  const events = artist.events?.filter((event) => event.status !== "cancelled") ?? []
-  const hasTechnicalRider = Boolean(
-    artist.technicalRider &&
-      (artist.technicalRider.summary ||
-        artist.technicalRider.preferredSetup?.length ||
-        artist.technicalRider.boothMonitors ||
-        artist.technicalRider.mediaFormats?.length ||
-        artist.technicalRider.fileUrl),
-  )
+
+  const section = sections.find(({ id }) => id === activeSection) || sections[0];
+  const events = artist.events?.filter((event) => event.status !== "past" && event.status !== "cancelled") ?? []
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-6 py-5">
-          <Link className="text-sm font-semibold tracking-wide" href="/">
-            Freaky Frank  
-          </Link>
-          <nav aria-label="Artist page">
-            <ul className="flex items-center gap-5 text-sm text-muted-foreground">
-              <li>
-                <Link className="hover:text-foreground" href="/artists">
-                  Artists
-                </Link>
-              </li>
-              {bookingHref ? (
-                <li>
-                  <a className="font-medium text-foreground" href={bookingHref}>
-                    Book {artist.name}
-                  </a>
-                </li>
-              ) : null}
-            </ul>
-          </nav>
-        </div>
-      </header>
-
-      <main>
-        <section className="border-b border-border" aria-labelledby="artist-name">
-          <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-12 md:grid-cols-[minmax(0,1fr)_minmax(20rem,0.72fr)] md:items-center md:py-20">
-            <div>
-              {artist.primaryLogo ? (
-                <div className="mb-8 h-24 w-24">
-                  <SanityImage
-                    image={artist.primaryLogo}
-                    alt={artist.primaryLogo.alt || `${artist.name} logo`}
-                    width={112}
-                    height={112}
-                    className="h-24 w-24 object-contain"
-                  />
-                </div>
-              ) : null}
-              {artist.positioning ? (
-                <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                  {artist.positioning}
-                </p>
-              ) : null}
-              <h1 id="artist-name" className="mt-4 text-5xl font-semibold tracking-tight sm:text-7xl">
-                {artist.name}
-              </h1>
-              {artist.realName ? (
-                <p className="mt-3 text-lg text-muted-foreground">{artist.realName}</p>
-              ) : null}
-              {artist.tagline ? (
-                <p className="mt-7 max-w-2xl text-2xl leading-tight tracking-tight sm:text-3xl">
-                  {artist.tagline}
-                </p>
-              ) : null}
-
-              <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-4 text-sm">
-                {artist.location ? (
-                  <div>
-                    <dt className="text-muted-foreground">Based in</dt>
-                    <dd className="mt-1 font-medium">{artist.location}</dd>
-                  </div>
-                ) : null}
-                {artist.activeSince ? (
-                  <div>
-                    <dt className="text-muted-foreground">Active since</dt>
-                    <dd className="mt-1 font-medium">{artist.activeSince}</dd>
-                  </div>
-                ) : null}
-              </dl>
-
-              {artist.genres?.length ? (
-                <ul className="mt-8 flex flex-wrap gap-2" aria-label="Genres">
-                  {artist.genres.map((genre) => (
-                    <li key={genre} className="rounded-md border border-border px-3 py-1.5 text-sm">
-                      {genre}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-
-              <div className="mt-9 flex flex-wrap gap-3">
-                {bookingHref ? (
-                  <a
-                    className="inline-flex min-h-11 items-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
-                    href={bookingHref}
-                  >
-                    {artist.bookingLabel || "Booking inquiries"}
-                  </a>
-                ) : null}
-                {artist.audioEmbeds?.length ? (
-                  <a
-                    className="inline-flex min-h-11 items-center rounded-md border border-border px-5 py-2.5 text-sm font-medium"
-                    href="#listen"
-                  >
-                    Listen to recent sets
-                  </a>
-                ) : null}
-              </div>
-            </div>
-
-            {artist?.heroImage ? (
-              <figure>
-                <div className="relative aspect-[3/4] overflow-hidden rounded-md shadow-md border border-border bg-muted">
-                  <SanityImage
-                    image={artist.heroImage}
+    <div className="epk-frame relative">
+      <TopHeader section={section} />
+      {/* 3. Main Single Column Container */}
+      <main className="epk-scroll">
+        {/* 1. PROFILE / INTRO (DARK CAP) */}
+        <section id="bio" className="epk-section mx-4 bg-[var(--bg-dark)] text-[var(--text-light)]">
+          <div>
+            <img src={artist.primaryLogo.src} alt={artist.heroImage.alt || artist.name} />
+          </div>
+          <div className=" mt-4 text-base text-[var(--white-subtle)]">
+            {artist.positioning}
+          </div>
+          <div className="relative mt-6">
+              {/* Photo Left */}
+              {artist.heroImage ? (
+                <div className="wrapped-photo-container">
+                  <img
+                    src={artist.heroImage.src}
                     alt={artist.heroImage.alt || artist.name}
-                    className="object-cover"
-                    sizes="(max-width: 767px) calc(100vw - 3rem), 40vw"
-                    priority
-                    fill
+                    width={225} 
+                    height={300}
+                    fill="true"
                   />
                 </div>
-                {artist.heroImage.caption || artist.heroImage.credit ? (
-                  <figcaption className="mt-3 text-xs text-muted-foreground">
-                    {[artist.heroImage.caption, artist.heroImage.credit].filter(Boolean).join(" · ")}
-                  </figcaption>
-                ) : null}
-              </figure>
-            ) : null}
+              ) : (
+                <div className="w-full h-full bg-[rgba(255,255,255,0.05)] border-r border-[var(--line-dark)]"></div>
+              )}
+              {/* Bio Right */}
+              <div className="w-full text-base leading-relaxed text-[var(--white-muted)] shadow-sm">
+                {artist.shortBio?.split('\n').map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+            </div>
           </div>
         </section>
 
+        {/* 2. AUDIO STREAMS (LIGHT CORE) */}
         {artist.audioEmbeds?.length ? (
-          <section id="listen" className="border-b border-border" aria-labelledby="listen-heading">
-            <div className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
-              <div className="max-w-2xl">
-                <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  Featured audio
-                </p>
-                <h2 id="listen-heading" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                  Recent sets
-                </h2>
+          <section id="audio" className="epk-section bg-[var(--bg-light)] text-[var(--text-dark)] my-24 px-6">
+            <div className="mx-auto">
+              <div className="flex items-center gap-4 mb-16 pb-4">
+                <Headphones className="text-[var(--accent-primary)]" size={28} />
+                <h2 className="text-4xl font-semibold tracking-tight">Audio Streams</h2>
               </div>
-              <div className="mt-8 grid gap-5 lg:grid-cols-2">
-                {artist.audioEmbeds.map((audio) => {
-                  const embedUrl = safeEmbedUrl(audio.embedUrl)
-                  const sourceUrl = safeHref(audio.sourceUrl)
 
-                  return (
-                    <article key={`${audio.provider}-${audio.title}`} className="rounded-md border border-border bg-card p-5 shadow-sm">
-                      <div className="flex items-start justify-between gap-5">
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                            {audio.provider}
-                          </p>
-                          <h3 className="mt-2 font-medium">{audio.title}</h3>
-                          {audio.details ? (
-                            <p className="mt-1 text-sm text-muted-foreground">{audio.details}</p>
-                          ) : null}
-                        </div>
-                        {sourceUrl ? (
-                          <a
-                            className="shrink-0 text-sm underline underline-offset-4"
-                            href={sourceUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Open ↗
-                          </a>
-                        ) : null}
-                      </div>
-                      {embedUrl ? (
-                        <iframe
-                          className="mt-5 h-44 w-full rounded-md border-0"
-                          src={embedUrl}
-                          title={audio.title || undefined}
-                          loading="lazy"
-                          allow="autoplay"
-                          referrerPolicy="strict-origin-when-cross-origin"
-                        />
-                      ) : null}
-                    </article>
-                  )
-                })}
-              </div>
-            </div>
-          </section>
-        ) : null}
-
-        <section className="border-b border-border" aria-labelledby="about-heading">
-          <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[0.7fr_1.3fr] md:py-20">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Biography</p>
-              <h2 id="about-heading" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                About {artist.name}
-              </h2>
-            </div>
-            <div>
-              <p className="text-xl leading-8">{artist.shortBio}</p>
-              {biography?.length ? (
-                <div className="mt-8 space-y-5 text-base leading-7 text-muted-foreground">
-                  {biography.map((paragraph, index) => (
-                    <p key={`${index}-${paragraph}`}>{paragraph}</p>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </section>
-
-        {artist.careerHighlights?.length ? (
-          <section className="border-b border-border" aria-labelledby="history-heading">
-            <div className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
-              <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Career</p>
-              <h2 id="history-heading" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Selected history
-              </h2>
-              <div className="mt-9 grid gap-px overflow-hidden rounded-md border border-border bg-border shadow-sm sm:grid-cols-2">
-                {artist.careerHighlights.map((highlight) => (
-                  <article key={`${highlight.label}-${highlight.title}`} className="bg-card p-6 sm:p-7">
-                    {highlight.label ? (
-                      <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                        {highlight.label}
-                      </p>
-                    ) : null}
-                    <h3 className="mt-3 text-xl font-medium">{highlight.title}</h3>
-                    {highlight.description ? (
-                      <p className="mt-3 leading-7 text-muted-foreground">{highlight.description}</p>
-                    ) : null}
-                  </article>
+              <div className="grid lg:grid-cols-2 gap-8">
+                {artist.audioEmbeds.map((audio, i) => (
+                  <AudioCard key={i} audio={audio as ArtistAudio} />
                 ))}
               </div>
             </div>
           </section>
         ) : null}
 
+        {/* 3. LIVE VIDEO ARCHIVE (LIGHT CORE) */}
         {artist.videos?.length ? (
-          <section className="border-b border-border" aria-labelledby="video-heading">
-            <div className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
-              <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Live</p>
-              <h2 id="video-heading" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Field recordings
-              </h2>
-              <div className="mt-8 grid gap-6 md:grid-cols-2">
-                {artist.videos.map((video) => (
-                  <VideoCard key={video.title} video={video as ArtistVideo} />
-                ))}
-              </div>
+          <section id="video" className="epk-section my-24 mx-4 bg-[var(--bg-light)] text-[var(--text-dark)]">
+            <div className="flex items-center">
+              <h2 className="text-xl uppercase font-semibold tracking-tight">Live from the Booth</h2>
+            </div>
+
+            <div className="grid lg:grid-cols-2">
+              {artist.videos.map((video, i) => (
+                <VideoCard key={i} video={video as ArtistVideo} />
+              ))}
             </div>
           </section>
         ) : null}
 
-        {artist.gallery?.length ? (
-          <section className="border-b border-border" aria-labelledby="gallery-heading">
-            <div className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
-              <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Gallery</p>
-              <h2 id="gallery-heading" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                In the room
-              </h2>
-              <div className="mt-8 grid gap-6 md:grid-cols-2">
-                {artist.gallery.map((image, index) => (
-                  <figure key={image.asset?._ref || image.src || index}>
-                    <div className="relative aspect-[6/5] overflow-hidden rounded-md shadow-md bg-muted">
-                      <SanityImage
-                        image={image}
-                        alt={image.alt || `${artist.name} gallery image`}
-                        className="object-cover"
-                        sizes="(max-width: 767px) calc(100vw - 3rem), 50vw"
-                        fill
-                      />
-                    </div>
-                    {image.caption || image.credit ? (
-                      <figcaption className="mt-3 text-xs text-muted-foreground">
-                        {[image.caption, image.credit].filter(Boolean).join(" · ")}
-                      </figcaption>
-                    ) : null}
-                  </figure>
-                ))}
-              </div>
-            </div>
-          </section>
-        ) : null}
-
+        {/* 4. UPCOMING EVENTS (LIGHT CORE) */}
         {events.length ? (
-          <section className="border-b border-border" aria-labelledby="events-heading">
-            <div className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
-              <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Schedule</p>
-              <h2 id="events-heading" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Upcoming
-              </h2>
-              <div className="mt-8 divide-y divide-border border-y border-border">
-                {events.map((event, index) => {
-                  const eventUrl = safeHref(event.url)
-                  const venueLine = [event.venue, event.location].filter(Boolean).join(" · ")
+          <section id="events" className="my-24 px-6 border-t bg-[var(--bg-light)] text-[var(--text-dark)] border-[var(--line-light)]">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex items-center gap-4 mb-16 border-b border-[var(--line-light)] pb-4">
+                <Calendar className="text-[var(--accent-primary)]" size={28} />
+                <h2 className="text-4xl font-semibold tracking-tight">Upcoming Events</h2>
+              </div>
 
-                  return (
-                    <article key={`${index}-${event.title}-${event.dateDisplay || event.startsAt}`} className="grid gap-4 py-6 sm:grid-cols-[12rem_1fr_auto] sm:items-start">
-                      <div>
-                        <p className="font-medium">xxxx</p>
-                        {event.status === "pending" ? (
-                          <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-                            Details pending
-                          </p>
-                        ) : null}
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-medium">{event.title}</h3>
-                        {event.organizer ? <p className="mt-1 text-medium text-muted-foreground">{event.organizer}</p> : null}
-                        {venueLine ? <p className="mt-1 text-sm text-muted-foreground italic">{venueLine}</p> : null}
-                        {event.details ? (
-                          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{event.details}</p>
-                        ) : null}
-                      </div>
-                      {eventUrl ? (
-                        <a
-                          className="text-sm font-medium underline underline-offset-4"
-                          href={eventUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Event site ↗
-                        </a>
-                      ) : null}
-                    </article>
-                  )
-                })}
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="border border-[var(--line-light)] bg-white p-6 md:p-8 shadow-sm">
+                  <p className="mono text-[10px] uppercase tracking-[0.18em] opacity-50 mb-8">Confirmed Dates</p>
+                  <div className="space-y-6">
+                    {events.map((event, i) => {
+                      const displayDate = event.dateDisplay || (event.startsAt ? new Date(event.startsAt).toLocaleDateString() : 'TBA')
+                      const venueLine = [event.venue, event.location].filter(Boolean).join(" — ")
+                      return (
+                        <div key={i} className="flex flex-col md:flex-row md:items-start justify-between border-b border-[var(--line-light)] pb-6 last:border-0 last:pb-0 gap-4">
+                          <div>
+                            <div className="flex items-center gap-4 mb-2">
+                              <span className="font-semibold text-xl">{displayDate}</span>
+                              {event.status === 'pending' && <span className="mono text-[10px] uppercase tracking-widest bg-[var(--accent-primary)] text-white px-2 py-1 rounded-sm">PENDING</span>}
+                            </div>
+                            <h3 className="text-lg font-medium">{event.title}</h3>
+                            {venueLine && <p className="opacity-70 mt-1 text-sm">{venueLine}</p>}
+                          </div>
+                          {event.url && (
+                            <a href={event.url} target="_blank" rel="noreferrer" className="mono text-[10px] uppercase tracking-[0.18em] whitespace-nowrap hover:text-[var(--accent-primary)] transition-colors pt-1">
+                              Tickets ↗
+                            </a>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           </section>
         ) : null}
 
-        {artist.collaborations?.length ? (
-          <section className="border-b border-border" aria-labelledby="collaborations-heading">
-            <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[0.7fr_1.3fr] md:py-20">
-              <div>
-                <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Projects</p>
-                <h2 id="collaborations-heading" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                  Collaborations
-                </h2>
-              </div>
-              <div className="space-y-8">
-                {artist.collaborations.map((collaboration) => {
-                  const projectUrl = safeHref(collaboration.url)
+        {/* 5. BOOKING & CONNECTIONS (DARK CAP) */}
+        <section id="connect" className="epk-section y-24 px-6 border-t-4 bg-[var(--bg-dark)] text-[var(--text-light)] border-[var(--line-dark)]">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-16 max-w-2xl leading-tight">
+              Contact, booking & logistics<span className="text-[var(--accent-primary)]">.</span>
+            </h2>
 
-                  return (
-                    <article key={collaboration.name}>
-                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                        <h3 className="text-xl font-medium">{collaboration.name}</h3>
-                        {collaboration.with ? (
-                          <p className="text-sm text-muted-foreground">with {collaboration.with}</p>
-                        ) : null}
-                      </div>
-                      {collaboration.description ? (
-                        <p className="mt-2 leading-7 text-muted-foreground">{collaboration.description}</p>
-                      ) : null}
-                      {projectUrl ? (
-                        <a
-                          className="mt-3 inline-flex text-sm font-medium underline underline-offset-4"
-                          href={projectUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Visit project ↗
-                        </a>
-                      ) : null}
-                    </article>
-                  )
-                })}
-              </div>
-            </div>
-          </section>
-        ) : null}
+            <div className="grid md:grid-cols-2 gap-16 items-start">
 
-        <section aria-labelledby="booking-heading">
-          <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-2 md:py-20">
-            <div className="rounded-md border border-border bg-card shadow-sm p-7 sm:p-9">
-              <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Contact</p>
-              <h2 id="booking-heading" className="mt-3 text-3xl font-semibold tracking-tight">
-                Booking
-              </h2>
-              {artist.bookingEmail ? (
-                <p className="mt-5 text-lg">
-                  <a className="underline underline-offset-4" href={bookingHref ?? undefined}>
-                    {artist.bookingEmail}
-                  </a>
-                </p>
-              ) : (
-                <p className="mt-5 text-muted-foreground">Booking contact coming soon.</p>
-              )}
-              {artist.externalLinks?.length ? (
-                <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-3 text-sm">
-                  {artist.externalLinks.map((link) => {
-                    const href = safeHref(link.href)
-                    if (!href) return null
-                    const external = isExternalHref(href)
-
-                    return (
-                      <li key={`${link.label}-${href}`}>
-                        <a
-                          className="underline underline-offset-4"
-                          href={href}
-                          target={link.openInNewTab || external ? "_blank" : undefined}
-                          rel={link.openInNewTab || external ? "noreferrer" : undefined}
-                        >
-                          {link.label}{external ? " ↗" : ""}
+              {/* Network & Specs */}
+              <div className="space-y-16">
+                <div>
+                  <h3 className="mono text-sm uppercas">CONNETIONS & BOOKING</h3>
+                  <ul className="space-y-4 font-medium mono text-sm">
+                    {artist.bookingEmail && (
+                      <li><a href={`mailto:${artist.bookingEmail}`} className="hover:text-[var(--accent-primary)] transition-colors">{artist.bookingEmail}</a></li>
+                    )}
+                    {artist.externalLinks?.map((link, i) => (
+                      <li key={i}>
+                        <a href={link.href!} target={link.openInNewTab ? "_blank" : undefined} className="hover:text-[var(--accent-primary)] transition-colors">
+                          {link.label || link.href}
                         </a>
                       </li>
-                    )
-                  })}
-                </ul>
-              ) : null}
-            </div>
+                    ))}
+                  </ul>
+                </div>
 
-            <div className="rounded-md border border-border bg-card shadow-sm p-7 sm:p-9">
-              <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Media</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight">Press assets</h2>
-              {artist.pressAssets?.length ? (
-                <ul className="mt-5 divide-y divide-border">
-                  {artist.pressAssets.map((asset) => {
-                    const href = safeHref(asset.url)
-                    if (!href) return null
-
-                    return (
-                      <li key={`${asset.label}-${asset.url}`}>
-                        <a
-                          className="flex items-center justify-between gap-4 py-3 text-sm"
-                          href={href}
-                          download={href.startsWith("/") ? true : undefined}
-                          target={isExternalHref(href) ? "_blank" : undefined}
-                          rel={isExternalHref(href) ? "noreferrer" : undefined}
-                        >
-                          <span>
-                            <span className="font-medium">{asset.label}</span>
-                            {asset.format ? (
-                              <span className="ml-2 text-muted-foreground">{asset.format}</span>
-                            ) : null}
-                          </span>
-                          <span aria-hidden="true">↓</span>
-                        </a>
-                      </li>
-                    )
-                  })}
-                </ul>
-              ) : (
-                <p className="mt-5 text-muted-foreground">Press assets available on request.</p>
-              )}
-            </div>
-
-            {hasTechnicalRider && artist.technicalRider ? (
-              <div className="rounded-md border border-border bg-card shadow-sm p-7 sm:col-span-2 sm:p-9">
-                <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Production</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight">Technical setup</h2>
-                {artist.technicalRider.summary ? (
-                  <p className="mt-5 max-w-3xl leading-7 text-muted-foreground">
-                    {artist.technicalRider.summary}
-                  </p>
-                ) : null}
-                {artist.technicalRider.preferredSetup?.length ? (
-                  <div className="mt-5">
-                    <h3 className="text-sm font-medium">Preferred setup</h3>
-                    <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-muted-foreground">
-                      {artist.technicalRider.preferredSetup.map((item) => (
-                        <li key={item}>{item}</li>
+                {artist.technicalRider?.preferredSetup?.length ? (
+                  <div>
+                    <h3 className="mono text-[10px] uppercase tracking-[0.18em] mb-6">TECH SPECS</h3>
+                    <ul className="border-l border-[var(--accent-primary)] pl-6 space-y-3 font-medium mono text-sm">
+                      {artist.technicalRider.preferredSetup.map((item, i) => (
+                        <li key={i}>{item}</li>
                       ))}
+                      {artist.technicalRider.boothMonitors && <li>{artist.technicalRider.boothMonitors}</li>}
                     </ul>
                   </div>
                 ) : null}
-                {artist.technicalRider.boothMonitors ? (
-                  <p className="mt-5 text-sm">
-                    <span className="font-medium">Booth monitors:</span>{" "}
-                    <span className="text-muted-foreground">{artist.technicalRider.boothMonitors}</span>
-                  </p>
-                ) : null}
-                {artist.technicalRider.mediaFormats?.length ? (
-                  <p className="mt-3 text-sm">
-                    <span className="font-medium">Media formats:</span>{" "}
-                    <span className="text-muted-foreground">
-                      {artist.technicalRider.mediaFormats.join(", ")}
-                    </span>
-                  </p>
-                ) : null}
-                {safeHref(artist.technicalRider.fileUrl) ? (
-                  <a
-                    className="mt-6 inline-flex text-sm font-medium underline underline-offset-4"
-                    href={safeHref(artist.technicalRider.fileUrl) ?? undefined}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Download full rider ↗
-                  </a>
+              </div>
+
+              {/* Form & EPK Download */}
+              <div className="space-y-16">
+                <form className="flex border-b border-[var(--line-dark)] pb-3" onSubmit={(e) => e.preventDefault()}>
+                  <input
+                    type="text"
+                    placeholder="Send a message (include contact info)"
+                    className="flex-1 bg-transparent outline-none placeholder:opacity-40 text-sm"
+                  />
+                  <button type="button" className="mono text-[10px] uppercase tracking-[0.18em] bg-[rgba(255,255,255,0.1)] hover:bg-[var(--accent-primary)] px-4 py-2 transition-colors">
+                    SEND
+                  </button>
+                </form>
+
+                {/* EPK Package Download */}
+                {artist.epkPackage?.url ? (
+                  <div className="border border-[var(--line-dark)] p-8 md:p-10 bg-[rgba(255,255,255,0.03)] rounded-sm">
+                    <h3 className="mono text-[10px] uppercase tracking-[0.18em] opacity-50 mb-3">Media Kit</h3>
+                    <h4 className="text-3xl font-bold mb-8">Download Full EPK</h4>
+                    <a
+                      href={artist.epkPackage.url}
+                      className="inline-flex items-center gap-3 bg-[var(--bg-light)] text-[var(--bg-dark)] px-8 py-4 font-bold hover:bg-[var(--accent-primary)] hover:text-white transition-colors"
+                      download
+                    >
+                      <Download size={20} /> Get Press Package
+                    </a>
+                  </div>
                 ) : null}
               </div>
-            ) : null}
+
+            </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} DJ Freaky Frank</p>
-          <p>{artist.name} electronic press kit</p>
-        </div>
-      </footer>
+      <BottomTray section={section} />
     </div>
   )
 }

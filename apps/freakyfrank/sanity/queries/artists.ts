@@ -47,6 +47,9 @@ const artistQuery = defineQuery(`*[_type == "artistPage" && slug.current == $slu
   bookingEmail,
   bookingLabel,
   externalLinks[]{label, href, openInNewTab},
+  epkPackage {
+    "url": asset->url
+  },
   pressAssets[]{
     label,
     format,

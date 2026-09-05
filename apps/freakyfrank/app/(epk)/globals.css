@@ -97,6 +97,7 @@ a {
 .wrapped-photo-container {
   /* Fluid width: takes up exactly 40% of the screen on mobile, 35% on desktop */
   float: right;
+  width: 50%;
   shape-outside: polygon(100% 0%,
     100% 0%,
     41% 1%,

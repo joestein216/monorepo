@@ -67,7 +67,7 @@ function safeEmbedUrl(value?: string | null) {
 function AudioCard({ audio }: { audio: ArtistAudio }) {
   const embedUrl = audio.embedUrl //safeEmbedUrl(audio.embedUrl)
   return (
-    <article className="bg-[var(--anchor-section)] text-[var(--white-muted)]">
+    <article className="text-[var(--white-muted)]">
       {embedUrl ? (
         <div className="w-full bg-[var(--bg-light)] p-2 border border-[var(--line-light)] shadow-inner">
           <iframe
@@ -102,7 +102,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
   const posterUrl = poster ? getSiteImageUrl(poster, { width: 1280, height: 720 }) : undefined
 
   return (
-    <article className="overflow-hidden mx-4">
+    <article className="overflow-hidden">
       <div className="relative">
         {localOrHostedFile ? (
           <video
@@ -262,7 +262,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                   />
                 </div>
               ) : (
-                <div className="w-full h-full bg-[rgba(255,255,255,0.05)] border-r border-[var(--line-dark)]"></div>
+                <div className="w-full h-full bg-[rgba(255,255,255,0.05)]"></div>
               )}
               {/* Bio Right */}
               <div className="w-full text-base leading-relaxed text-[var(--white-muted)] shadow-sm">
@@ -275,14 +275,14 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
 
         {/* 2. AUDIO STREAMS (LIGHT CORE) */}
         {artist.audioEmbeds?.length ? (
-          <section id="audio" className="epk-section bg-[var(--bg-light)] text-[var(--text-dark)] my-24 px-6">
+          <section id="audio" className="epk-section mx-4">
             <div className="mx-auto">
-              <div className="flex items-center gap-4 mb-16 pb-4">
-                <Headphones className="text-[var(--accent-primary)]" size={28} />
-                <h2 className="text-4xl font-semibold tracking-tight">Audio Streams</h2>
+              <div className="flex items-center mb-4">
+                <Headphones className="text-[var(--accent-primary)]" size={28} />&nbsp;&nbsp;
+                <h2 className="text-lg font-semibold uppercase tracking-tight">Audio Streams</h2>
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-8">
+              <div className="grid lg:grid-cols-2 gap-4">
                 {artist.audioEmbeds.map((audio, i) => (
                   <AudioCard key={i} audio={audio as ArtistAudio} />
                 ))}
@@ -294,11 +294,12 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
         {/* 3. LIVE VIDEO ARCHIVE (LIGHT CORE) */}
         {artist.videos?.length ? (
           <section id="video" className="epk-section my-24 mx-4 bg-[var(--bg-light)] text-[var(--text-dark)]">
-            <div className="flex items-center">
+            <div className="flex items-center mb-4">
+              <Video className="text-[var(--accent-primary)]" size={28} />&nbsp;&nbsp;
               <h2 className="text-xl uppercase font-semibold tracking-tight">Live from the Booth</h2>
             </div>
 
-            <div className="grid lg:grid-cols-2">
+            <div className="grid lg:grid-cols-2 gap-4">
               {artist.videos.map((video, i) => (
                 <VideoCard key={i} video={video as ArtistVideo} />
               ))}
@@ -308,11 +309,11 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
 
         {/* 4. UPCOMING EVENTS (LIGHT CORE) */}
         {events.length ? (
-          <section id="events" className="my-24 px-6 border-t bg-[var(--bg-light)] text-[var(--text-dark)] border-[var(--line-light)]">
+          <section id="events" className="text-[var(--text-dark)]">
             <div className="max-w-6xl mx-auto">
-              <div className="flex items-center gap-4 mb-16 border-b border-[var(--line-light)] pb-4">
+              <div className="flex items-center gap-4 mb-4">
                 <Calendar className="text-[var(--accent-primary)]" size={28} />
-                <h2 className="text-4xl font-semibold tracking-tight">Upcoming Events</h2>
+                <h2 className="text-lg uppercase font-semibold tracking-tight">Upcoming Events</h2>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
@@ -348,7 +349,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
         ) : null}
 
         {/* 5. BOOKING & CONNECTIONS (DARK CAP) */}
-        <section id="connect" className="epk-section y-24 px-6 border-t-4 bg-[var(--bg-dark)] text-[var(--text-light)] border-[var(--line-dark)]">
+        <section id="connect" className="epk-section y-24 px-6 bg-[var(--bg-dark)] text-[var(--text-light)]">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-16 max-w-2xl leading-tight">
               Contact, booking & logistics<span className="text-[var(--accent-primary)]">.</span>
@@ -359,7 +360,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
               {/* Network & Specs */}
               <div className="space-y-16">
                 <div>
-                  <h3 className="mono text-sm uppercas">CONNETIONS & BOOKING</h3>
+                  <h3 className="mono text-sm uppercase">CONNETIONS & BOOKING</h3>
                   <ul className="space-y-4 font-medium mono text-sm">
                     {artist.bookingEmail && (
                       <li><a href={`mailto:${artist.bookingEmail}`} className="hover:text-[var(--accent-primary)] transition-colors">{artist.bookingEmail}</a></li>

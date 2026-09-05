@@ -38,15 +38,18 @@ a {
 } 
 
 .epk-frame { 
-  width: 100%; min-height: 100dvh; margin: 0 auto; background: var(--ink); box-shadow: 0 0 0 1px var(--chrome-line); 
+  width: 100%; min-height: 100dvh; align-content: center; margin: 0 auto;  background: var(--ink); box-shadow: 0 0 0 1px var(--chrome-line); 
 }
 
 .epk-section { 
-  min-height: 100dvh; 
+  min-height: 100dvh;
+  align-content: center;
+  margin-top: auto;
+  margin-bottom: auto
 }
 .reader-chrome { 
   position: fixed; 
-  inset-inline: 0; 
+  inset-inline: 4px; 
   z-index: 20; 
   display: flex; 
   align-items: center; 

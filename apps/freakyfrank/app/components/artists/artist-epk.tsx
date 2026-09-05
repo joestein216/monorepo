@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import React, { useEffect, useState } from "react"
@@ -29,6 +30,7 @@ export type ArtistVideo = {
 
 const trustedEmbedHosts = new Set([
   "hearthis.at",
+  "app.hearthis.at",
   "open.spotify.com",
   "player.vimeo.com",
   "w.soundcloud.com",
@@ -69,7 +71,7 @@ function AudioCard({ audio }: { audio: ArtistAudio }) {
   return (
     <article className="text-[var(--white-muted)]">
       {embedUrl ? (
-        <div className="w-full bg-[var(--bg-light)] p-2 border border-[var(--line-light)] shadow-inner">
+        <div className="w-full bg-[var(--bg-light)] p-2 border border-[var(--chrome-line)] shadow-inner">
           <iframe
             className="w-full h-40"
             src={embedUrl}
@@ -80,7 +82,7 @@ function AudioCard({ audio }: { audio: ArtistAudio }) {
           />
         </div>
       ) : (
-        <div className="w-full h-40 bg-[var(--bg-light)] border border-[var(--line-light)] flex items-center justify-center mono text-[10px] uppercase tracking-widest opacity-50">
+        <div className="w-full h-40 bg-[var(--bg-light)] border border-[var(--chrome-line)] flex items-center justify-center mono text-[10px] uppercase tracking-widest opacity-50">
           Player Unavailable
         </div>
       )}
@@ -102,11 +104,11 @@ function VideoCard({ video }: { video: ArtistVideo }) {
   const posterUrl = poster ? getSiteImageUrl(poster, { width: 1280, height: 720 }) : undefined
 
   return (
-    <article className="overflow-hidden">
+    <article className="overflow-hidden mb-8 h-auto max-h-[250px] text-[var(--white-muted)] border border-[var(--chrome-line)] shadow-sm">
       <div className="relative">
         {localOrHostedFile ? (
           <video
-            className="w-full h-full object-contain"
+            className="w-full max-h-[175px] md:mn-h-[250px] object-contain"
             controls
             playsInline
             preload="metadata"
@@ -133,8 +135,8 @@ function VideoCard({ video }: { video: ArtistVideo }) {
           </a>
         ) : null}
       </div>
-      <div className="mb-6">
-        <h3 className="font-semibold text-xl tracking-tight">{video.title}</h3>
+      <div className="">
+        <h3 className="text-base tracking-tight">{video.title}</h3>
         {video.caption && <p className="text-sm text-[var(--text-dark)] opacity-70 mt-2">{video.caption}</p>}
       </div>
     </article>
@@ -184,9 +186,9 @@ function BottomTray({ section }: { section: Section }) {
   return (
     <footer className="reader-chrome reader-footer">
       <nav className="reader-content flex items-center gap-4 mono">
-        <a className="focus-ring transition-colors hover:text-[var(--signal)]" href="#bio">▧ <span className="underline underline-offset-4">EPK</span></a>
+        <a className="focus-ring transition-colors hover:text-[var(--signal)]" href="#connect">▧ <span className="underline underline-offset-4">EPK</span></a>
         <span className="text-[var(--white-faint)]">/</span>
-        <a className="focus-ring transition-colors hover:text-[var(--signal)]" href="mailto:connect@freakyfrank.com">◫ <span className="underline underline-offset-4">BOOK</span></a>
+        <a className="focus-ring transition-colors hover:text-[var(--signal)]" href="#connect">◫ <span className="underline underline-offset-4">BOOK</span></a>
       </nav>
       {nextSection && (
         <a className="reader-content focus-ring mono flex items-center gap-3 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href={`#${nextSection}`}>
@@ -234,7 +236,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
   if (!artist) { return null }
 
   const section = sections.find(({ id }) => id === activeSection) || sections[0];
-  const events = artist.events?.filter((event) => event.status !== "past" && event.status !== "cancelled") ?? []
+  const events = artist.events //?.filter((event) => event.status !== "past" && event.status !== "cancelled") ?? []
 
   return (
     <div className="epk-frame relative">
@@ -243,31 +245,30 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
       <main className="epk-scroll">
         {/* 1. PROFILE / INTRO (DARK CAP) */}
         <section id="bio" className="epk-section mx-4 bg-[var(--bg-dark)] text-[var(--text-light)]">
-          <div>
-            <img src={artist.primaryLogo.src} alt={artist.heroImage.alt || artist.name} />
+         {artist.primaryLogo?.src && ( <div>
+            <img src={artist.primaryLogo.src} alt={artist.heroImage?.alt || artist.name || undefined} />
           </div>
-          <div className=" mt-4 text-base text-[var(--white-subtle)]">
+          )}
+          <div className="mt-6 text-base text-[var(--white-subtle)]">
             {artist.positioning}
           </div>
           <div className="relative mt-6">
               {/* Photo Left */}
-              {artist.heroImage ? (
+              {artist.heroImage?.src ? (
                 <div className="wrapped-photo-container">
-                  <img
-                    src={artist.heroImage.src}
+                  <SanityImage
+                    image={artist.heroImage}
                     alt={artist.heroImage.alt || artist.name}
-                    width={225} 
-                    height={300}
-                    fill="true"
+                    sizes="(max-width: 300px) 30vw, (max-width: 600px) 20vw, 15vw"
                   />
                 </div>
               ) : (
                 <div className="w-full h-full bg-[rgba(255,255,255,0.05)]"></div>
               )}
               {/* Bio Right */}
-              <div className="w-full text-base leading-relaxed text-[var(--white-muted)] shadow-sm">
+              <div className="w-full text-base text-[var(--white-muted)] shadow-sm">
                 {artist.shortBio?.split('\n').map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
+                  <div key={i}>{paragraph}</div>
                 ))}
             </div>
           </div>
@@ -296,7 +297,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
           <section id="video" className="epk-section my-24 mx-4 bg-[var(--bg-light)] text-[var(--text-dark)]">
             <div className="flex items-center mb-4">
               <Video className="text-[var(--accent-primary)]" size={28} />&nbsp;&nbsp;
-              <h2 className="text-xl uppercase font-semibold tracking-tight">Live from the Booth</h2>
+              <h2 className="text-lg uppercase font-semibold tracking-tight">Live from the Booth</h2>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-4">
@@ -308,8 +309,8 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
         ) : null}
 
         {/* 4. UPCOMING EVENTS (LIGHT CORE) */}
-        {events.length ? (
-          <section id="events" className="text-[var(--text-dark)]">
+        {events?.length ? (
+          <section id="events" className="epk-section mx-4 text-[var(--text-dark)]">
             <div className="max-w-6xl mx-auto">
               <div className="flex items-center gap-4 mb-4">
                 <Calendar className="text-[var(--accent-primary)]" size={28} />
@@ -317,8 +318,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
-                <div className="border border-[var(--line-light)] bg-white p-6 md:p-8 shadow-sm">
-                  <p className="mono text-[10px] uppercase tracking-[0.18em] opacity-50 mb-8">Confirmed Dates</p>
+                <div className=" bg-[var(--cover-inner)] p-4 border border-[var(--chrome-line)] shadow-sm">
                   <div className="space-y-6">
                     {events.map((event, i) => {
                       const displayDate = event.dateDisplay || (event.startsAt ? new Date(event.startsAt).toLocaleDateString() : 'TBA')
@@ -349,18 +349,44 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
         ) : null}
 
         {/* 5. BOOKING & CONNECTIONS (DARK CAP) */}
-        <section id="connect" className="epk-section y-24 px-6 bg-[var(--bg-dark)] text-[var(--text-light)]">
+        <section id="connect" className="epk-section px-6 bg-[var(--bg-dark)] text-[var(--text-light)]">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-16 max-w-2xl leading-tight">
-              Contact, booking & logistics<span className="text-[var(--accent-primary)]">.</span>
+            <h2 className=" mb-4 text-lg font-bold tracking-tight uppercase leading-tight shadow-sm">
+              BOOKING & CONNECTIONS 
             </h2>
+            {/* Form & EPK Download */}
+            <div className="space-y-16">
+              <form className="flex border border-[var(--chrome-line)]" onSubmit={(e) => e.preventDefault()}>
+                <textarea rows={4}
+                  placeholder="Send a message (include contact info)"
+                  className="flex-1 p-1 bg-[var(--cover-inner)] outline-none placeholder:opacity-40 text-base"
+                />
+                <button type="button" className="mono text-sm px-2 uppercase bg-[rgba(255,255,255,0.1)]">
+                  SEND
+                </button>
+              </form>
+              {/* EPK Package Download */}
+              {artist.epkPackage?.url ? (
+                <div className="border border-[var(--line-dark)] p-8 md:p-10 bg-[rgba(255,255,255,0.03)] rounded-sm">
+                  <h3 className="mono text-[10px] uppercase tracking-[0.18em] opacity-50 mb-3">Media Kit</h3>
+                  <h4 className="text-3xl font-bold mb-8">Download Full EPK</h4>
+                  <a
+                    href={artist.epkPackage.url}
+                    className="inline-flex items-center gap-3 bg-[var(--bg-light)] text-[var(--bg-dark)] px-8 py-4 font-bold hover:bg-[var(--accent-primary)] hover:text-white transition-colors"
+                    download
+                  >
+                    <Download size={20} /> Get Press Package
+                  </a>
+                </div>
+              ) : null}
+            </div>
 
             <div className="grid md:grid-cols-2 gap-16 items-start">
 
               {/* Network & Specs */}
               <div className="space-y-16">
                 <div>
-                  <h3 className="mono text-sm uppercase">CONNETIONS & BOOKING</h3>
+                  <h3 className="mono text-sm uppercase"></h3>
                   <ul className="space-y-4 font-medium mono text-sm">
                     {artist.bookingEmail && (
                       <li><a href={`mailto:${artist.bookingEmail}`} className="hover:text-[var(--accent-primary)] transition-colors">{artist.bookingEmail}</a></li>
@@ -387,36 +413,6 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                   </div>
                 ) : null}
               </div>
-
-              {/* Form & EPK Download */}
-              <div className="space-y-16">
-                <form className="flex border-b border-[var(--line-dark)] pb-3" onSubmit={(e) => e.preventDefault()}>
-                  <input
-                    type="text"
-                    placeholder="Send a message (include contact info)"
-                    className="flex-1 bg-transparent outline-none placeholder:opacity-40 text-sm"
-                  />
-                  <button type="button" className="mono text-[10px] uppercase tracking-[0.18em] bg-[rgba(255,255,255,0.1)] hover:bg-[var(--accent-primary)] px-4 py-2 transition-colors">
-                    SEND
-                  </button>
-                </form>
-
-                {/* EPK Package Download */}
-                {artist.epkPackage?.url ? (
-                  <div className="border border-[var(--line-dark)] p-8 md:p-10 bg-[rgba(255,255,255,0.03)] rounded-sm">
-                    <h3 className="mono text-[10px] uppercase tracking-[0.18em] opacity-50 mb-3">Media Kit</h3>
-                    <h4 className="text-3xl font-bold mb-8">Download Full EPK</h4>
-                    <a
-                      href={artist.epkPackage.url}
-                      className="inline-flex items-center gap-3 bg-[var(--bg-light)] text-[var(--bg-dark)] px-8 py-4 font-bold hover:bg-[var(--accent-primary)] hover:text-white transition-colors"
-                      download
-                    >
-                      <Download size={20} /> Get Press Package
-                    </a>
-                  </div>
-                ) : null}
-              </div>
-
             </div>
           </div>
         </section>

@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
 
 export default async function ArtistPage({ params }: ArtistPageProps) {
   const { slug } = await params
-  const artist= await getArtistBySlug(slug)
+  const artist = await getArtistBySlug(slug)
 
   if (!artist) notFound()
 

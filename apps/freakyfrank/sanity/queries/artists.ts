@@ -43,7 +43,7 @@ const artistQuery = defineQuery(`*[_type == "artistPage" && slug.current == $slu
     loop
   },
   "gallery": gallery[] ${imageProjection},
-  events[]{title, organizer, status, startsAt, endsAt, dateDisplay, venue, location, details, url},
+  "events": *[_type == "event" && references(^._id)] {title, organizer, status, startsAt, endsAt, dateDisplay, venue, location, details, url},
   bookingEmail,
   bookingLabel,
   externalLinks[]{label, href, openInNewTab},

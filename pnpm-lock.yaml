@@ -1,8 +1,8 @@
 lockfileVersion: '9.0'
 
 settings:
-  autoInstallPeers: false
-  excludeLinksFromLockfile: true
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
 
 overrides:
   '@supabase/supabase-js': 2.111.0

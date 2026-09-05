@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "typegen": "sanity schema extract && sanity typegen generate"
   },
+  "packageManager": "pnpm@11.9.0",
   "dependencies": {
     "@repo/database": "workspace:*",
     "@repo/ui": "workspace:*",

@@ -8,11 +8,11 @@ import { ArtistQueryResult } from "../../../sanity.types"
 export const revalidate = 300
 
 export async function generateMetadata(): Promise<Metadata> {
-  const artist = await getArtistBySlug("freaky-frank")
+  const artist = await getArtistBySlug("freaky-frank") as ArtistQueryResult
 
   if (!artist) {
     return {
-      title: "Artist not found | Freaky Frank",
+      title: "Artist not found | Freaky Frank",                                                                                                          
       robots: { index: false, follow: false },
     }
   }

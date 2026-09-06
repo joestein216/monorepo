@@ -8,7 +8,7 @@ import { ArtistQueryResult } from "../../../sanity.types"
 export const revalidate = 300
 
 export async function generateMetadata(): Promise<Metadata> {
-  const artist = await getArtistBySlug("freaky-frank")
+  const artist = await getArtistBySlug("freaky-frank") as ArtistQueryResult
 
   if (!artist) {
     return {
@@ -52,9 +52,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function EpkPage() {
-  const artist = await getArtistBySlug("freaky-frank")
+  const artist = await getArtistBySlug("freaky-frank") as ArtistQueryResult
 
   if (!artist) notFound()
 
-  return <ArtistEpk artist={artist as ArtistQueryResult} />
+  return <ArtistEpk artist={artist} />
 }

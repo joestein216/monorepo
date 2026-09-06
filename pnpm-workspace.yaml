@@ -1,10 +1,14 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# Dependency Resolution
 overrides:
-  '@supabase/supabase-js': 2.111.0
-  sanity: 6.8.0
+  '@supabase/supabase-js': '2.111.0'
+  'sanity': '6.8.0'
+
+# Build Settings
 allowBuilds:
-  esbuild: true
-  sharp: true
-  unrs-resolver: true
+  'esbuild': true
+  'sharp': true
+  'unrs-resolver': true

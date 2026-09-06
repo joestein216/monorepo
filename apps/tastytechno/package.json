@@ -11,6 +11,7 @@
     "sanity:seed:site": "sanity exec scripts/seed-tasty-techno-site.ts --with-user-token",
     "typecheck": "tsc --noEmit"
   },
+  "packageManager": "pnpm@11.9.0",
   "dependencies": {
     "@repo/database": "workspace:*",
     "@repo/ui": "workspace:*",

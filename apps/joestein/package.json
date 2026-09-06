@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },
+  "packageManager": "pnpm@11.9.0",
   "dependencies": {
     "@repo/database": "workspace:*",
     "@repo/sanity-config": "workspace:*",

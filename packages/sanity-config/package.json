@@ -10,6 +10,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
+  "packageManager": "pnpm@11.9.0",
   "peerDependencies": {
     "sanity": "^6.8.0"
   },

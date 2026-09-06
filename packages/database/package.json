@@ -9,6 +9,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
+  "packageManager": "pnpm@11.9.0",
   "dependencies": {
     "@supabase/supabase-js": "2.111.0"
   },

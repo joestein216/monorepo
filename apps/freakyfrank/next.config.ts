@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
     'monorepo-freakyfrank.vercel.app',
   ],
   devIndicators: false,
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/electronic-press-kit', //
+        permanent: false,          // Use false (307) for testing, true (308) for SEO production
+      },
+    ]
+  },
   // typescript: {
   //   // Dangerously allow production builds to successfully complete 
   //   // even if your project has TypeScript errors.

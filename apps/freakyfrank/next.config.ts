@@ -10,13 +10,25 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  allowedDevOrigins: ['fondue-germicide-coronary.ngrok-free.dev'],
+  allowedDevOrigins: [
+    'fondue-germicide-coronary.ngrok-free.dev',
+    'monorepo-freakyfrank.vercel.app',
+  ],
   devIndicators: false,
-  typescript: {
-    // Dangerously allow production builds to successfully complete 
-    // even if your project has TypeScript errors.
-    ignoreBuildErrors: true,
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/electronic-press-kit', 
+        permanent: false,              // false creates a 307 temporary redirect
+      },
+    ]
   },
+  // typescript: {
+  //   // Dangerously allow production builds to successfully complete 
+  //   // even if your project has TypeScript errors.
+  //   ignoreBuildErrors: true,
+  // },
 };
 
 export default nextConfig;

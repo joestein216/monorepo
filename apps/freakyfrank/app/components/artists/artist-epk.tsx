@@ -2,6 +2,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
+import { useSearchParams } from 'next/navigation';
 import { ArtistQueryResult } from "../../../sanity.types"
 import { type SanityImageValue, getSiteImageUrl } from "../../../sanity/queries/image"
 import { SanityImage } from "../site/sanity-image"
@@ -168,7 +169,7 @@ function TopHeader({ section }: { section: Section }) {
   return previousSection && (
     <header className="reader-chrome reader-header">
       <span className="reader-content">
-        <span className="mono">{section.label}</span>
+        <span className="mono text-base">{section.label}</span>
       </span>
       {previousSection && (
         <a className="reader-content focus-ring flex items-center gap-2 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href={`#${previousSection}`}>
@@ -205,6 +206,8 @@ function BottomTray({ section }: { section: Section }) {
 
 export function ArtistEpk({ artist }: ArtistEpkProps) {
   const [activeSection, setActiveSection] = useState<SectionId>('bio');
+  const searchParams = useSearchParams();
+  const hasMessaged = searchParams.get('messaged') === 'true';
 
   useEffect(() => {
     const latestEntries = new Map<SectionId, IntersectionObserverEntry>();
@@ -332,7 +335,6 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                           <div>
                             <div className="flex items-center gap-4 mb-2">
                               <span className="font-semibold text-xl">{displayDate}</span>
-                              {event.status === 'pending' && <span className="mono text-[10px] uppercase tracking-widest bg-[var(--accent-primary)] text-white px-2 py-1 rounded-sm">PENDING</span>}
                             </div>
                             <h3 className="text-lg font-medium">{event.title}</h3>
                             {venueLine && <p className="opacity-70 mt-1 text-sm">{venueLine}</p>}
@@ -373,19 +375,27 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                 <li>
                   <div className="pt-6">
                     Message (include contact info):
-                    <form className="flex border border-[var(--chrome-line)] mt-2" action="https://api.web3forms.com/submit" method="POST">
-                      <input type="hidden" name="access_key" value="a94d67d6-466d-4749-afae-cc7e00cd0454"></input>
-                      <textarea 
-                        name="message"
-                        required
-                        rows={4}
-                        placeholder="type message then click send"
-                        className="flex-1 p-1 outline-none placeholder:opacity-40 text-sm sans"
-                      />
-                      <button type="submit" className="mono text-sm px-4 uppercase shadow-sm bg-[rgba(255,255,255,0.1)]">
-                        SEND
-                      </button>
-                    </form>
+                    {!hasMessaged ? (
+                      <form className="flex border border-[var(--chrome-line)] mt-2" action="https://api.web3forms.com/submit" method="POST">
+                        <input type="hidden" name="access_key" value="a94d67d6-466d-4749-afae-cc7e00cd0454"></input>
+                        <textarea 
+                          name="message"
+                          required
+                          rows={6}
+                          placeholder="type message then click send"
+                          className="flex-1 p-1 outline-none placeholder:opacity-40 text-sm sans"
+                        />
+                        <button type="submit" className="mono text-sm px-4 uppercase shadow-sm bg-[rgba(255,255,255,0.1)]">
+                          SEND
+                        </button>
+                      </form>
+                    ) : (
+                      <div className="mt-2 font-medium sans text-xs text-[var(--white-subtle)]">
+                        Thank you for the message. <br />
+                        Freaky Frank will get back to you if you left contact info.
+                      </div>
+                    )}
+                    
                   </div>
                 </li>
               </ul>

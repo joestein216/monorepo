@@ -353,9 +353,9 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
         ) : null}
 
         {/* 5. CONNECT */}
-        <section id="connect" className="epk-section px-6 bg-[var(--bg-dark)]">
+        <section id="connect" className="epk-section mx-4 bg-[var(--bg-dark)]">
           <div className="max-w-6xl mx-auto">
-            <h2 className=" mb-8 text-lg font-bold tracking-tight uppercase leading-tight text-[var(--text-light)] shadow-sm">
+            <h2 className="mb-8 text-lg font-bold tracking-tight uppercase leading-tight text-[var(--text-light)] shadow-sm">
               BOOKING & CONNECTIONS
             </h2>
             <div className="">

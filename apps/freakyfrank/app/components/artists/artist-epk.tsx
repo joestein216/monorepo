@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react"
 import { ArtistQueryResult } from "../../../sanity.types"
 import { type SanityImageValue, getSiteImageUrl } from "../../../sanity/queries/image"
 import { SanityImage } from "../site/sanity-image"
-import { Download, Headphones, Calendar, Video, ArrowDown, ArrowUp } from "lucide-react"
+import { Download, Headphones, Calendar, Video, ArrowDown, ArrowUp, Handshake } from "lucide-react"
 
 type ArtistEpkProps = {
   artist: ArtistQueryResult
@@ -156,11 +156,11 @@ type Section = {
 };
 
 const sections: Section[] = [
-  { id: 'bio', label: 'PROFILE', icon: '◼', previous: null, previousLabel: null, next: 'audio', nextLabel: 'MUSIC' },
-  { id: 'audio', label: 'AUDIO', icon: '◉', previous: 'bio', previousLabel: 'BIO', next: 'video', nextLabel: 'VIDEO' },
+  { id: 'bio', label: 'BIO', icon: '◼', previous: null, previousLabel: null, next: 'audio', nextLabel: 'MUSIC' },
+  { id: 'audio', label: 'MUSIC', icon: '◉', previous: 'bio', previousLabel: 'BIO', next: 'video', nextLabel: 'VIDEO' },
   { id: 'video', label: 'VIDEO', icon: '◷', previous: 'audio', previousLabel: 'AUDIO', next: 'events', nextLabel: 'EVENTS' },
   { id: 'events', label: 'EVENTS', icon: '◷', previous: 'video', previousLabel: 'VIDEO', next: 'connect', nextLabel: 'CONNECT' },
-  { id: 'connect', label: 'CONNECT | BOOK ', icon: '⌁', previous: 'events', previousLabel: 'EVENTS', next: null, nextLabel: null },
+  { id: 'connect', label: 'CONNECT', icon: '⌁', previous: 'events', previousLabel: 'EVENTS', next: null, nextLabel: null },
 ];
 
 function TopHeader({ section }: { section: Section }) {
@@ -168,13 +168,13 @@ function TopHeader({ section }: { section: Section }) {
   return previousSection && (
     <header className="reader-chrome reader-header">
       <span className="reader-content">
-        <span className="mr-3 text-[16px] text-[var(--signal)]">{section.icon}</span>
-        <span className="mono text-[var(--white-muted)]">{section.label}</span>
+        <span className="mr-3 text-sm text-[var(--signal)]">{section.icon}</span>
+        <span className="mono">{section.label}</span>
       </span>
       {previousSection && (
         <a className="reader-content focus-ring flex items-center gap-2 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href={`#${previousSection}`}>
-          <span className="inline mono text-[10px]">{section.previousLabel}</span>
-          <span className="text-lg text-[var(--signal)]">↑</span>
+          <span className="inline mono">{section.previousLabel}</span>
+          <span className=""><ArrowUp className="text-[var(--signal)]" size={18} /></span>
         </a>
       )}
     </header>
@@ -186,13 +186,18 @@ function BottomTray({ section }: { section: Section }) {
   return (
     <footer className="reader-chrome reader-footer">
       <nav className="reader-content flex items-center gap-4 mono">
-        <a className="focus-ring transition-colors hover:text-[var(--signal)]" href="#connect">▧ <span className="underline underline-offset-4">EPK</span></a>
-        <span className="text-[var(--white-faint)]">/</span>
-        <a className="focus-ring transition-colors hover:text-[var(--signal)]" href="#connect">◫ <span className="underline underline-offset-4">BOOK</span></a>
+        {false && (
+          <a className="focus-ring transition-colors hover:text-[var(--signal)]" href="#connect">▧ <span className="underline underline-offset-4">EPK</span></a>
+        )}
+        <a className="reader-content focus-ring mono flex items-center gap-2 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href="#connect">
+          <span className="inline"><Handshake className="text-[var(--accent-primary)]" size={18} /></span>
+          <span className="">BOOK</span>
+        </a>
       </nav>
       {nextSection && (
-        <a className="reader-content focus-ring mono flex items-center gap-3 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href={`#${nextSection}`}>
-          <span className="inline">{section.nextLabel}</span><span className="text-lg text-[var(--signal)]">↓</span>
+        <a className="reader-content focus-ring mono flex items-center gap-2 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href={`#${nextSection}`}>
+          <span className="inline">{section.nextLabel}</span>
+          <span className="text-[var(--signal)]"><ArrowDown className="text-[var(--accent-primary)]" size={18} /></span>
         </a>
       )}
     </footer>
@@ -348,23 +353,36 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
           </section>
         ) : null}
 
-        {/* 5. BOOKING & CONNECTIONS (DARK CAP) */}
-        <section id="connect" className="epk-section px-6 bg-[var(--bg-dark)] text-[var(--text-light)]">
+        {/* 5. CONNECT */}
+        <section id="connect" className="epk-section px-6 bg-[var(--bg-dark)]">
           <div className="max-w-6xl mx-auto">
-            <h2 className=" mb-4 text-lg font-bold tracking-tight uppercase leading-tight shadow-sm">
-              BOOKING & CONNECTIONS 
+            <h2 className=" mb-8 text-lg font-bold tracking-tight uppercase leading-tight text-[var(--text-light)] shadow-sm">
+              BOOKING & CONNECTIONS
             </h2>
-            {/* Form & EPK Download */}
-            <div className="space-y-16">
-              <form className="flex border border-[var(--chrome-line)]" onSubmit={(e) => e.preventDefault()}>
-                <textarea rows={4}
-                  placeholder="Send a message (include contact info)"
-                  className="flex-1 p-1 bg-[var(--cover-inner)] outline-none placeholder:opacity-40 text-base"
-                />
-                <button type="button" className="mono text-sm px-2 uppercase bg-[rgba(255,255,255,0.1)]">
-                  SEND
-                </button>
-              </form>
+            <div className="">
+              <ul className="font-medium mono text-sm text-[var(--white-muted)]">
+                {artist.externalLinks?.map((link, i) => (
+                  <li key={i}>
+                    <a  href={link.href!} target={link.openInNewTab ? "_blank" : undefined} className="block pt-6 pb-6">
+                      {link.label || link.href}
+                    </a>
+                  </li>
+                ))}
+                {artist.bookingEmail && (
+                  <li><a href={`mailto:${artist.bookingEmail}`} className="block pt-6 pb-6">{artist.bookingEmail}</a></li>
+                )}
+              </ul>
+              {false ? (
+                <form className="flex border border-[var(--chrome-line)]" onSubmit={(e) => e.preventDefault()}>
+                  <textarea rows={4}
+                    placeholder="Send a message (include contact info)"
+                    className="flex-1 p-1 bg-[var(--cover-inner)] outline-none placeholder:opacity-40 text-base"
+                  />
+                  <button type="button" className="mono text-sm px-2 uppercase bg-[rgba(255,255,255,0.1)]">
+                    SEND
+                  </button>
+                </form>
+              ) : null}
               {/* EPK Package Download */}
               {artist.epkPackage?.url ? (
                 <div className="border border-[var(--line-dark)] p-8 md:p-10 bg-[rgba(255,255,255,0.03)] rounded-sm">
@@ -379,40 +397,17 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                   </a>
                 </div>
               ) : null}
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-16 items-start">
-
-              {/* Network & Specs */}
-              <div className="space-y-16">
+              {artist.technicalRider?.preferredSetup?.length ? (
                 <div>
-                  <h3 className="mono text-sm uppercase"></h3>
-                  <ul className="space-y-4 font-medium mono text-sm">
-                    {artist.bookingEmail && (
-                      <li><a href={`mailto:${artist.bookingEmail}`} className="hover:text-[var(--accent-primary)] transition-colors">{artist.bookingEmail}</a></li>
-                    )}
-                    {artist.externalLinks?.map((link, i) => (
-                      <li key={i}>
-                        <a href={link.href!} target={link.openInNewTab ? "_blank" : undefined} className="hover:text-[var(--accent-primary)] transition-colors">
-                          {link.label || link.href}
-                        </a>
-                      </li>
+                  <h3 className="mono text-[10px] uppercase tracking-[0.18em] mb-6">TECH SPECS</h3>
+                  <ul className="border-l border-[var(--accent-primary)] pl-6 space-y-3 font-medium mono text-sm">
+                    {artist.technicalRider.preferredSetup.map((item, i) => (
+                      <li key={i}>{item}</li>
                     ))}
+                    {artist.technicalRider.boothMonitors && <li>{artist.technicalRider.boothMonitors}</li>}
                   </ul>
                 </div>
-
-                {artist.technicalRider?.preferredSetup?.length ? (
-                  <div>
-                    <h3 className="mono text-[10px] uppercase tracking-[0.18em] mb-6">TECH SPECS</h3>
-                    <ul className="border-l border-[var(--accent-primary)] pl-6 space-y-3 font-medium mono text-sm">
-                      {artist.technicalRider.preferredSetup.map((item, i) => (
-                        <li key={i}>{item}</li>
-                      ))}
-                      {artist.technicalRider.boothMonitors && <li>{artist.technicalRider.boothMonitors}</li>}
-                    </ul>
-                  </div>
-                ) : null}
-              </div>
+              ) : null}
             </div>
           </div>
         </section>

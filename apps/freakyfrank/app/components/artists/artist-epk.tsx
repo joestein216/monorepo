@@ -368,20 +368,27 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                   </li>
                 ))}
                 {artist.bookingEmail && (
-                  <li><a href={`mailto:${artist.bookingEmail}`} className="block pt-6 pb-6">{artist.bookingEmail}</a></li>
+                  <li><a href={`mailto:${artist.bookingEmail}`} className="block pt-6 pb-6">{artist.bookingLabel}</a></li>
                 )}
+                <li>
+                  <div className="pt-6">
+                    Message (include contact info):
+                    <form className="flex border border-[var(--chrome-line)] mt-2" action="https://api.web3forms.com/submit" method="POST">
+                      <input type="hidden" name="access_key" value="a94d67d6-466d-4749-afae-cc7e00cd0454"></input>
+                      <textarea 
+                        name="message"
+                        required
+                        rows={4}
+                        placeholder="type message then click send"
+                        className="flex-1 p-1 outline-none placeholder:opacity-40 text-sm sans"
+                      />
+                      <button type="submit" className="mono text-sm px-4 uppercase shadow-sm bg-[rgba(255,255,255,0.1)]">
+                        SEND
+                      </button>
+                    </form>
+                  </div>
+                </li>
               </ul>
-              {false ? (
-                <form className="flex border border-[var(--chrome-line)]" onSubmit={(e) => e.preventDefault()}>
-                  <textarea rows={4}
-                    placeholder="Send a message (include contact info)"
-                    className="flex-1 p-1 bg-[var(--cover-inner)] outline-none placeholder:opacity-40 text-base"
-                  />
-                  <button type="button" className="mono text-sm px-2 uppercase bg-[rgba(255,255,255,0.1)]">
-                    SEND
-                  </button>
-                </form>
-              ) : null}
               {/* EPK Package Download */}
               {artist.epkPackage?.url ? (
                 <div className="border border-[var(--line-dark)] p-8 md:p-10 bg-[rgba(255,255,255,0.03)] rounded-sm">

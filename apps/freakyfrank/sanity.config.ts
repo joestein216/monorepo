@@ -9,8 +9,8 @@ export default defineConfig({
   name: "freakyfrank-studio",
   title: 'Freaky Frank',
   basePath: '/studio',
-  projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'e6kdq235',
-  dataset: process.env.SANITY_STUDIO_DATASET || 'development',
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'e6kdq235',
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'development',
   plugins: [
     structureTool(),
     presentationTool({

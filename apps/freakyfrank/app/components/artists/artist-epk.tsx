@@ -104,11 +104,11 @@ function VideoCard({ video }: { video: ArtistVideo }) {
   const posterUrl = poster ? getSiteImageUrl(poster, { width: 1280, height: 720 }) : undefined
 
   return (
-    <article className="overflow-hidden mb-8 h-auto max-h-[250px] text-[var(--white-muted)] border border-[var(--chrome-line)] shadow-sm">
+    <article className="overflow-hidden w-full h-auto">
       <div className="relative">
         {localOrHostedFile ? (
           <video
-            className="w-full max-h-[175px] md:mn-h-[250px] object-contain"
+            className="w-full h-auto object-contain text-[var(--white-muted)] border border-[var(--chrome-line)] shadow-sm"
             controls
             playsInline
             preload="metadata"
@@ -121,7 +121,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
           </video>
         ) : embedUrl ? (
           <iframe
-            className="w-full h-full"
+            className="w-full h-auto object-contain  text-[var(--white-muted)] border border-[var(--chrome-line)] shadow-sm"
             src={embedUrl}
             title={video.title}
             loading="lazy"
@@ -137,7 +137,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
       </div>
       <div className="">
         <h3 className="text-base tracking-tight">{video.title}</h3>
-        {video.caption && <p className="text-sm text-[var(--text-dark)] opacity-70 mt-2">{video.caption}</p>}
+        {video.caption && <p className="text-sm text-[var(--white-muted)] mt-2">{video.caption}</p>}
       </div>
     </article>
   )
@@ -168,7 +168,6 @@ function TopHeader({ section }: { section: Section }) {
   return previousSection && (
     <header className="reader-chrome reader-header">
       <span className="reader-content">
-        <span className="mr-3 text-sm text-[var(--signal)]">{section.icon}</span>
         <span className="mono">{section.label}</span>
       </span>
       {previousSection && (
@@ -190,7 +189,7 @@ function BottomTray({ section }: { section: Section }) {
           <a className="focus-ring transition-colors hover:text-[var(--signal)]" href="#connect">▧ <span className="underline underline-offset-4">EPK</span></a>
         )}
         <a className="reader-content focus-ring mono flex items-center gap-2 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href="#connect">
-          <span className="inline"><Handshake className="text-[var(--accent-primary)]" size={18} /></span>
+          <span className="inline text-[var(--signal)]"><Handshake className="text-[var(--accent-primary)]" size={18} /></span>
           <span className="">BOOK</span>
         </a>
       </nav>

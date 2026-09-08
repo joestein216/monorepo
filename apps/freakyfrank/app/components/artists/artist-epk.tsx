@@ -168,7 +168,7 @@ function TopHeader({ section }: { section: Section }) {
   return previousSection && (
     <header className="reader-chrome reader-header">
       <span className="reader-content">
-        <span className="mono text-base">{section.label}</span>
+        <span className="mono font-semibold text-[var(--white-muted)] text-base">{section.label}</span>
       </span>
       {previousSection && (
         <a className="reader-content focus-ring flex items-center gap-2 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href={`#${previousSection}`}>

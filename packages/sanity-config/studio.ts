@@ -34,7 +34,7 @@ export function createStudioConfig({
       structureTool(),
       presentationTool({
         previewUrl: {
-          initial: process.env.SANITY_STUDIO_PREVIEW_URL,
+          initial: process.env.NEXT_PUBLIC_STUDIO_URL,
           previewMode: {
             enable: '/api/draft-mode/enable',
             disable: '/api/draft-mode/disable',

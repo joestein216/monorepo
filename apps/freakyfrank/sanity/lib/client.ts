@@ -9,6 +9,6 @@ export const client = createClient({
   useCdn: true, // Set to false if statically generating pages, using ISR or tag-based revalidation
   stega: {
     enabled: true,
-    studioUrl: 'http://localhost:3005/studio',
+    studioUrl: process.env.NEXT_PUBLIC_STUDIO_URL || 'http://localhost:3005/studio',
   },
 })

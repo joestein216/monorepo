@@ -9,8 +9,8 @@ export default defineConfig({
   name: "tastytechno-studio",
   title: 'Tasty Techno',
   basePath: "/studio",
-  projectId: process.env.SANITY_STUDIO_PROJECT_ID || '5sak3amq',
-  dataset: process.env.SANITY_STUDIO_DATASET || 'development',
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '5sak3amq',
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'development',
   plugins: [
     structureTool(),
     presentationTool({

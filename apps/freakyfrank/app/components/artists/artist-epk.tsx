@@ -13,6 +13,7 @@ type ArtistEpkProps = {
 }
 
 export type ArtistAudio = {
+  _key: string
   title: string | null
   provider: "hearthis" | "mixcloud" | "soundcloud" | "spotify" | "youtube" | null
   sourceUrl: string | null
@@ -21,6 +22,7 @@ export type ArtistAudio = {
 }
 
 export type ArtistVideo = {
+  _key: string
   title: string
   fileUrl?: string | null
   externalUrl?: string | null
@@ -67,37 +69,53 @@ function safeEmbedUrl(value?: string | null) {
   }
 }
 
-function AudioCard({ audio }: { audio: ArtistAudio }) {
+export type AudioCardProps = {
+  audioIndex: number,
+  totalAudioCount: number,
+  audio: ArtistAudio,
+}
+
+function AudioCard({ audioIndex, totalAudioCount, audio }: AudioCardProps) {
   const embedUrl = audio.embedUrl //safeEmbedUrl(audio.embedUrl)
   return (
-    <article className="text-[var(--white-muted)]">
-      {embedUrl ? (
-        <div className="w-full bg-[var(--bg-light)] p-2 border border-[var(--chrome-line)] shadow-inner">
-          <iframe
-            className="w-full h-40"
-            src={embedUrl}
-            title={audio.title || undefined}
-            loading="lazy"
-            allow="autoplay"
-            referrerPolicy="strict-origin-when-cross-origin"
-          />
+    <article id={`audio${audioIndex}`} className="flex flex-col justify-center h-svh w-full p-2">
+      <div className="flex items-center gap-2 mb-2">
+        <Headphones className="text-[var(--signal)]" size={28} />
+        <h2 className="text-lg uppercase font-semibold tracking-tight text-[var(--white-muted)]">{`DJ Mixes (${audioIndex} of ${totalAudioCount})`}</h2>
+      </div>
+      <div className="max-h-[75vh] w-full flex items-center justify-center">
+        {embedUrl ? (
+          <div className="w-full bg-[var(--bg-light)] p-2 border border-[var(--chrome-line)] shadow-inner">
+            <iframe
+              className="w-full h-full max-h-[75vh] object-contain"
+              src={embedUrl}
+              title={audio.title || undefined}
+              loading="lazy"
+              allow="autoplay"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          </div>
+        ) : (
+          <div className="w-full h-40 bg-[var(--bg-light)] border border-[var(--chrome-line)] flex items-center justify-center mono text-[10px] uppercase tracking-widest opacity-50">
+            Player Unavailable
+          </div>
+        )}
         </div>
-      ) : (
-        <div className="w-full h-40 bg-[var(--bg-light)] border border-[var(--chrome-line)] flex items-center justify-center mono text-[10px] uppercase tracking-widest opacity-50">
-          Player Unavailable
-        </div>
-      )}
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h3 className="text-lg font-semibold tracking-tight">{audio.title}</h3>
-          {audio.details && <p className="text-sm opacity-70 mt-2">{audio.details}</p>}
-        </div>
+      <div className="pt-4 pb-2">
+        <h3 className="text-base tracking-tight">{audio.title}</h3>
+        {audio.details && <p className="text-sm text-[var(--white-muted)] mt-2">{audio.details}</p>}
       </div>
     </article>
   )
 } 
 
-function VideoCard({ video }: { video: ArtistVideo }) {
+export type VideoCardProps = {
+  videoIndex: number,
+  totalVideoCount: number,
+  video: ArtistVideo,
+}
+
+function VideoCard({ videoIndex, totalVideoCount, video }: VideoCardProps) {
   const localOrHostedFile = safeHref(video.fileUrl)
   const embedUrl = safeEmbedUrl(video.externalUrl)
   const externalUrl = safeHref(video.externalUrl)
@@ -105,11 +123,15 @@ function VideoCard({ video }: { video: ArtistVideo }) {
   const posterUrl = poster ? getSiteImageUrl(poster, { width: 1280, height: 720 }) : undefined
 
   return (
-    <article className="overflow-hidden w-full h-auto">
-      <div className="relative">
+    <article id={`video${videoIndex}`} className="flex flex-col justify-center h-svh w-full p-2">
+      <div className="flex items-center gap-2 mb-2">
+        <Video className="text-[var(--signal)]" size={28} />
+        <h2 className="text-lg uppercase font-semibold tracking-tight text-[var(--white-muted)]">{`Video Clips of Live Sets (${videoIndex} of ${totalVideoCount})`}</h2>
+      </div>
+      <div className="max-h-[75vh] w-full flex items-center justify-center">
         {localOrHostedFile ? (
           <video
-            className="w-full h-auto object-contain text-[var(--white-muted)] border border-[var(--chrome-line)] shadow-sm"
+            className="w-full h-full max-h-[75vh] object-contain"
             controls
             playsInline
             preload="metadata"
@@ -122,7 +144,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
           </video>
         ) : embedUrl ? (
           <iframe
-            className="w-full h-auto object-contain  text-[var(--white-muted)] border border-[var(--chrome-line)] shadow-sm"
+            className="w-full aspect-video max-h-[75vh] max-w-full"
             src={embedUrl}
             title={video.title}
             loading="lazy"
@@ -135,7 +157,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
           </a>
         ) : null}
       </div>
-      <div className="">
+      <div className="pt-4 pb-2">
         <h3 className="text-base tracking-tight">{video.title}</h3>
         {video.caption && <p className="text-sm text-[var(--white-muted)] mt-2">{video.caption}</p>}
       </div>
@@ -143,7 +165,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
   )
 }
 
-type SectionId = 'bio' | 'audio' | 'video' | 'events' | 'connect';
+type SectionId = 'bio' | 'audio1' | 'audio2' | 'video1' | 'video2' | 'events' | 'connect';
 
 type Section = {
   id: SectionId;
@@ -156,24 +178,34 @@ type Section = {
 };
 
 const sections: Section[] = [
-  { id: 'bio', label: 'BIO', icon: '◼', previous: null, previousLabel: null, next: 'audio', nextLabel: 'MUSIC' },
-  { id: 'audio', label: 'MUSIC', icon: '◉', previous: 'bio', previousLabel: 'BIO', next: 'video', nextLabel: 'VIDEO' },
-  { id: 'video', label: 'VIDEO', icon: '◷', previous: 'audio', previousLabel: 'AUDIO', next: 'events', nextLabel: 'EVENTS' },
-  { id: 'events', label: 'EVENTS', icon: '◷', previous: 'video', previousLabel: 'VIDEO', next: 'connect', nextLabel: 'CONNECT' },
-  { id: 'connect', label: 'CONNECT', icon: '⌁', previous: 'events', previousLabel: 'EVENTS', next: null, nextLabel: null },
+  { id: 'bio', label: 'DJ FREAKY FRANK EPK', icon: '◼', previous: null, previousLabel: null, next: 'audio1', nextLabel: 'AUDIO MIX 1/2' },
+  { id: 'audio1', label: 'AUDIO MIX 1/2', icon: '◉', previous: 'bio', previousLabel: 'BIO', next: 'audio2', nextLabel: 'AUDIO MIX 2/2' },
+  { id: 'audio2', label: 'AUDIO MIX 2/2', icon: '◉', previous: 'audio1', previousLabel: 'AUDIO MIX 1/2', next: 'video1', nextLabel: 'VIDEO CLIP 1/2' },
+  { id: 'video1', label: 'VIDEO CLIP 1/2', icon: '◷', previous: 'audio2', previousLabel: 'AUDIO MIX 2/2', next: 'video2', nextLabel: 'VIDEO CLIP 2/2' },
+  { id: 'video2', label: 'VIDEO CLIP 2/2', icon: '◷', previous: 'video1', previousLabel: 'VIDEO CLIP 1/2', next: 'events', nextLabel: 'UPCOMING EVENTS' },
+  { id: 'events', label: 'UPCOMING EVENTS', icon: '◷', previous: 'video2', previousLabel: 'VIDEO CLIP 2/2', next: 'connect', nextLabel: 'BOOK + CONNECT' },
+  { id: 'connect', label: 'BOOK + CONNECT', icon: '⌁', previous: 'events', previousLabel: 'UPCOMING EVENTS', next: null, nextLabel: null },
 ];
 
 function TopHeader({ section }: { section: Section }) {
   const previousSection = section.previous;
-  return previousSection && (
+  return (
     <header className="reader-chrome reader-header">
-      <span className="reader-content">
-        <span className="mono font-semibold text-[var(--white-muted)] text-base">{section.label}</span>
-      </span>
+      <nav className="reader-content flex items-center gap-4 mono">
+        <span className="reader-content">
+          <span className="mono font-semibold text-[var(--white-muted)] text-base">
+            {section.label}
+          </span>
+        </span>
+      </nav>
       {previousSection && (
-        <a className="reader-content focus-ring flex items-center gap-2 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href={`#${previousSection}`}>
-          <span className="inline mono">{section.previousLabel}</span>
-          <span className=""><ArrowUp className="text-[var(--signal)]" size={18} /></span>
+        <a className="reader-content flex items-center gap-2 text-[var(--white-muted)]" href={`#${previousSection}`}>
+          <span className="inline mono">
+            {section.previousLabel}
+          </span>
+          <span className="inline"><
+            ArrowUp className="text-[var(--signal)]" size={18} />
+          </span>
         </a>
       )}
     </header>
@@ -185,18 +217,31 @@ function BottomTray({ section }: { section: Section }) {
   return (
     <footer className="reader-chrome reader-footer">
       <nav className="reader-content flex items-center gap-4 mono">
-        {false && (
-          <a className="focus-ring transition-colors hover:text-[var(--signal)]" href="#connect">▧ <span className="underline underline-offset-4">EPK</span></a>
-        )}
-        <a className="reader-content focus-ring mono flex items-center gap-2 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href="#connect">
-          <span className="inline text-[var(--signal)]"><Handshake className="text-[var(--accent-primary)]" size={18} /></span>
-          <span className="">BOOK</span>
-        </a>
+        <span className="reader-content">
+          {false && (
+            <a className="text-[var(--white-muted)]" href="#connect">
+              ▧
+              <span className="underline underline-offset-4">
+                EPK
+              </span>
+            </a>
+          )}
+          <a className="reader-content mono flex items-center gap-2 text-[var(--white-muted)]" href="#connect">
+            <span className="inline">
+              <Handshake className="text-[var(--signal)]" size={18} />
+            </span>
+            <span className="">BOOK | CONNECT</span>
+          </a>
+        </span>
       </nav>
       {nextSection && (
-        <a className="reader-content focus-ring mono flex items-center gap-2 text-[var(--white-subtle)] transition-colors hover:text-[var(--white)]" href={`#${nextSection}`}>
-          <span className="inline">{section.nextLabel}</span>
-          <span className="text-[var(--signal)]"><ArrowDown className="text-[var(--accent-primary)]" size={18} /></span>
+        <a className="reader-content mono flex items-center gap-2 text-[var(--white-subtle)]" href={`#${nextSection}`}>
+          <span className="inline">
+            {section.nextLabel}
+          </span>
+          <span className="inline">
+            <ArrowDown className="text-[var(--signal)]" size={18} />
+          </span>
         </a>
       )}
     </footer>
@@ -205,6 +250,8 @@ function BottomTray({ section }: { section: Section }) {
 
 export function ArtistEpk({ artist }: ArtistEpkProps) {
   const [activeSection, setActiveSection] = useState<SectionId>('bio');
+  const maxCountVideos = 2;
+  const maxCountAudioEmbeds = 2;
 
   useEffect(() => {
     const latestEntries = new Map<SectionId, IntersectionObserverEntry>();
@@ -240,7 +287,9 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
   if (!artist) { return null }
 
   const section = sections.find(({ id }) => id === activeSection) || sections[0];
-  const events = artist.events //?.filter((event) => event.status !== "past" && event.status !== "cancelled") ?? []
+  const events = artist.events; //?.filter((event) => event.status !== "past" && event.status !== "cancelled") ?? []
+  const videos = artist.videos?.slice(0, maxCountVideos);
+  const audioEmbeds = artist.audioEmbeds?.slice(0, maxCountAudioEmbeds);
 
   return (
     <div className="epk-frame relative">
@@ -248,79 +297,64 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
       {/* 3. Main Single Column Container */}
       <main className="epk-scroll">
         {/* 1. PROFILE / INTRO (DARK CAP) */}
-        <section id="bio" className="epk-section mx-4 bg-[var(--bg-dark)] text-[var(--text-light)]">
-         {artist.primaryLogo?.src && ( <div>
-            <img src={artist.primaryLogo.src} alt={artist.heroImage?.alt || artist.name || undefined} />
-          </div>
-          )}
-          <div className="mt-6 text-base text-[var(--white-subtle)]">
-            {artist.positioning}
-          </div>
-          <div className="relative mt-6">
-              {/* Photo Left */}
-              {artist.heroImage?.src ? (
-                <div className="wrapped-photo-container">
-                  <SanityImage
-                    image={artist.heroImage}
-                    alt={artist.heroImage.alt || artist.name}
-                    sizes="(max-width: 300px) 30vw, (max-width: 600px) 20vw, 15vw"
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-full bg-[rgba(255,255,255,0.05)]"></div>
-              )}
-              {/* Bio Right */}
-              <div className="w-full text-base text-[var(--white-muted)] shadow-sm">
-                {artist.shortBio?.split('\n').map((paragraph, i) => (
-                  <div key={i}>{paragraph}</div>
-                ))}
+        <section id="bio" className="w-full p-4">
+          <article className="flex flex-col justify-center h-svh w-full p-2">
+            {artist.primaryLogo?.src && ( <div>
+              <img src={artist.primaryLogo.src} alt={artist.heroImage?.alt || artist.name || undefined} />
             </div>
-          </div>
+            )}
+            <div className="mt-6 text-base text-[var(--white-subtle)]">
+              {artist.positioning}
+            </div>
+            <div className="relative mt-6">
+                {/* Photo Left */}
+                {artist.heroImage?.src ? (
+                  <div className="wrapped-photo-container">
+                    <SanityImage
+                      image={artist.heroImage}
+                      alt={artist.heroImage.alt || artist.name}
+                      sizes="(max-width: 300px) 30vw, (max-width: 600px) 20vw, 15vw"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-full bg-[rgba(255,255,255,0.05)]"></div>
+                )}
+                {/* Bio Right */}
+                <div className="w-full text-base text-[var(--white-muted)] shadow-sm">
+                  {artist.shortBio?.split('\n').map((paragraph, i) => (
+                    <div key={i}>{paragraph}</div>
+                  ))}
+              </div>
+            </div>
+          </article>
         </section>
 
-        {/* 2. AUDIO STREAMS (LIGHT CORE) */}
-        {artist.audioEmbeds?.length ? (
-          <section id="audio" className="epk-section mx-4">
-            <div className="mx-auto">
-              <div className="flex items-center mb-4">
-                <Headphones className="text-[var(--accent-primary)]" size={28} />&nbsp;&nbsp;
-                <h2 className="text-lg font-semibold uppercase tracking-tight">Audio Streams</h2>
-              </div>
-
-              <div className="grid lg:grid-cols-2 gap-4">
-                {artist.audioEmbeds.map((audio, i) => (
-                  <AudioCard key={i} audio={audio as ArtistAudio} />
-                ))}
-              </div>
-            </div>
+        {/* 2. AUDIO EMBEDS */}
+        {audioEmbeds?.length ? (
+          <section className="w-full p-4">
+            {audioEmbeds.map((audio, i) => (
+              <AudioCard key={audio._key} audioIndex={i + 1} totalAudioCount={audioEmbeds.length} audio={audio as ArtistAudio} />
+            ))}
           </section>
         ) : null}
 
-        {/* 3. LIVE VIDEO ARCHIVE (LIGHT CORE) */}
-        {artist.videos?.length ? (
-          <section id="video" className="epk-section my-24 mx-4 bg-[var(--bg-light)] text-[var(--text-dark)]">
-            <div className="flex items-center mb-4">
-              <Video className="text-[var(--accent-primary)]" size={28} />&nbsp;&nbsp;
-              <h2 className="text-lg uppercase font-semibold tracking-tight">Live from the Booth</h2>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-4">
-              {artist.videos.map((video, i) => (
-                <VideoCard key={i} video={video as ArtistVideo} />
-              ))}
-            </div>
+        {/* 3. VIDEOS */}
+        {videos?.length ? (
+          <section className="w-full p-4">
+            {videos.map((video, i) => (
+              <VideoCard key={video._key} videoIndex={i + 1} totalVideoCount={videos.length} video={video as ArtistVideo} />
+            ))}
           </section>
         ) : null}
 
         {/* 4. UPCOMING EVENTS (LIGHT CORE) */}
         {events?.length ? (
-          <section id="events" className="epk-section mx-4 text-[var(--text-dark)]">
-            <div className="max-w-6xl mx-auto">
-              <div className="flex items-center gap-4 mb-4">
-                <Calendar className="text-[var(--accent-primary)]" size={28} />
-                <h2 className="text-lg uppercase font-semibold tracking-tight">Upcoming Events</h2>
+          <section id="events" className="w-full p-4">
+            <article className="flex flex-col justify-center h-svh w-full p-2">
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar className="text-[var(--signal)]" size={28} />
+                <h2 className="text-lg uppercase font-semibold tracking-tight text-[var(--white-muted)]">Upcoming Events</h2>
               </div>
-
               <div className="grid md:grid-cols-2 gap-8">
                 <div className=" bg-[var(--cover-inner)] p-4 border border-[var(--chrome-line)] shadow-sm">
                   <div className="space-y-6">
@@ -347,16 +381,17 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                   </div>
                 </div>
               </div>
-            </div>
+            </article>
           </section>
         ) : null}
 
         {/* 5. CONNECT */}
-        <section id="connect" className="epk-section mx-4 bg-[var(--bg-dark)]">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="mb-8 text-lg font-bold tracking-tight uppercase leading-tight text-[var(--text-light)] shadow-sm">
-              BOOKING & CONNECTIONS
-            </h2>
+        <section id="connect" className="w-full p-4">
+          <article className="flex flex-col justify-center h-svh w-full p-2">
+            <div className="flex items-center gap-2 mb-4">
+              <Handshake className="text-[var(--signal)]" size={28} />
+              <h2 className="text-lg uppercase font-semibold tracking-tight text-[var(--white-muted)]">Booking & Connections</h2>
+            </div>
             <div className="">
               <ul className="font-medium mono text-sm text-[var(--white-muted)]">
                 {artist.externalLinks?.map((link, i) => (
@@ -406,7 +441,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                 </div>
               ) : null}
             </div>
-          </div>
+          </article>
         </section>
       </main>
 

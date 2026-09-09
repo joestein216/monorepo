@@ -33,8 +33,16 @@ const artistQuery = defineQuery(`*[_type == "artistPage" && slug.current == $slu
   "biography": pt::text(biography),
   careerHighlights[]{label, title, description},
   collaborations[]{name, with, description, url},
-  audioEmbeds[]{title, provider, sourceUrl, embedUrl, details},
+  audioEmbeds[]{
+    _key, 
+    title, 
+    provider, 
+    sourceUrl, 
+    embedUrl, 
+    details
+  },
   videos[]{
+    _key,
     title,
     "fileUrl": file.asset->url,
     externalUrl,
@@ -43,7 +51,7 @@ const artistQuery = defineQuery(`*[_type == "artistPage" && slug.current == $slu
     loop
   },
   "gallery": gallery[] ${imageProjection},
-  "events": *[_type == "event" && references(^._id)] {title, organizer, status, startsAt, endsAt, dateDisplay, venue, location, details, url},
+  "events": *[_type == "event" && references(^._id)] {title, organizer, status, startsAt, endsAt, dateDisplay, venue, location, details, "url": eventUrl},
   bookingEmail,
   bookingLabel,
   externalLinks[]{label, href, openInNewTab},

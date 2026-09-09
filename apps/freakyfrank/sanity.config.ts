@@ -16,7 +16,7 @@ export default defineConfig({
     presentationTool({
       resolve,
       previewUrl: {
-        origin: 'http://localhost:3005',
+        origin: process.env.NEXT_PUBLIC_STUDIO_URL || 'http://localhost:3005',
         previewMode: {
           enable: '/api/draft-mode/enable',
         },

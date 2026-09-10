@@ -28,7 +28,7 @@ export default function MessageForm() {
         required
         rows={4}
         placeholder="type message then click send..."
-        className="border border-[var(--line)] p-2"
+        className="border border-[var(--line)] p-2 shadow-sm shadow-black"
       />
       
       {state.error && <p className="text-xs text-red-600">{state.error}</p>}
@@ -36,7 +36,7 @@ export default function MessageForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="bg-[var(--button-hover)] p-2"
+        className="bg-[var(--button-hover)] p-2 shadow-sm shadow-black"
       >
         {isPending ? '...' : 'Send'}
       </button>

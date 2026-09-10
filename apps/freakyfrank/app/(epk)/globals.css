@@ -2,22 +2,38 @@
 @import 'tailwindcss';
 
 :root {
+  /* System Foundations */
+  --cover: #1b1b18;
+  --desk: #8c897c;
+  
+   /* Text Contrast Architecture */
+  --muted: #5e5c54;          /* Soft slate for dates, meta text, and labels */
+  --signal: #d66705;         /* The orange laser lines and active hooks */ 
+  
+  --paper: #c5c2b6;          /* The new muted paper sheet canvas */
+  --paper-raised: #d2cfc4;   /* Slightly lighter paper tone to lift containers */
+  --ink-heading: #1b1b18;    /* Deep dark contrast for titles */
+  --ink-body: #2b2a26;       /* Clean charcoal for description narrative */
+  
+  /* Sharp Mechanical Shadows (No Blur) */
+  --shadow-sharp: 2px 2px 0px 0px rgba(27, 27, 24, 0.15);
+  --shadow-sharp-hover: 4px 4px 0px 0px rgba(27, 27, 24, 0.25);
+
   --ink: #11110f;
-  --paper: #f3f1ea;
-  --desk: #3c3c3c;
   --chrome: #272727;
   --chrome-line: #454545;
   --white: #ffffff;
   --white-muted: #b8b8b8;
   --white-subtle: #929292;
   --white-faint: #6f6f6f;
-  --cover: #1b1b18;
+  
+  /* Section Canvas Contexts */
+  
   --cover-inner: #252520;
   --button-hover: #393934;
   --scrollbar: #4a4a45;
   --line: #c8c5ba;
-  --muted: #6c6b64;
-  --signal: #d66705;
+  --line-dark: #333330; /* Transition step line for dark blocks */
   --anchor-section: #262522;
 }
 
@@ -31,107 +47,139 @@ html {
   box-sizing: inherit;
 }
 
-body { 
-  margin: 0; 
-  background: var(--desk); 
-  color: var(--paper);
-  font-family: 'DM Sans', sans-serif; 
+body {
+  margin: 0;
+  /* Now defaults to the muted, industrial off-white desktop workspace */
+  background: var(--desk);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-.epk-frame { 
-  width: 100%; 
-  max-width: 768px; 
-  min-height: 100svh; 
-  align-content: center; 
-  margin: 0 auto;  
-  background: var(--ink); 
-  box-shadow: 0 0 0 1px var(--chrome-line); 
-}
+/* --- EPK Structural Frame Base --- */
 .epk-frame {
-  .reader-header {
-    top: 0; 
-    height: 48px; 
-    justify-content: space-between; 
-    border-bottom: 1px solid var(--chrome-line); 
+  width: 100%;
+  max-width: 768px;
+  min-height: 100svh;
+  margin: 0 auto;
+  background: var(--cover);
+  /* Outlines the content container cleanly against the matte desktop view */
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.15), 0 0 0 1px var(--chrome-line);
+  position: relative;
+}
 
+/* --- Semantic Section Canvas Variants --- */
+
+/* Cover Layout Mode (Bio & Connect) */
+.section-cover {
+  background-color: var(--cover);
+  color: var(--white);
+  /* Softens the bottom edge right before the bright paper sheet enters the frame */
+  border-bottom: 1px solid var(--line-dark);
+}
+.section-cover .text-muted {
+  color: var(--white-subtle);
+}
+
+/* Inkscape Ink-on-Paper Canvas Variant (Middle Media & Schedule Sections) */
+.section-paper {
+  background-color: var(--paper);
+  color: var(--ink-body);
+  position: relative;
+  /* Creates a definitive "stacked sheet" appearance resting over the desk foundation */
+  border-bottom: 1px solid var(--line);
+}
+.section-paper h2, .section-paper h3 {
+  color: var(--ink-heading);
+}
+
+.section-paper .text-muted {
+  color: var(--muted);
+}
+
+/* Sharp Document Container Card */
+.content-card {
+  background-color: var(--desk);
+  padding: 16px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+/* Optional hover feedback for interactive download blocks */
+.content-card-interactive:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-sharp-hover);
+}
+
+/* Fixed Hardware Reader Controls */
+.epk-frame .reader-chrome {
+  position: fixed;
+  left: 50%;
+  width: 100%;
+  max-width: 768px;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  background: var(--chrome);
+  padding: 0 16px;
+  color: var(--white);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.epk-frame .reader-header {
+  top: 0;
+  height: 48px;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--chrome-line);
+}
+
+.epk-frame .reader-footer {
+  bottom: 0;
+  height: 56px;
+  justify-content: space-between;
+  border-top: 1px solid var(--chrome-line);
+}
+
+/* --- Content Typographic System --- */
+.mono {
+  font-family: 'DM Mono', monospace;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 4px;
+}
+
+/* Asymmetrical Composition Helpers for Half-Page/Split Brochure Layouts */
+.split-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (min-width: 640px) {
+  .split-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
-  .reader-footer {
-    bottom: 0; 
-    height: 56px; 
-    justify-content: space-between; 
-    border-top: 1px solid var(--chrome-line); 
-  }
-  .reader-chrome { 
-    position: fixed;
-    left: 50%; 
-    right: auto; 
-    width: 100%; 
-    max-width: 768px;
-    transform: translateX(-50%); 
-    z-index: 20; 
-    display: flex; 
-    align-items: center; 
-    background: var(--chrome); 
-    padding: 8px; 
-    color: var(--white); 
-    font-size: 11px; 
-    text-transform: uppercase; 
-    letter-spacing: 0.16em;
-  }
+}
+
+/* --- Media Shape Constraints & Vector Traps --- */
+.wrapped-photo-container {
+  float: right;
+  width: 50%;
+  shape-outside: polygon(
+    100% 0%, 100% 0%, 41% 1%, 35% 8%, 32% 13%, 31% 15%, 
+    28% 18%, 23% 25%, 23% 28%, 12% 32%, 0% 51%, 0% 59%, 
+    0% 69%, 15% 73%, 39% 80%, 49% 83%, 100% 100%
+  );
+  shape-margin: 8px;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 85%);
+  mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 85%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .epk-frame  { scroll-behavior: auto; }
-}
-
-.mono { 
-  font-family: 'DM Mono', monospace; 
-}
-
-.focus-ring:focus-visible { 
-  outline: 2px solid var(--signal); 
-  outline-offset: 4px; 
-}
-
-/* 
-  Updated Vector Mapping Matrix:
-  1. Starts at the top right header space.
-  2. Drops left to touch the crown of his hair (45%).
-  3. Traces down his left cheek/jawline (42%).
-  4. Follows the slope of the red hood (32% -> 25%).
-  5. Cuts out tightly along the leather sleeve contour down to the elbow flare (10% width, 65% height).
-  6. Sweeps instantly back to 100% width, forcing text underneath the elbow line.
-*/
-.wrapped-photo-container {
-  /* Fluid width: takes up exactly 40% of the screen on mobile, 35% on desktop */
-  float: right;
-  width: 50%;
-  shape-outside: polygon(100% 0%,
-    100% 0%,
-    41% 1%,
-    35% 8%,
-    32% 13%,
-    31% 15%,
-    28% 18%,
-    23% 25%,
-    23% 28%,
-    12% 32%,
-    0% 51%,
-    0% 59%,
-    0% 69%,
-    15% 73%,
-    39% 80%,
-    49% 83%,
-    100% 100%
-  );
-  /* Buffer spacing between typography and the leather jacket edges */
-  shape-margin:8px;
-  /* 
-    The Bottom Fade Engine:
-    Keeps the profile crisp and solid past his head, chest, and shoulder.
-    Begins the smooth linear opacity drop exactly at the 60% height mark (right above the elbow) 
-    and vanishes entirely into the #1b1b18 background color by the 85% height mark.
-  */
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 85%);
-  mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 85%);
+  html {
+    scroll-behavior: auto !important;
+  }
 }

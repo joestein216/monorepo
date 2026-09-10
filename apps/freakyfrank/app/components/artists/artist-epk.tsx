@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import React, { useEffect, useState } from "react"
@@ -19,6 +18,15 @@ export type ArtistAudio = {
   sourceUrl: string | null
   embedUrl: string | null
   details: string | null
+  trackId: string | null
+  thumbUrl: string | null
+  thumbImage: SanityImageValue | null
+  coverArtUrl: string | null
+  coverArtImage: SanityImageValue | null
+  waveformUrl: string | null
+  waveformImage: SanityImageValue | null
+  waveformBgUrl: string | null
+  waveformBgImage: SanityImageValue | null
 }
 
 export type ArtistVideo = {
@@ -85,9 +93,9 @@ function AudioCard({ audioIndex, totalAudioCount, audio }: AudioCardProps) {
       </div>
       <div className="max-h-[75vh] w-full flex items-center justify-center">
         {embedUrl ? (
-          <div className="w-full bg-[var(--bg-light)] p-2 border border-[var(--chrome-line)] shadow-inner">
+          <div className="w-full h-full">
             <iframe
-              className="w-full h-full max-h-[75vh] object-contain"
+              className="content-card w-full h-full max-h-[75vh] object-contain shadow-sm shadow-black"
               src={embedUrl}
               title={audio.title || undefined}
               loading="lazy"
@@ -96,14 +104,14 @@ function AudioCard({ audioIndex, totalAudioCount, audio }: AudioCardProps) {
             />
           </div>
         ) : (
-          <div className="w-full h-40 bg-[var(--bg-light)] border border-[var(--chrome-line)] flex items-center justify-center mono text-[10px] uppercase tracking-widest opacity-50">
+          <div className="content-card w-full h-40 bg-[var(--bg-light)] border border-[var(--chrome-line)] flex items-center justify-center mono text-[10px] uppercase tracking-widest opacity-50">
             Player Unavailable
           </div>
         )}
         </div>
       <div className="pt-4 pb-2">
-        <h3 className="text-base tracking-tight">{audio.title}</h3>
-        {audio.details && <p className="text-sm text-[var(--white-muted)] mt-2">{audio.details}</p>}
+        <h3 className="font-bold text-base text-[var(--ink-heading)]">{audio.title}</h3>
+        {audio.details && <p className="text-base text-[var(--ink-body)] mt-2">{audio.details}</p>}
       </div>
     </article>
   )
@@ -131,7 +139,7 @@ function VideoCard({ videoIndex, totalVideoCount, video }: VideoCardProps) {
       <div className="max-h-[75vh] w-full flex items-center justify-center">
         {localOrHostedFile ? (
           <video
-            className="w-full h-full max-h-[75vh] object-contain"
+            className="content-card w-full h-full max-h-[75vh] object-contain  shadow-sm shadow-black"
             controls
             playsInline
             preload="metadata"
@@ -144,7 +152,7 @@ function VideoCard({ videoIndex, totalVideoCount, video }: VideoCardProps) {
           </video>
         ) : embedUrl ? (
           <iframe
-            className="w-full aspect-video max-h-[75vh] max-w-full"
+            className="content-card w-full aspect-video max-h-[75vh] max-w-full shadow-sm shadow-black"
             src={embedUrl}
             title={video.title}
             loading="lazy"
@@ -158,8 +166,8 @@ function VideoCard({ videoIndex, totalVideoCount, video }: VideoCardProps) {
         ) : null}
       </div>
       <div className="pt-4 pb-2">
-        <h3 className="text-base tracking-tight">{video.title}</h3>
-        {video.caption && <p className="text-sm text-[var(--white-muted)] mt-2">{video.caption}</p>}
+        <h3 className="font-bold text-basetext-[var(--ink-heading)]">{video.title}</h3>
+        {video.caption && <p className="text-base text-[var(--ink-body)] leading-relaxed mt-2">{video.caption}</p>}
       </div>
     </article>
   )
@@ -189,11 +197,12 @@ const sections: Section[] = [
 
 function TopHeader({ section }: { section: Section }) {
   const previousSection = section.previous;
-  return (
+
+  return previousSection && (
     <header className="reader-chrome reader-header">
       <nav className="reader-content flex items-center gap-4 mono">
         <span className="reader-content">
-          <span className="mono font-semibold text-[var(--white-muted)] text-base">
+          <span className="mono font-semibold text-[var(--white-muted)] text-sm">
             {section.label}
           </span>
         </span>
@@ -203,8 +212,8 @@ function TopHeader({ section }: { section: Section }) {
           <span className="inline mono">
             {section.previousLabel}
           </span>
-          <span className="inline"><
-            ArrowUp className="text-[var(--signal)]" size={18} />
+          <span className="inline">
+            <ArrowUp className="text-[var(--signal)]" size={18} />
           </span>
         </a>
       )}
@@ -214,28 +223,25 @@ function TopHeader({ section }: { section: Section }) {
 
 function BottomTray({ section }: { section: Section }) {
   const nextSection = section.next;
-  return (
+
+  return nextSection && (
     <footer className="reader-chrome reader-footer">
-      <nav className="reader-content flex items-center gap-4 mono">
-        <span className="reader-content">
-          {false && (
-            <a className="text-[var(--white-muted)]" href="#connect">
-              ▧
-              <span className="underline underline-offset-4">
-                EPK
-              </span>
-            </a>
-          )}
-          <a className="reader-content mono flex items-center gap-2 text-[var(--white-muted)]" href="#connect">
-            <span className="inline">
-              <Handshake className="text-[var(--signal)]" size={18} />
-            </span>
-            <span className="">BOOK | CONNECT</span>
-          </a>
-        </span>
+      <nav className="reader-content flex items-center gap-6 mono">
+        <a className="flex items-center gap-2 text-[var(--white-muted)]" href="/api/epk-pdf" target="_blank">
+          <Download className="inline text-[var(--signal)]" size={18} /> 
+          <span className="inline">
+            EPK
+          </span>
+        </a>
+        <a className="reader-content mono flex items-center gap-2 text-[var(--white-muted)]" href="#connect">
+          <Handshake className="inline text-[var(--signal)]" size={18} />
+          <span className="">
+            CONNECT
+          </span>
+        </a>
       </nav>
       {nextSection && (
-        <a className="reader-content mono flex items-center gap-2 text-[var(--white-subtle)]" href={`#${nextSection}`}>
+        <a className="reader-content mono flex items-center gap-2 text-[var(--white-muted)]" href={`#${nextSection}`}>
           <span className="inline">
             {section.nextLabel}
           </span>
@@ -292,46 +298,54 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
   const audioEmbeds = artist.audioEmbeds?.slice(0, maxCountAudioEmbeds);
 
   return (
-    <div className="epk-frame relative">
+    <div className="epk-frame">
       <TopHeader section={section} />
       {/* 3. Main Single Column Container */}
-      <main className="epk-scroll">
+      <main className="">
         {/* 1. PROFILE / INTRO (DARK CAP) */}
-        <section id="bio" className="w-full p-4">
-          <article className="flex flex-col justify-center h-svh w-full p-2">
+        <section id="bio" className="section-cover w-full px-4 md:px-8 pt-4 md:pt-8">
+          <article className="flex flex-col h-svh w-full">
             {artist.primaryLogo?.src && ( <div>
-              <img src={artist.primaryLogo.src} alt={artist.heroImage?.alt || artist.name || undefined} />
+              <SanityImage
+                image={artist.primaryLogo}
+                alt={artist.primaryLogo.alt || artist.name}
+                className="w-full h-auto"
+              />
             </div>
             )}
             <div className="mt-6 text-base text-[var(--white-subtle)]">
               {artist.positioning}
             </div>
             <div className="relative mt-6">
-                {/* Photo Left */}
-                {artist.heroImage?.src ? (
-                  <div className="wrapped-photo-container">
-                    <SanityImage
-                      image={artist.heroImage}
-                      alt={artist.heroImage.alt || artist.name}
-                      sizes="(max-width: 300px) 30vw, (max-width: 600px) 20vw, 15vw"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-full bg-[rgba(255,255,255,0.05)]"></div>
-                )}
-                {/* Bio Right */}
-                <div className="w-full text-base text-[var(--white-muted)] shadow-sm">
-                  {artist.shortBio?.split('\n').map((paragraph, i) => (
-                    <div key={i}>{paragraph}</div>
-                  ))}
+              {/* Photo Left */}
+              {artist.heroImage?.src ? (
+              <div className="wrapped-photo-container">
+              <SanityImage
+                image={artist.heroImage}
+                alt={artist.heroImage.alt || artist.name}
+                sizes="(max-width: 300px) 30vw, (max-width: 600px) 20vw, 15vw"
+              />
               </div>
-            </div>
+                ) : (
+                  <div className="w-full h-full"></div>
+                )}
+                <div className="w-full text-base text-[var(--white-muted)] shadow-sm">
+                {artist?.shortBio && artist.shortBio?.split('\n').map((paragraph, i) => (
+                  <div key={i}>{paragraph}</div>
+                ))}
+                </div>
+                <div className="w-full text-base text-[var(--white-muted)] shadow-sm mt-4">
+                {artist?.biography && artist.biography?.split('\n').map((paragraph, i) => (
+                  <div key={i}>{paragraph}</div>
+                ))}
+                </div>
+              </div>  
           </article>
         </section>
 
         {/* 2. AUDIO EMBEDS */}
         {audioEmbeds?.length ? (
-          <section className="w-full p-4">
+          <section className="section-paper w-full p-4">
             {audioEmbeds.map((audio, i) => (
               <AudioCard key={audio._key} audioIndex={i + 1} totalAudioCount={audioEmbeds.length} audio={audio as ArtistAudio} />
             ))}
@@ -340,7 +354,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
 
         {/* 3. VIDEOS */}
         {videos?.length ? (
-          <section className="w-full p-4">
+          <section className="section-paper w-full p-4">
             {videos.map((video, i) => (
               <VideoCard key={video._key} videoIndex={i + 1} totalVideoCount={videos.length} video={video as ArtistVideo} />
             ))}
@@ -349,20 +363,20 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
 
         {/* 4. UPCOMING EVENTS (LIGHT CORE) */}
         {events?.length ? (
-          <section id="events" className="w-full p-4">
+          <section id="events" className="section-paper w-full p-4">
             <article className="flex flex-col justify-center h-svh w-full p-2">
               <div className="flex items-center gap-2 mb-4">
                 <Calendar className="text-[var(--signal)]" size={28} />
                 <h2 className="text-lg uppercase font-semibold tracking-tight text-[var(--white-muted)]">Upcoming Events</h2>
               </div>
               <div className="grid md:grid-cols-2 gap-8">
-                <div className=" bg-[var(--cover-inner)] p-4 border border-[var(--chrome-line)] shadow-sm">
+                <div className="p-4">
                   <div className="space-y-6">
                     {events.map((event, i) => {
                       const displayDate = event.dateDisplay || (event.startsAt ? new Date(event.startsAt).toLocaleDateString() : 'TBA')
                       const venueLine = [event.venue, event.location].filter(Boolean).join(" — ")
                       return (
-                        <div key={i} className="flex flex-col md:flex-row md:items-start justify-between border-b border-[var(--line-light)] pb-6 last:border-0 last:pb-0 gap-4">
+                        <div key={i} className="content-card flex flex-col ">
                           <div>
                             <div className="flex items-center gap-4 mb-2">
                               <span className="font-semibold text-xl">{displayDate}</span>
@@ -371,7 +385,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                             {venueLine && <p className="opacity-70 mt-1 text-sm">{venueLine}</p>}
                           </div>
                           {event.url && (
-                            <a href={event.url} target="_blank" rel="noreferrer" className="mono text-[10px] uppercase tracking-[0.18em] whitespace-nowrap hover:text-[var(--accent-primary)] transition-colors pt-1">
+                            <a href={event.url} target="_blank" rel="noreferrer" className="mono text-[10px] uppercase whitespace-nowrap">
                               Tickets ↗
                             </a>
                           )}
@@ -386,7 +400,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
         ) : null}
 
         {/* 5. CONNECT */}
-        <section id="connect" className="w-full p-4">
+        <section id="connect" className="section-cover w-full p-4">
           <article className="flex flex-col justify-center h-svh w-full p-2">
             <div className="flex items-center gap-2 mb-4">
               <Handshake className="text-[var(--signal)]" size={28} />
@@ -396,50 +410,23 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
               <ul className="font-medium mono text-sm text-[var(--white-muted)]">
                 {artist.externalLinks?.map((link, i) => (
                   <li key={i}>
-                    <a  href={link.href!} target={link.openInNewTab ? "_blank" : undefined} className="inline-block py-2 my-4">
+                    <a  href={link.href!} target={link.openInNewTab ? "_blank" : undefined} className="inline-block py-2 my-2">
                       {link.label || link.href}
                     </a>
                   </li>
                 ))}
                 {artist.bookingEmail && (
-                  <li><a href={`mailto:${artist.bookingEmail}`} className="inline-block py-2 my-4">{artist.bookingLabel}</a></li>
+                  <li><a href={`mailto:${artist.bookingEmail}`} className="inline-block py-2 my-2">{artist.bookingLabel}</a></li>
                 )}
-                <li>
-                  <div className="w-full max-w-sm mt-6">
-                    <div>
-                      Message (include contact info):
-                    </div>
-                    <div className="mt-2">
-                      <MessageForm />
-                    </div>
-                  </div>
-                </li>
               </ul>
-              {/* EPK Package Download */}
-              {artist.epkPackage?.url ? (
-                <div className="border border-[var(--line-dark)] p-8 md:p-10 bg-[rgba(255,255,255,0.03)] rounded-sm">
-                  <h3 className="mono text-[10px] uppercase tracking-[0.18em] opacity-50 mb-3">Media Kit</h3>
-                  <h4 className="text-3xl font-bold mb-8">Download Full EPK</h4>
-                  <a
-                    href={artist.epkPackage.url}
-                    className="inline-flex items-center gap-3 bg-[var(--bg-light)] text-[var(--bg-dark)] px-8 py-4 font-bold hover:bg-[var(--accent-primary)] hover:text-white transition-colors"
-                    download
-                  >
-                    <Download size={20} /> Get Press Package
-                  </a>
-                </div>
-              ) : null}
-              {artist.technicalRider?.preferredSetup?.length ? (
-                <div>
-                  <h3 className="mono text-[10px] uppercase tracking-[0.18em] mb-6">TECH SPECS</h3>
-                  <ul className="border-l border-[var(--accent-primary)] pl-6 space-y-3 font-medium mono text-sm">
-                    {artist.technicalRider.preferredSetup.map((item, i) => (
-                      <li key={i}>{item}</li>
-                    ))}
-                    {artist.technicalRider.boothMonitors && <li>{artist.technicalRider.boothMonitors}</li>}
-                  </ul>
-                </div>
-              ) : null}
+            </div>
+            <div className="w-full max-w-sm mt-6 font-medium mono text-sm text-[var(--white-muted)]">
+              <div>
+                Message (include contact info):
+              </div>
+              <div className="mt-2 content-card p-s">
+                <MessageForm />
+              </div>
             </div>
           </article>
         </section>

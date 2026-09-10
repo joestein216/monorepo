@@ -86,10 +86,14 @@ export type AudioCardProps = {
 function AudioCard({ audioIndex, totalAudioCount, audio }: AudioCardProps) {
   const embedUrl = audio.embedUrl //safeEmbedUrl(audio.embedUrl)
   return (
-    <article id={`audio${audioIndex}`} className="flex flex-col justify-center h-svh w-full p-2">
+    <article id={`audio${audioIndex}`} className="sans flex flex-col justify-center h-svh w-full p-2">
       <div className="flex items-center gap-2 mb-2">
-        <Headphones className="text-[var(--signal)]" size={28} />
-        <h2 className="text-lg uppercase font-semibold tracking-tight text-[var(--white-muted)]">{`DJ Mixes (${audioIndex} of ${totalAudioCount})`}</h2>
+        <h2 className="flex items-center gap-2 text-lg uppercase font-semibold tracking-tight text-[var(--white-muted)]">
+          <Headphones className="inline text-[var(--signal)]" size={28} />
+          <span className="inline">
+            {`DJ Mixes (${audioIndex} of ${totalAudioCount})`}
+          </span>
+        </h2>
       </div>
       <div className="max-h-[75vh] w-full flex items-center justify-center">
         {embedUrl ? (
@@ -104,14 +108,14 @@ function AudioCard({ audioIndex, totalAudioCount, audio }: AudioCardProps) {
             />
           </div>
         ) : (
-          <div className="content-card w-full h-40 bg-[var(--bg-light)] border border-[var(--chrome-line)] flex items-center justify-center mono text-[10px] uppercase tracking-widest opacity-50">
+          <div className="content-card w-full h-40 flex items-center justify-center">
             Player Unavailable
           </div>
         )}
         </div>
       <div className="pt-4 pb-2">
-        <h3 className="font-bold text-base text-[var(--ink-heading)]">{audio.title}</h3>
-        {audio.details && <p className="text-base text-[var(--ink-body)] mt-2">{audio.details}</p>}
+        <h3 className="font-bold text-lg tracking-tight  text-[var(--ink-heading)]">{audio.title}</h3>
+        {audio.details && <p className="text-base tracking-tight  text-[var(--ink-body)] mt-2">{audio.details}</p>}
       </div>
     </article>
   )
@@ -131,7 +135,7 @@ function VideoCard({ videoIndex, totalVideoCount, video }: VideoCardProps) {
   const posterUrl = poster ? getSiteImageUrl(poster, { width: 1280, height: 720 }) : undefined
 
   return (
-    <article id={`video${videoIndex}`} className="flex flex-col justify-center h-svh w-full p-2">
+    <article id={`video${videoIndex}`} className="sans flex flex-col justify-center h-svh w-full p-2">
       <div className="flex items-center gap-2 mb-2">
         <Video className="text-[var(--signal)]" size={28} />
         <h2 className="text-lg uppercase font-semibold tracking-tight text-[var(--white-muted)]">{`Video Clips of Live Sets (${videoIndex} of ${totalVideoCount})`}</h2>
@@ -160,14 +164,14 @@ function VideoCard({ videoIndex, totalVideoCount, video }: VideoCardProps) {
             referrerPolicy="strict-origin-when-cross-origin"
           />
         ) : externalUrl ? (
-          <a href={externalUrl} target="_blank" rel="noreferrer" className="absolute inset-0 flex items-center justify-center text-white underline mono text-xs uppercase tracking-widest hover:text-[var(--accent-primary)] transition-colors">
+          <a href={externalUrl} target="_blank" rel="noreferrer" className="absolute inset-0 flex items-center justify-center text-white underline text-xs uppercase tracking-widest hover:text-[var(--accent-primary)] transition-colors">
             Watch Video ↗
           </a>
         ) : null}
       </div>
       <div className="pt-4 pb-2">
-        <h3 className="font-bold text-basetext-[var(--ink-heading)]">{video.title}</h3>
-        {video.caption && <p className="text-base text-[var(--ink-body)] leading-relaxed mt-2">{video.caption}</p>}
+        <h3 className="font-bold text-lg tracking-tight text-[var(--ink-heading)]">{video.title}</h3>
+        {video.caption && <p className="text-base tracking-tight text-[var(--ink-body)] mt-2">{video.caption}</p>}
       </div>
     </article>
   )
@@ -186,10 +190,10 @@ type Section = {
 };
 
 const sections: Section[] = [
-  { id: 'bio', label: 'DJ FREAKY FRANK EPK', icon: '◼', previous: null, previousLabel: null, next: 'audio1', nextLabel: 'AUDIO MIX 1/2' },
-  { id: 'audio1', label: 'AUDIO MIX 1/2', icon: '◉', previous: 'bio', previousLabel: 'BIO', next: 'audio2', nextLabel: 'AUDIO MIX 2/2' },
-  { id: 'audio2', label: 'AUDIO MIX 2/2', icon: '◉', previous: 'audio1', previousLabel: 'AUDIO MIX 1/2', next: 'video1', nextLabel: 'VIDEO CLIP 1/2' },
-  { id: 'video1', label: 'VIDEO CLIP 1/2', icon: '◷', previous: 'audio2', previousLabel: 'AUDIO MIX 2/2', next: 'video2', nextLabel: 'VIDEO CLIP 2/2' },
+  { id: 'bio', label: 'DJ FREAKY FRANK EPK', icon: '◼', previous: null, previousLabel: null, next: 'audio1', nextLabel: 'DJ MIX 1/2' },
+  { id: 'audio1', label: 'DJ MIX 1/2', icon: '◉', previous: 'bio', previousLabel: 'BIO', next: 'audio2', nextLabel: 'DJ MIX 2/2' },
+  { id: 'audio2', label: 'DJ MIX 2/2', icon: '◉', previous: 'audio1', previousLabel: 'DJ MIX 1/2', next: 'video1', nextLabel: 'VIDEO CLIP 1/2' },
+  { id: 'video1', label: 'VIDEO CLIP 1/2', icon: '◷', previous: 'audio2', previousLabel: 'DJ MIX 2/2', next: 'video2', nextLabel: 'VIDEO CLIP 2/2' },
   { id: 'video2', label: 'VIDEO CLIP 2/2', icon: '◷', previous: 'video1', previousLabel: 'VIDEO CLIP 1/2', next: 'events', nextLabel: 'UPCOMING EVENTS' },
   { id: 'events', label: 'UPCOMING EVENTS', icon: '◷', previous: 'video2', previousLabel: 'VIDEO CLIP 2/2', next: 'connect', nextLabel: 'BOOK + CONNECT' },
   { id: 'connect', label: 'BOOK + CONNECT', icon: '⌁', previous: 'events', previousLabel: 'UPCOMING EVENTS', next: null, nextLabel: null },
@@ -227,12 +231,12 @@ function BottomTray({ section }: { section: Section }) {
   return nextSection && (
     <footer className="reader-chrome reader-footer">
       <nav className="reader-content flex items-center gap-6 mono">
-        <a className="flex items-center gap-2 text-[var(--white-muted)]" href="/api/epk-pdf" target="_blank">
+        {/* <a className="flex items-center gap-2 text-[var(--white-muted)]" href="/api/epk-pdf" target="_blank">
           <Download className="inline text-[var(--signal)]" size={18} /> 
           <span className="inline">
             EPK
           </span>
-        </a>
+        </a> */}
         <a className="reader-content mono flex items-center gap-2 text-[var(--white-muted)]" href="#connect">
           <Handshake className="inline text-[var(--signal)]" size={18} />
           <span className="">
@@ -376,7 +380,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                       const displayDate = event.dateDisplay || (event.startsAt ? new Date(event.startsAt).toLocaleDateString() : 'TBA')
                       const venueLine = [event.venue, event.location].filter(Boolean).join(" — ")
                       return (
-                        <div key={i} className="content-card flex flex-col ">
+                        <div key={i} className="content-card flex flex-col shadow-sm shadow-black">
                           <div>
                             <div className="flex items-center gap-4 mb-2">
                               <span className="font-semibold text-xl">{displayDate}</span>
@@ -407,7 +411,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
               <h2 className="text-lg uppercase font-semibold tracking-tight text-[var(--white-muted)]">Booking & Connections</h2>
             </div>
             <div className="">
-              <ul className="font-medium mono text-sm text-[var(--white-muted)]">
+              <ul className="font-medium mono text-base text-[var(--white-muted)]">
                 {artist.externalLinks?.map((link, i) => (
                   <li key={i}>
                     <a  href={link.href!} target={link.openInNewTab ? "_blank" : undefined} className="inline-block py-2 my-2">
@@ -420,11 +424,8 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                 )}
               </ul>
             </div>
-            <div className="w-full max-w-sm mt-6 font-medium mono text-sm text-[var(--white-muted)]">
-              <div>
-                Message (include contact info):
-              </div>
-              <div className="mt-2 content-card p-s">
+            <div className="absolute bottom-8 left-8 text-base text-[var(--white-subtle)]">
+              <div className="mt-2 p-s">
                 <MessageForm />
               </div>
             </div>

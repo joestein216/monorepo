@@ -37,6 +37,15 @@
   --anchor-section: #262522;
 }
 
+/* --- Content Typographic System --- */
+.mono {
+  font-family: 'DM Mono', monospace;
+}
+
+.sans {
+  font-family: 'DM Sans', sans-serif;
+}
+
 html {
   box-sizing: border-box;
   scroll-margin-top: 48px;
@@ -142,26 +151,9 @@ body {
   border-top: 1px solid var(--chrome-line);
 }
 
-/* --- Content Typographic System --- */
-.mono {
-  font-family: 'DM Mono', monospace;
-}
-
 .focus-ring:focus-visible {
   outline: 2px solid var(--signal);
   outline-offset: 4px;
-}
-
-/* Asymmetrical Composition Helpers for Half-Page/Split Brochure Layouts */
-.split-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-}
-@media (min-width: 640px) {
-  .split-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 /* --- Media Shape Constraints & Vector Traps --- */

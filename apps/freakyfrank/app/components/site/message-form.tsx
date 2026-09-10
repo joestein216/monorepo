@@ -22,23 +22,23 @@ export default function MessageForm() {
 
   return (
     // Next.js maps formAction straight to your secure server-side file
-    <form action={formAction} className="grid grid-cols-1 gap-2">
+    <form action={formAction} className="grid grid-cols-1 shadow-sm shadow-black">
       <textarea
         name="message" // <-- This matches formData.get('message') on the server
         required
-        rows={4}
+        rows={3}
         placeholder="type message then click send..."
-        className="border border-[var(--line)] p-2 shadow-sm shadow-black"
+        className="self-end p-2 text-base border border-[var(--line-dark)] focus:outline-none"
       />
       
-      {state.error && <p className="text-xs text-red-600">{state.error}</p>}
+      {state.error && <p className="text-sm text-red-600">{state.error}</p>}
 
       <button
         type="submit"
         disabled={isPending}
-        className="bg-[var(--button-hover)] p-2 shadow-sm shadow-black"
+        className="bg-[var(--button-hover)] text-base shadow-sm shadow-black uppercase p-1"
       >
-        {isPending ? '...' : 'Send'}
+        {isPending ? '...' : 'Send Message'}
       </button>
     </form>
   );

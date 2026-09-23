@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react"
 import { ArtistQueryResult } from "../../../sanity.types"
 import { type SanityImageValue, getSiteImageUrl } from "../../../sanity/queries/image"
 import { SanityImage } from "../site/sanity-image"
-import { Download, Headphones, Calendar, Video, ArrowDown, ArrowUp, Handshake } from "lucide-react"
+import { Headphones, Calendar, Video, ArrowDown, ArrowUp, Handshake } from "lucide-react"
 import MessageForm from "../../components/site/message-form"
 
 type ArtistEpkProps = {

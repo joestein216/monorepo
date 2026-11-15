@@ -164,8 +164,8 @@ const VinylCard = memo(function VinylCard({ vinyl }: { vinyl: VinylRecord }) {
                 fill="none" 
                 stroke="#555" 
                 strokeWidth="2" 
-                stroke-winecap="round" 
-                strokeLinejoin="round" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
                 className="lucide lucide-disc3-icon lucide-disc-3">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M6 12c0-1.7.7-3.2 1.8-4.2"/>
@@ -184,8 +184,8 @@ const VinylCard = memo(function VinylCard({ vinyl }: { vinyl: VinylRecord }) {
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="#555" 
-                stroke-width="2" 
-                stroke-linecap="round" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
                 strokeLinejoin="round" 
                 className="lucide lucide-disc-album-icon lucide-disc-album">
                 <rect width="18" height="18" x="3" y="3" rx="2"/>

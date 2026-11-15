@@ -5,7 +5,7 @@ import { VinylRecordCartItem } from '../store/useCartStore';
 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-07-29.dahlia', // Use latest stable API version
+  apiVersion: '2026-08-26.dahlia', // Use latest stable API version
 });
 
 export async function createCheckoutSession(cartItems: VinylRecordCartItem[]) {

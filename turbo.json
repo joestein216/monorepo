@@ -8,7 +8,10 @@
         "NEXT_PUBLIC_SANITY_DATASET",
         "NEXT_PUBLIC_SUPABASE_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-        "SANITY_API_READ_TOKEN"
+        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+        "SANITY_API_READ_TOKEN",
+        "STRIPE_SECRET_KEY"
       ],
       "outputs": [".next/**", "!.next/cache/**"]
     },

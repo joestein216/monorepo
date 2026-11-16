@@ -15,6 +15,170 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: sanity/extract.json
+export type SanityFileAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.fileAsset";
+};
+
+export type About = {
+  _id: string;
+  _type: "about";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  headline?: string;
+  intro?: string;
+  story?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+  nextRole?: {
+    status?: string;
+    targetTitles?: Array<string>;
+    environmentSummary?: string;
+  };
+  advisory?: {
+    availabilityNote?: string;
+    focusAreas?: Array<{
+      title?: string;
+      summary?: string;
+      _type: "focusArea";
+      _key: string;
+    }>;
+  };
+  downloads?: Array<{
+    label?: string;
+    description?: string;
+    file?: {
+      asset?: SanityFileAssetReference;
+      media?: unknown;
+      _type: "file";
+    };
+    _type: "download";
+    _key: string;
+  }>;
+  contact?: {
+    email?: string;
+    github?: string;
+    linkedin?: string;
+  };
+};
+
+export type TechnologyReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "technology";
+};
+
+export type Role = {
+  _id: string;
+  _type: "role";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  company?: string;
+  title?: string;
+  dateRange?: string;
+  order?: number;
+  roleSummary?: string;
+  technologies?: Array<
+    {
+      _key: string;
+    } & TechnologyReference
+  >;
+  achievements?: Array<{
+    bullet?: string;
+    deepDive?: string;
+    tracks?: Array<string>;
+    includeInDefaultOverview?: boolean;
+    technologies?: Array<
+      {
+        _key: string;
+      } & TechnologyReference
+    >;
+    _type: "achievement";
+    _key: string;
+  }>;
+};
+
+export type Project = {
+  _id: string;
+  _type: "project";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  subtitle?: string;
+  order?: number;
+  liveUrl?: string;
+  repoUrl?: string;
+  problem?: string;
+  techStack?: Array<
+    {
+      _key: string;
+    } & TechnologyReference
+  >;
+  architectureNotes?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+};
+
+export type Slug = {
+  _type: "slug";
+  current?: string;
+  source?: string;
+};
+
+export type Technology = {
+  _id: string;
+  _type: "technology";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  slug?: Slug;
+  category?:
+    | "Frontend & UI"
+    | "Backend & Systems"
+    | "CMS & Data"
+    | "Commerce & POS"
+    | "AI & Agents";
+  iconKey?: string;
+};
+
 export type SanityImagePaletteSwatch = {
   _type: "sanity.imagePaletteSwatch";
   background?: string;
@@ -128,13 +292,14 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type Slug = {
-  _type: "slug";
-  current?: string;
-  source?: string;
-};
-
 export type AllSanitySchemaTypes =
+  | SanityFileAssetReference
+  | About
+  | TechnologyReference
+  | Role
+  | Project
+  | Slug
+  | Technology
   | SanityImagePaletteSwatch
   | SanityImagePalette
   | SanityImageDimensions
@@ -144,5 +309,162 @@ export type AllSanitySchemaTypes =
   | SanityFileAsset
   | SanityAssetSourceData
   | SanityImageAsset
-  | Geopoint
-  | Slug;
+  | Geopoint;
+
+// Source: sanity/lib/queries.ts
+// Variable: PORTFOLIO_CONTEXT_QUERY
+// Query: {  "about": *[_type == "about" && _id == "about"][0]{    _id, headline, intro, story, nextRole, advisory, contact,    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}  },  "projects": *[_type == "project"] | order(order asc, title asc){    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,    techStack[]->{_id, name, "slug": slug.current, category, iconKey}  },  "roles": *[_type == "role"] | order(order asc, company asc){    _id, company, title, dateRange, order, roleSummary,    technologies[]->{_id, name, "slug": slug.current, category, iconKey},    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}  },  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}}
+export type PORTFOLIO_CONTEXT_QUERY_RESULT = {
+  about: {
+    _id: "about";
+    headline: string | null;
+    intro: string | null;
+    story: Array<{
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: "span";
+        _key: string;
+      }>;
+      style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+      listItem?: "bullet" | "number";
+      markDefs?: Array<{
+        href?: string;
+        _type: "link";
+        _key: string;
+      }>;
+      level?: number;
+      _type: "block";
+      _key: string;
+    }> | null;
+    nextRole: {
+      status?: string;
+      targetTitles?: Array<string>;
+      environmentSummary?: string;
+    } | null;
+    advisory: {
+      availabilityNote?: string;
+      focusAreas?: Array<{
+        title?: string;
+        summary?: string;
+        _type: "focusArea";
+        _key: string;
+      }>;
+    } | null;
+    contact: {
+      email?: string;
+      github?: string;
+      linkedin?: string;
+    } | null;
+    downloads: Array<{
+      _key: string;
+      label: string | null;
+      description: string | null;
+      url: string | null;
+      filename: string | null;
+    }> | null;
+  } | null;
+  projects: Array<{
+    _id: string;
+    title: string | null;
+    slug: string | null;
+    subtitle: string | null;
+    order: number | null;
+    liveUrl: string | null;
+    repoUrl: string | null;
+    problem: string | null;
+    architectureNotes: Array<{
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: "span";
+        _key: string;
+      }>;
+      style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+      listItem?: "bullet" | "number";
+      markDefs?: Array<{
+        href?: string;
+        _type: "link";
+        _key: string;
+      }>;
+      level?: number;
+      _type: "block";
+      _key: string;
+    }> | null;
+    techStack: Array<{
+      _id: string;
+      name: string | null;
+      slug: string | null;
+      category:
+        | "AI & Agents"
+        | "Backend & Systems"
+        | "CMS & Data"
+        | "Commerce & POS"
+        | "Frontend & UI"
+        | null;
+      iconKey: string | null;
+    }> | null;
+  }>;
+  roles: Array<{
+    _id: string;
+    company: string | null;
+    title: string | null;
+    dateRange: string | null;
+    order: number | null;
+    roleSummary: string | null;
+    technologies: Array<{
+      _id: string;
+      name: string | null;
+      slug: string | null;
+      category:
+        | "AI & Agents"
+        | "Backend & Systems"
+        | "CMS & Data"
+        | "Commerce & POS"
+        | "Frontend & UI"
+        | null;
+      iconKey: string | null;
+    }> | null;
+    achievements: Array<{
+      _key: string;
+      bullet: string | null;
+      deepDive: string | null;
+      tracks: Array<string> | null;
+      includeInDefaultOverview: boolean | null;
+      technologies: Array<{
+        _id: string;
+        name: string | null;
+        slug: string | null;
+        category:
+          | "AI & Agents"
+          | "Backend & Systems"
+          | "CMS & Data"
+          | "Commerce & POS"
+          | "Frontend & UI"
+          | null;
+        iconKey: string | null;
+      }> | null;
+    }> | null;
+  }>;
+  technologies: Array<{
+    _id: string;
+    name: string | null;
+    slug: string | null;
+    category:
+      | "AI & Agents"
+      | "Backend & Systems"
+      | "CMS & Data"
+      | "Commerce & POS"
+      | "Frontend & UI"
+      | null;
+    iconKey: string | null;
+  }>;
+};
+
+// Query TypeMap
+import "@sanity/client";
+declare module "@sanity/client" {
+  interface SanityQueries {
+    '{\n  "about": *[_type == "about" && _id == "about"][0]{\n    _id, headline, intro, story, nextRole, advisory, contact,\n    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}\n  },\n  "projects": *[_type == "project"] | order(order asc, title asc){\n    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,\n    techStack[]->{_id, name, "slug": slug.current, category, iconKey}\n  },\n  "roles": *[_type == "role"] | order(order asc, company asc){\n    _id, company, title, dateRange, order, roleSummary,\n    technologies[]->{_id, name, "slug": slug.current, category, iconKey},\n    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,\n      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}\n  },\n  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}\n}': PORTFOLIO_CONTEXT_QUERY_RESULT;
+  }
+}

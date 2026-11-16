@@ -1,0 +1,61 @@
+"use client";
+
+import { useState } from "react";
+import type { PortfolioMessage, PortfolioReceipt } from "@/lib/portfolio-tools";
+import { DownloadsSection, Overview, ReceiptCard } from "./portfolio-content";
+
+export function PortfolioResponse({ message }: { message: PortfolioMessage }) {
+  const [showAll, setShowAll] = useState(false);
+  const summary = message.parts
+    .filter((part) => part.type === "text")
+    .map((part) => part.text)
+    .join("\n\n");
+  const receiptCalls = message.parts.filter((part) => part.type === "tool-showReceipts");
+  const receiptsById = new Map<string, PortfolioReceipt>();
+
+  // Keep text above the cards regardless of the order of streamed tool parts.
+  // Preserve every match across tool calls, keeping the strongest duplicate.
+  for (const part of receiptCalls) {
+    if (part.state !== "output-available") continue;
+    for (const receipt of part.output) {
+      const identity = `${receipt.type}:${receipt.id}`;
+      const existing = receiptsById.get(identity);
+      if (!existing || receipt.relevanceScore > existing.relevanceScore) {
+        receiptsById.set(identity, receipt);
+      }
+    }
+  }
+  const receipts = [...receiptsById.values()].sort((a, b) => b.relevanceScore - a.relevanceScore);
+  const visibleReceipts = showAll ? receipts : receipts.slice(0, 3);
+
+  const pending = receiptCalls.some((part) => part.state === "input-streaming" || part.state === "input-available");
+  const failed = receiptCalls.some((part) => part.state === "output-error" || part.state === "output-denied");
+
+  return <>
+    <output aria-label={message.role === "user" ? "Your question" : "Summary"}>{summary}</output>
+    {receiptCalls.length > 0 && <section aria-label="Receipts">
+      <h4>Receipts</h4>
+      <ul aria-label="Receipts">
+        {visibleReceipts.map((receipt) => <li key={`${receipt.type}:${receipt.id}`}>
+          <ReceiptCard receipt={receipt} />
+        </li>)}
+      </ul>
+      {receipts.length > 3 && <button type="button" aria-expanded={showAll} onClick={() => setShowAll((value) => !value)}>
+        {showAll ? "Show top 3 receipts" : `Show all ${receipts.length} receipts`}
+      </button>}
+      {pending && <p>Finding supporting work…</p>}
+      {failed && <p>The supporting work could not be loaded. Please try again.</p>}
+      {!pending && !failed && receipts.length === 0 && <p>No matching supporting work was found.</p>}
+    </section>}
+    {message.parts.map((part) => {
+      if (part.type !== "tool-showDownloads" && part.type !== "tool-showOverview") return null;
+      if (part.state === "output-error" || part.state === "output-denied") {
+        return <p key={part.toolCallId}>The requested portfolio section could not be loaded.</p>;
+      }
+      if (part.state !== "output-available") return <p key={part.toolCallId}>Loading portfolio section…</p>;
+      return part.type === "tool-showDownloads"
+        ? <DownloadsSection key={part.toolCallId} downloads={part.output} />
+        : <Overview key={part.toolCallId} context={part.output} />;
+    })}
+  </>;
+}

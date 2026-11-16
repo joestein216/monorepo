@@ -8,19 +8,25 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "typegen": "sanity schema extract --path=./sanity/extract.json && sanity typegen generate"
+    "typegen": "sanity schema extract --force --path=./sanity/extract.json && sanity typegen generate"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.121",
+    "@ai-sdk/react": "^4.0.177",
     "@next/env": "16.4.6",
+    "@portabletext/react": "^8.0.1",
+    "@sanity/client": "^8.5.0",
     "@sanity/image-url": "^2.1.1",
     "@sanity/vision": "6.8.0",
+    "ai": "^7.0.173",
     "next": "16.4.6",
     "next-sanity": "13.3.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "sanity": "6.8.0",
     "server-only": "^0.0.1",
-    "styled-components": "^6.5.3"
+    "styled-components": "^6.5.3",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",

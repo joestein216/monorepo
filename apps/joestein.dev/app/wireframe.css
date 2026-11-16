@@ -1,0 +1,12 @@
+/* Disposable Phase 1 receipt boundaries. */
+section[aria-label="Receipts"] > ul {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+}
+
+article[aria-label*="receipt"] {
+  outline: 1px dashed currentColor;
+  padding: 1rem;
+}

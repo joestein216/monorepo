@@ -4,6 +4,8 @@ import type { PortfolioMessage, PortfolioReceipt } from "@/lib/portfolio-tools";
 import { DownloadsSection, Overview, ReceiptCard } from "./portfolio-content";
 
 export function PortfolioResponse({ message, streaming = false }: { message: PortfolioMessage; streaming?: boolean }) {
+  const textParts = message.parts.filter((part) => part.type === "text");
+  const proseStreaming = streaming && textParts.some((part) => part.state === "streaming");
   const summary = [...new Set(message.parts
     .filter((part) => part.type === "text")
     .map((part) => part.text.trim())
@@ -31,15 +33,16 @@ export function PortfolioResponse({ message, streaming = false }: { message: Por
   const failed = receiptCalls.some((part) => part.state === "output-error" || part.state === "output-denied");
 
   return <>
-    <output aria-live="off" aria-label={message.role === "user" ? "Your question" : "Summary"}>{summary}</output>
+    {message.role === "user" ? <h2 data-slot="user-query">{summary}</h2> : <p data-slot="summary-block" aria-label="Summary">{summary}{proseStreaming && <span data-slot="stream-cursor" aria-hidden="true" />}</p>}
     {receiptCalls.length > 0 && <section aria-label="Receipts">
-      <h4>Receipts</h4>
-      <ul aria-label="Receipts">
+      <h3 data-slot="visually-hidden">Supporting receipts</h3>
+      {pending && streaming && !proseStreaming && <p data-slot="receipts-status" role="status">Pulling matching receipts…</p>}
+      <ul aria-label="Receipts" data-slot="receipt-list" role="list">
         {visibleReceipts.map((receipt) => <li key={`${receipt.type}:${receipt.id}`}>
           <ReceiptCard receipt={receipt} />
         </li>)}
       </ul>
-      {pending && <p>{streaming ? "Finding supporting work…" : "The supporting work was not completed. Try again or ask another question."}</p>}
+      {pending && !streaming && <p>The supporting work was not completed. Try again or ask another question.</p>}
       {failed && <p>The supporting work could not be loaded. Please try again.</p>}
       {!pending && !failed && receipts.length === 0 && <p>No matching supporting work was found.</p>}
     </section>}

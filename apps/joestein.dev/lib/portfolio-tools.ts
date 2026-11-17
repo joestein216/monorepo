@@ -2,20 +2,18 @@ import { tool, type InferUITools, type UIMessage } from "ai";
 import { z } from "zod";
 import type { PortfolioData } from "./portfolio-topics";
 import { followUpsSchema } from "./portfolio-topics";
+import { getReceiptCatalog } from "./receipt-catalog";
 
 export const receiptsInputSchema = z.object({
   receipts: z.array(z.object({
     id: z.string().min(1).describe(
-      "Copy the exact achievement _key or project _id from SANITY_PORTFOLIO_JSON. Never invent or rewrite an ID, or substitute a slug, title, or starter-topic ID. Achievement keys must identify exactly one achievement across the portfolio.",
-    ),
-    type: z.enum(["achievement", "project"]).optional().describe(
-      "Optional disambiguation hint. The server determines and returns receipt type from the matching Sanity record. Omit when the ID uniquely identifies one record.",
+      "Copy an exact id from SANITY_PORTFOLIO_JSON.receiptCatalog. Only these entries are selectable. Never use a role ID, slug, title, or starter-topic ID.",
     ),
     relevanceScore: z.number().min(1).max(100).describe(
       "An honest 1–100 score for how strongly this work substantiates the visitor’s specific prompt. Score projects and achievements together on the same relevance scale, without a type preference. Score the evidence, not merely a keyword match.",
     ),
-    matchReason: z.string().trim().min(1).describe(
-      "A concise note explaining why this particular accomplishment or project matches the visitor’s question.",
+    matchReason: z.string().trim().optional().describe(
+      "Optional concise explanation of this match. Omit when unavailable; the receipt remains valid without a separate reason.",
     ),
     tailoredNarrative: z.string().trim().min(1).describe(
       "A complete, self-contained 2–3 sentence third-person engineering vignette combining the outcome and technical implementation from the achievement bullet and deepDive, or project problem and architectureNotes. Explain its relevance to the visitor. Say Joe/he/his; use only facts from that record. The full story must be readable immediately without opening a disclosure.",
@@ -26,14 +24,15 @@ export const receiptsInputSchema = z.object({
 });
 
 export function createPortfolioTools(context: PortfolioData) {
+  const catalog = new Map(getReceiptCatalog(context).map((record) => [record.id, record]));
   return {
     suggestFollowUps: tool({
-      description: "Alongside the portfolio response, suggest three short questions that go deeper into the current question using the prose summary just written and its supporting evidence. Each question is the exact visible button text and submitted prompt: one focus, usually 5–10 words, at most 65 characters. Explore a documented mechanism, decision, or outcome within the current subject, rather than unrelated adjacent topics. Prefer questions beyond what the summary already fully answered. Older conversation is background, not the current topic. Suggestions are first-class prompts with contextual origin, not a navigation hierarchy.",
+      description: "An optional enhancement to the portfolio response: suggest three short questions that go deeper into the current question using the prose summary just written and its supporting evidence. Each question is the exact visible button text and submitted prompt: one focus, usually 5–10 words, at most 65 characters. Explore a documented mechanism, decision, or outcome within the current subject, rather than unrelated adjacent topics. Prefer questions beyond what the summary already fully answered. Older conversation is background, not the current topic. Suggestions are first-class prompts with contextual origin, not a navigation hierarchy.",
       inputSchema: followUpsSchema,
       execute: async ({ suggestions }) => suggestions,
     }),
     showReceipts: tool({
-      description: "After a concise third-person prose summary, call once with at most three of the strongest genuinely relevant achievements/projects. Include exact Sanity _key/_id values, an honest relevanceScore from 1–100, a concise matchReason, and a complete 2–3 sentence third-person tailoredNarrative weaving the outcome and engineering implementation into a self-contained vignette. Use fewer than three when the evidence is limited; never pad with unrelated work. The server infers receipt type from an unambiguous ID, hydrates metadata, and sorts by relevance; unknown or ambiguous IDs are discarded. Do not use for explicit download or full-overview requests.",
+      description: "Required evidence-card renderer for experience, project, technology, and engineering answers, even when the supplied JSON already answers the question. After a concise third-person prose summary, call once with at most three of the strongest genuinely relevant achievements/projects. Select exact ids from SANITY_PORTFOLIO_JSON.receiptCatalog, an honest relevanceScore from 1–100, an optional matchReason, and a complete 2–3 sentence third-person tailoredNarrative weaving the outcome and engineering implementation into a self-contained vignette. Use fewer than three when the evidence is limited; never pad with unrelated work. Do not supply a type field. The server owns receipt type and metadata and sorts by relevance; unknown or ambiguous IDs are discarded. Do not use for explicit download or full-overview requests.",
       inputSchema: receiptsInputSchema,
       execute: async ({ receipts }) => {
         const hydrated = [];
@@ -42,50 +41,18 @@ export function createPortfolioTools(context: PortfolioData) {
         // Rank before deduplication so a repeated ID keeps its strongest match.
         const ranked = [...receipts].sort((a, b) => b.relevanceScore - a.relevanceScore);
         for (const receipt of ranked) {
-          const project = context.projects.find((item) => item._id === receipt.id);
-          const matches = context.roles.flatMap((role) =>
-            (role.achievements ?? [])
-              .filter((achievement) => achievement._key === receipt.id)
-              .map((achievement) => ({ role, achievement })),
-          );
-          // Type is authoritative server metadata too. Missing model hints are
-          // safe only when the exact pointer identifies one record globally.
-          if (!receipt.type && (Number(Boolean(project)) + matches.length !== 1)) continue;
-          const type = receipt.type ?? (project ? "project" : "achievement");
-          if (type === "project" ? !project : matches.length !== 1) continue;
-          const identity = `${type}:${receipt.id}`;
-          if (seen.has(identity)) continue;
-          seen.add(identity);
-
-          if (type === "project" && project) {
-            hydrated.push({
-              type: "project" as const,
-              id: project._id,
-              relevanceScore: receipt.relevanceScore,
-              matchReason: receipt.matchReason,
-              tailoredNarrative: receipt.tailoredNarrative,
-              title: project.title,
-              subtitle: project.subtitle,
-              technologies: project.techStack,
-              liveUrl: project.liveUrl,
-              repoUrl: project.repoUrl,
-              architectureNotes: project.architectureNotes,
-            });
+          const record = catalog.get(receipt.id);
+          if (!record || seen.has(record.id)) continue;
+          seen.add(record.id);
+          const generated = {
+            id: record.id, relevanceScore: receipt.relevanceScore,
+            matchReason: receipt.matchReason?.trim() || undefined,
+            tailoredNarrative: receipt.tailoredNarrative,
+          };
+          if (record.type === "project") {
+            hydrated.push({ ...record.metadata, ...generated, type: "project" as const });
           } else {
-            const { role, achievement } = matches[0];
-            hydrated.push({
-              type: "achievement" as const,
-              id: achievement._key,
-              relevanceScore: receipt.relevanceScore,
-              matchReason: receipt.matchReason,
-              tailoredNarrative: receipt.tailoredNarrative,
-              roleId: role._id,
-              roleTitle: role.title,
-              company: role.company,
-              dateRange: role.dateRange,
-              technologies: achievement.technologies,
-              deepDive: achievement.deepDive,
-            });
+            hydrated.push({ ...record.metadata, ...generated, type: "achievement" as const });
           }
         }
         return hydrated.slice(0, 3);

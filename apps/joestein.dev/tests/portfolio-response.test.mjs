@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { ReceiptCard } from "../components/portfolio-content.tsx";
 import { PortfolioResponse } from "../components/portfolio-response.tsx";
 
 test("identical summary parts render once, preserving distinct text and first-seen order", () => {
@@ -32,4 +33,29 @@ test("multiple receipt tool calls share a maximum of three ranked cards", () => 
   assert.ok(html.indexOf("Vignette four.") < html.indexOf("Vignette three."));
   assert.equal(html.includes("Vignette two."), false);
   assert.equal(html.includes("Show all"), false);
+});
+
+test("stream cursor follows actual text state, then yields to receipt hydration status", () => {
+  const message = { id: "stream", role: "assistant", parts: [
+    { type: "text", text: "Joe built this system.", state: "streaming" },
+    { type: "tool-showReceipts", toolCallId: "pending", state: "input-streaming" },
+  ] };
+  const prose = renderToStaticMarkup(React.createElement(PortfolioResponse, { message, streaming: true }));
+  assert.ok(prose.includes('data-slot="stream-cursor"'));
+  assert.equal(prose.includes("Pulling matching receipts"), false);
+  message.parts[0].state = "done";
+  const tools = renderToStaticMarkup(React.createElement(PortfolioResponse, { message, streaming: true }));
+  assert.equal(tools.includes('data-slot="stream-cursor"'), false);
+  assert.ok(tools.includes("Pulling matching receipts…"));
+  assert.ok(tools.indexOf("Pulling matching receipts…") < tools.indexOf('data-slot="receipt-list"'));
+});
+
+
+test("receipts without reasons retain the score and vignette but have no explanation trigger", () => {
+  const receipt = { type: "project", id: "no-reason", title: "Portfolio", relevanceScore: 91, tailoredNarrative: "Joe built grounded systems.", technologies: [] };
+  const html = renderToStaticMarkup(React.createElement(ReceiptCard, { receipt }));
+  assert.ok(html.includes(receipt.tailoredNarrative));
+  assert.ok(html.includes('Relevance score 91 out of 100.'));
+  assert.equal(html.includes('data-slot="info-trigger"'), false);
+  assert.equal(html.includes("Click for reasoning"), false);
 });

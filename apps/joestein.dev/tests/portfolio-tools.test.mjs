@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { getReceiptCatalog, getPortfolioPromptData } from "../lib/receipt-catalog.ts";
 import { createPortfolioTools, receiptsInputSchema } from "../lib/portfolio-tools.ts";
 
 const technology = {
@@ -29,8 +30,8 @@ function fixture() {
   };
 }
 const options = { toolCallId: "test", messages: [] };
-const selection = (id, type = "achievement") => ({
-  id, type, relevanceScore: 75, matchReason: "Relevant to responsive workflows.",
+const selection = (id) => ({
+  id, relevanceScore: 75, matchReason: "Relevant to responsive workflows.",
   tailoredNarrative: "Joe keeps large workflows responsive for users. He applies virtualization to reduce rendering work while preserving access to the full dataset.",
 });
 
@@ -58,9 +59,9 @@ test("receipts hydrate only server metadata and retain the tailored narrative", 
   assert.equal(JSON.stringify(context), before);
 });
 
-test("unknown IDs, wrong record types, and duplicate selections are discarded", async () => {
+test("unknown and role IDs are discarded while eligible IDs are hydrated without a model type", async () => {
   const result = await createPortfolioTools(fixture()).showReceipts.execute({ receipts: [
-    selection("missing"), selection("project-1"), selection("virtualization"), selection("virtualization"),
+    selection("missing"), selection("role-1"), selection("virtualization"), selection("virtualization"),
   ] }, options);
   assert.deepEqual(result.map((receipt) => receipt.id), ["virtualization"]);
 });
@@ -72,17 +73,17 @@ test("achievement keys shared by multiple roles are rejected instead of misattri
   assert.deepEqual(result, []);
 });
 
-test("receipt input requires honest bounded scores, match reasons, and nonempty narratives", () => {
+test("receipt input requires bounded scores and narratives but allows missing or empty reasons", () => {
   for (const relevanceScore of [0, 101, NaN, Infinity]) {
     assert.equal(receiptsInputSchema.safeParse({ receipts: [{ ...selection("virtualization"), relevanceScore }] }).success, false);
   }
-  for (const field of ["relevanceScore", "matchReason", "tailoredNarrative"]) {
+  for (const field of ["relevanceScore", "tailoredNarrative"]) {
     const receipt = selection("virtualization");
     delete receipt[field];
     assert.equal(receiptsInputSchema.safeParse({ receipts: [receipt] }).success, false);
   }
   assert.equal(receiptsInputSchema.safeParse({ receipts: [{ ...selection("virtualization"), tailoredNarrative: " " }] }).success, false);
-  assert.equal(receiptsInputSchema.safeParse({ receipts: [{ ...selection("virtualization"), matchReason: " " }] }).success, false);
+  assert.equal(receiptsInputSchema.safeParse({ receipts: [{ ...selection("virtualization"), matchReason: " " }] }).success, true);
 });
 
 test("receipt schema caps selections at three; execution defensively returns the strongest three valid matches", async () => {
@@ -122,55 +123,47 @@ test("empty content is safe; explicit downloads and overview remain available", 
   assert.equal(context.roles[0].achievements.length, 2);
 });
 
-test("projects and achievements share one ranking and retain their type even when IDs overlap", async () => {
+test("flat catalog contains selectable evidence and hides parent identifiers from the model", async () => {
+  const context = fixture();
+  const promptData = getPortfolioPromptData(context);
+  assert.deepEqual(promptData.receiptCatalog.map((item) => item.id), ["project-1", "virtualization", "delivery"]);
+  assert.equal(promptData.receiptCatalog[1].bullet, achievement.bullet);
+  assert.equal(promptData.receiptCatalog[1].deepDive, achievement.deepDive);
+  assert.equal(promptData.receiptCatalog[1].company, "Example Company");
+  assert.equal("roleId" in promptData.receiptCatalog[1], false);
+  assert.equal("_id" in promptData.roles[0], false);
+  assert.equal("achievements" in promptData.roles[0], false);
+  const results = await createPortfolioTools(context).showReceipts.execute({ receipts: [selection("project-1"), selection("virtualization")] }, options);
+  assert.deepEqual(results.map((item) => item.type), ["project", "achievement"]);
+  assert.equal(results[1].roleId, "role-1");
+});
+
+test("cross-type ID collisions are excluded from both selection catalog and execution", async () => {
   const context = fixture();
   context.projects = [{ ...project, _id: "virtualization" }];
-  const result = await createPortfolioTools(context).showReceipts.execute({ receipts: [
-    { ...selection("virtualization"), relevanceScore: 80 },
-    { ...selection("virtualization", "project"), relevanceScore: 95 },
-    { ...selection("delivery"), relevanceScore: 90 },
-  ] }, options);
-  assert.deepEqual(result.map(({ type, relevanceScore }) => ({ type, relevanceScore })), [
-    { type: "project", relevanceScore: 95 },
-    { type: "achievement", relevanceScore: 90 },
-    { type: "achievement", relevanceScore: 80 },
-  ]);
-  assert.equal(result[0].liveUrl, project.liveUrl);
-  assert.equal(result[0].repoUrl, project.repoUrl);
-  assert.equal(result[2].roleId, context.roles[0]._id);
+  assert.deepEqual(getReceiptCatalog(context).map((item) => item.id), ["delivery"]);
+  const results = await createPortfolioTools(context).showReceipts.execute({ receipts: [selection("virtualization"), selection("delivery")] }, options);
+  assert.deepEqual(results.map((item) => item.id), ["delivery"]);
 });
 
-test("omitted receipt types are inferred only from exact unambiguous Sanity pointers", async () => {
-  const context = fixture();
-  // Reproduce the logged response shape: no type on any input item and a
-  // guessed project slug alongside valid achievement keys.
-  const withoutType = (id) => { const item = selection(id); delete item.type; return item; };
+test("the logged role-type payload no longer invalidates valid receipt selections", async () => {
   const input = receiptsInputSchema.parse({ receipts: [
-    withoutType("booking"), withoutType("virtualization"), withoutType("delivery"),
+    { ...selection("role-1"), type: "role" },
+    { ...selection("virtualization"), type: "role" },
+    { ...selection("project-1"), type: "achievement" },
   ] });
-  const results = await createPortfolioTools(context).showReceipts.execute(input, options);
+  assert.ok(input.receipts.every((item) => !("type" in item)));
+  const results = await createPortfolioTools(fixture()).showReceipts.execute(input, options);
   assert.deepEqual(results.map(({ id, type }) => ({ id, type })), [
-    { id: "virtualization", type: "achievement" }, { id: "delivery", type: "achievement" },
+    { id: "virtualization", type: "achievement" }, { id: "project-1", type: "project" },
   ]);
-  const projects = await createPortfolioTools(context).showReceipts.execute({ receipts: [withoutType("project-1")] }, options);
-  assert.equal(projects[0].type, "project");
-  assert.equal(projects[0].title, project.title);
-  assert.equal(projects[0].liveUrl, project.liveUrl);
-
-  context.projects.push({ ...project, _id: "virtualization" });
-  assert.deepEqual(await createPortfolioTools(context).showReceipts.execute({ receipts: [withoutType("virtualization")] }, options), []);
-  context.roles.push({ ...context.roles[0], _id: "another-role" });
-  assert.deepEqual(await createPortfolioTools(context).showReceipts.execute({ receipts: [withoutType("delivery")] }, options), []);
 });
 
-test("explicit and inferred types deduplicate together, preserving the strongest match", async () => {
-  const item = selection("virtualization");
-  const inferred = { ...item };
-  delete inferred.type;
-  const results = await createPortfolioTools(fixture()).showReceipts.execute({ receipts: [
-    item, { ...inferred, relevanceScore: 95 },
-  ] }, options);
-  assert.equal(results.length, 1);
-  assert.equal(results[0].type, "achievement");
-  assert.equal(results[0].relevanceScore, 95);
+test("missing reasons leave otherwise valid receipts intact without synthesized explanations", async () => {
+  const withoutReason = selection("virtualization"); delete withoutReason.matchReason;
+  const input = receiptsInputSchema.parse({ receipts: [withoutReason, { ...selection("project-1"), matchReason: " " }] });
+  const results = await createPortfolioTools(fixture()).showReceipts.execute(input, options);
+  assert.equal(results.length, 2);
+  assert.ok(results.every((item) => item.matchReason === undefined));
+  assert.equal(results[0].tailoredNarrative, withoutReason.tailoredNarrative);
 });

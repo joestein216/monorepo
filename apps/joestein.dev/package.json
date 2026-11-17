@@ -14,6 +14,7 @@
   "dependencies": {
     "@ai-sdk/google": "^4.0.121",
     "@ai-sdk/react": "^4.0.177",
+    "@base-ui-components/react": "1.0.0-rc.0",
     "@next/env": "16.4.6",
     "@portabletext/react": "^8.0.1",
     "@sanity/client": "^8.5.0",

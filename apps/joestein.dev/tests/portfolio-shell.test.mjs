@@ -43,9 +43,11 @@ test("flat prompt replacement preserves origin, order, turn isolation, reset, an
     await React.act(async () => root.render(React.createElement(PortfolioPrototype, { context })));
     assert.equal(container.querySelector('[data-slot="prompt-dock"]').getAttribute("data-conversation-state"), "idle");
     assert.equal(container.querySelectorAll('[data-slot="topic-item"][data-tier="starter"]').length, 8);
+    const originalTextarea = container.querySelector("textarea");
     findButton("What is chapter 0?").focus();
     await click(findButton("What is chapter 0?"));
     assert.equal(document.activeElement, findButton("What is turn 1 detail 0?"));
+    assert.equal(container.querySelector("textarea"), originalTextarea, "composer node survives engagement");
     assert.equal(requests.at(-1).messages.at(-1).parts[0].text, "What is chapter 0?");
     assert.equal(container.querySelector('[data-slot="prompt-dock"]').getAttribute("data-conversation-state"), "active");
     assert.equal(container.querySelectorAll('[data-slot="topic-item"][data-tier="starter"]').length, 7);
@@ -87,7 +89,7 @@ test("flat prompt replacement preserves origin, order, turn isolation, reset, an
     await React.act(async () => root.render(React.createElement(PortfolioPrototype, { context: { ...context, starterTopics: [] }, key: "empty-topics" })));
     assert.equal(container.querySelector('nav[aria-label="Portfolio topics"]'), null);
     const textarea = container.querySelector("textarea");
-    assert.equal(textarea.maxLength, 2000);
+    assert.equal(textarea.hasAttribute("maxlength"), false);
     await React.act(async () => {
       Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype, "value").set.call(textarea, "Explain Joe’s work.\nInclude trade-offs.");
       textarea.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
@@ -101,9 +103,8 @@ test("flat prompt replacement preserves origin, order, turn isolation, reset, an
     assert.equal(requests.length, count + 1);
     assert.equal(requests.at(-1).messages.at(-1).parts[0].text, "Explain Joe’s work.\nInclude trade-offs.");
     assert.equal(container.querySelector('[role="alert"]'), null);
-    assert.equal(container.querySelector("[style], [class]"), null);
-    assert.equal(container.querySelector('[data-slot="conversation"]').hasAttribute("aria-live"), false);
-    assert.equal(container.querySelector('output[aria-label="Summary"]').getAttribute("aria-live"), "off");
+    assert.equal(container.querySelector('[data-slot="conversation-canvas"]').hasAttribute("aria-live"), false);
+    assert.ok(container.querySelector('[data-slot="summary-block"]'));
     responseFailure = true;
     await React.act(async () => {
       Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype, "value").set.call(textarea, "What about ERP?");

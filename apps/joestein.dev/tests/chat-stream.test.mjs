@@ -13,10 +13,10 @@ async function guarded(chunks, signal = new AbortController().signal) {
   return Array.fromAsync(stream.pipeThrough(guardPortfolioStream(signal)));
 }
 
-test("complete bundles stop immediately; missing companion tools get at most one additional step", () => {
+test("core tool results stop immediately without generating another step for suggestions", () => {
   for (const name of ["showReceipts", "showDownloads", "showOverview"]) {
     assert.equal(portfolioTurnComplete({ steps: [step(name, "suggestFollowUps")] }), true);
-    assert.equal(portfolioTurnComplete({ steps: [step(name)] }), false);
+    assert.equal(portfolioTurnComplete({ steps: [step(name)] }), true);
     assert.equal(portfolioTurnComplete({ steps: [step(name), step("suggestFollowUps")] }), true);
   }
   assert.equal(portfolioTurnComplete({ steps: [step(), step()] }), true);
@@ -28,15 +28,12 @@ test("successful live text and tool results pass through unchanged, including em
   assert.deepEqual(await guarded([text, { type: "finish", finishReason: "stop" }]), [text, { type: "finish", finishReason: "stop" }]);
 });
 
-test("truncation, empty streams, pending tools, missing companions, and timeout aborts disclose failure", async () => {
+test("core truncation, empty streams, pending evidence, and timeout aborts disclose failure", async () => {
   for (const chunks of [
     [], [{ type: "finish", finishReason: "stop" }],
     [text, { type: "finish", finishReason: "length" }],
-    [text, ...call("showReceipts"), { type: "finish" }],
-    [text, ...call("suggestFollowUps"), { type: "finish" }],
     [text, { type: "tool-input-start", toolName: "showReceipts", toolCallId: "pending" }, { type: "finish" }],
     [text, { type: "abort" }],
-    [text, { type: "tool-output-error", toolCallId: "suggestFollowUps", errorText: "failed" }, { type: "finish" }],
     [text],
   ]) {
     const output = await guarded(chunks);
@@ -51,4 +48,32 @@ test("intentional visitor cancellation stays cancellation; existing errors are n
   assert.deepEqual(await guarded([text, { type: "abort" }], controller.signal), [text, { type: "abort" }]);
   const chunks = [text, { type: "error", errorText: recoveryMessage }, { type: "finish" }];
   assert.deepEqual(await guarded(chunks), chunks);
+});
+
+
+test("missing, failed, or unfinished optional suggestions never spoil complete core output", async () => {
+  const core = [text, ...call("showReceipts")];
+  const optionalStart = { type: "tool-input-start", toolName: "suggestFollowUps", toolCallId: "follow" };
+  for (const optional of [
+    [], [optionalStart],
+    [optionalStart, { type: "tool-output-error", toolCallId: "follow", errorText: "unavailable" }],
+    [{ type: "tool-input-error", toolCallId: "follow", toolName: "suggestFollowUps", input: {}, errorText: "invalid" }],
+  ]) {
+    const chunks = [...core, ...optional, { type: "finish", finishReason: "tool-calls" }];
+    assert.deepEqual(await guarded(chunks), chunks);
+  }
+  const truncatedSuggestions = [...core, optionalStart, { type: "finish", finishReason: "length" }];
+  assert.deepEqual(await guarded(truncatedSuggestions), truncatedSuggestions);
+  const timeout = await guarded([...core, optionalStart, { type: "abort" }]);
+  assert.equal(timeout.some((chunk) => chunk.type === "error"), false);
+});
+
+test("an optional tool failure cannot mask an incomplete core receipt call", async () => {
+  const chunks = [text,
+    { type: "tool-input-start", toolName: "showReceipts", toolCallId: "receipts" },
+    { type: "tool-input-error", toolName: "suggestFollowUps", toolCallId: "follow", input: {}, errorText: "invalid" },
+    { type: "finish" },
+  ];
+  const result = await guarded(chunks);
+  assert.equal(result.filter((chunk) => chunk.type === "error").length, 1);
 });

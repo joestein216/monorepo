@@ -11,7 +11,8 @@
         "NEXT_PUBLIC_APP_URL",
         "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
         "SANITY_API_READ_TOKEN",
-        "STRIPE_SECRET_KEY"
+        "STRIPE_SECRET_KEY",
+        "GOOGLE_GENERATIVE_AI_API_KEY"
       ],
       "outputs": [".next/**", "!.next/cache/**"]
     },

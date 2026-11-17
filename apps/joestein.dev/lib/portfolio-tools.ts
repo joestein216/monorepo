@@ -1,6 +1,7 @@
 import { tool, type InferUITools, type UIMessage } from "ai";
 import { z } from "zod";
 import type { PortfolioContext } from "./sanity-context";
+import { followUpsSchema } from "./portfolio-topics";
 
 export const receiptsInputSchema = z.object({
   receipts: z.array(z.object({
@@ -24,6 +25,11 @@ export const receiptsInputSchema = z.object({
 
 export function createPortfolioTools(context: PortfolioContext) {
   return {
+    suggestFollowUps: tool({
+      description: "Alongside showReceipts, suggest exactly three concise, relevant next-step questions grounded in the portfolio and the visitor’s current thread. Each label is 2–4 words and each prompt is a complete question. These power second-level navigation, not additional evidence or a third navigation tier.",
+      inputSchema: followUpsSchema,
+      execute: async ({ suggestions }) => suggestions,
+    }),
     showReceipts: tool({
       description: "After a concise third-person prose summary, call once with ALL genuinely relevant achievements/projects. Include exact Sanity _key/_id values, an honest relevanceScore from 1–100, a concise matchReason, and a complete 2–4 sentence third-person tailoredNarrative weaving the outcome and engineering implementation into a self-contained vignette. Do not pad with unrelated work or truncate by item count. The server hydrates metadata and sorts by relevance; unknown or ambiguous IDs are discarded. Do not use for explicit download or full-overview requests.",
       inputSchema: receiptsInputSchema,

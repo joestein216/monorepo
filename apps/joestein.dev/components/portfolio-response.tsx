@@ -6,9 +6,10 @@ import { DownloadsSection, Overview, ReceiptCard } from "./portfolio-content";
 
 export function PortfolioResponse({ message }: { message: PortfolioMessage }) {
   const [showAll, setShowAll] = useState(false);
-  const summary = message.parts
+  const summary = [...new Set(message.parts
     .filter((part) => part.type === "text")
-    .map((part) => part.text)
+    .map((part) => part.text.trim())
+    .filter(Boolean))]
     .join("\n\n");
   const receiptCalls = message.parts.filter((part) => part.type === "tool-showReceipts");
   const receiptsById = new Map<string, PortfolioReceipt>();

@@ -1,6 +1,31 @@
 import { PortableText } from "@portabletext/react";
 import type { PortfolioContext } from "@/lib/sanity-context";
 import type { PortfolioReceipt } from "@/lib/portfolio-tools";
+import type { StarterTopic, FollowUpSuggestion } from "@/lib/portfolio-topics";
+
+export function TopicNavigation({ topics, poppedTopicId, suggestions, disabled, onTopic, onFollowUp }: {
+  topics: StarterTopic[];
+  poppedTopicId: string | null;
+  suggestions: FollowUpSuggestion[];
+  disabled: boolean;
+  onTopic: (topic: StarterTopic) => void;
+  onFollowUp: (suggestion: FollowUpSuggestion) => void;
+}) {
+  if (!topics.length) return null;
+  return <nav aria-label="Portfolio topics" data-slot="topic-bladder">
+    <ul data-slot="toc-topics">
+      {topics.map((topic) => <li key={topic.id} data-topic-id={topic.id} data-topic-state={poppedTopicId === topic.id ? "popped" : "ready"}>
+        {poppedTopicId === topic.id && suggestions.length === 3 ? (
+          <ul aria-label={`${topic.label} follow-ups`} data-slot="toc-subtopics">
+            {suggestions.map((suggestion) => <li key={suggestion.prompt}>
+              <button type="button" data-bubble-tier="secondary" disabled={disabled} onClick={() => onFollowUp(suggestion)}>{suggestion.label}</button>
+            </li>)}
+          </ul>
+        ) : <button type="button" data-bubble-tier="primary" disabled={disabled} onClick={() => onTopic(topic)}>{topic.label}</button>}
+      </li>)}
+    </ul>
+  </nav>;
+}
 
 export function safeUrl(value?: string | null) {
   if (!value) return undefined;
@@ -24,10 +49,10 @@ export function ReceiptCard({ receipt }: { receipt: PortfolioReceipt }) {
     ? [receipt.roleTitle, receipt.company, receipt.dateRange].filter(Boolean).join(" · ")
     : [receipt.title, receipt.subtitle].filter(Boolean).join(" · ");
 
-  return <article aria-label={receipt.type === "achievement" ? "Achievement receipt" : "Project receipt"}>
+  return <article data-slot="receipt-card" aria-label={receipt.type === "achievement" ? "Achievement receipt" : "Project receipt"}>
     <p>{receipt.tailoredNarrative}</p>
     <Technologies items={receipt.technologies} />
-    <footer>
+    <footer data-slot="receipt-footer">
       <small>{metadata}</small>{" "}
       {receipt.type === "project" && <>
         {safeUrl(receipt.liveUrl) && <><a href={safeUrl(receipt.liveUrl)}>Live system</a>{" "}</>}

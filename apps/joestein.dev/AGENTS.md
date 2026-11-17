@@ -41,3 +41,30 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Verification Checklist
 - Run `pnpm --filter joestein.dev typegen`, `pnpm --filter joestein.dev build`, `pnpm --filter joestein.dev lint`, and `pnpm --filter joestein.dev typecheck` from the root.
+
+
+## Core UI Architecture & Accessibility Values (Phase 2+)
+
+### 1. Separation of Structure & Presentation (`data-slot` + Semantic HTML)
+- **Semantic First:** Always choose semantic HTML5 elements (`main`, `header`, `section`, `article`, `footer`, `nav`, `aside`, `fieldset`, `output`, `address`) before reaching for `div`. Use `div` only as a pure CSS layout/grid grouping wrapper where no landmark meaning applies.
+- **Zero Class Soup in Domain Components:** Keep domain JSX (`ReceiptCard`, `Overview`, `PortfolioPrototype`) free of long inline Tailwind utility strings. Stamp structural boundaries with `data-slot="..."` attributes and style them through semantic CSS token layers so themes can control colors, typography, and layout geometry without altering JSX.
+
+### 2. White-Label Design Token Contract
+- **No Raw Values in JSX or Component CSS:** Never hardcode hex/rgb colors (`#0B0D11`, `bg-zinc-900`), arbitrary pixel widths (`w-[640px]`), or hardcoded font weights inside components.
+- **Semantic Tokens Only:** All visual properties must map to semantic CSS custom properties (`--color-surface`, `--color-surface-elevated`, `--color-foreground`, `--color-muted`, `--color-border`, `--color-accent`, `--color-focus-ring`, `--space-*`, `--radius-*`) so re-theming (`data-theme="..."`) requires zero markup changes.
+
+### 3. WCAG A+ Accessibility & Agent-Readability
+- **Accessibility Tree = Agent Interface:** Every interactive element must be keyboard-operable, screen-reader friendly, and cleanly exposed in the accessibility tree with unique, descriptive `aria-label` landmarks and sequential heading levels.
+- **Headless Primitives (`Base UI`):** Use Base UI–backed primitives for interactive controls (tabs, tooltips, disclosures) via the `render` prop—never build custom `div` click handlers or hover-only tooltips that hide content from keyboard/agent users.
+- **Contrast & Focus Rings:** Primary text must meet WCAG AAA (`7:1+`) and secondary metadata must meet WCAG AA (`4.5:1+`). Never remove `:focus-visible` outlines without replacing them with a visible `--color-focus-ring` indicator.
+
+---
+
+## Trade-Off & Rule Conflict Escalation Protocol
+- **Never Silently Violate Core Values:** If a user request, quick fix, or third-party integration requires breaking any rule above (for example, adding a fixed pixel width, an inline color override, a presentational DOM wrapper, or hiding content behind hover-only interaction):
+  1. **Pause before editing** (or isolate the proposal) and explicitly call out which core rule is affected.
+  2. **Explain the concrete trade-off** (e.g., white-label theme portability, DOM cleanliness, or keyboard/screen-reader accessibility impact).
+  3. **Offer two clear paths:**
+     - **Option A (Compliant Alternative):** How to achieve the goal within the design token / `data-slot` / accessibility rules.
+     - **Option B (Scoped Compromise):** Proceed with the requested exception, isolated cleanly with a brief inline comment explaining why the compromise was approved.
+  4. **Wait for explicit user confirmation** before applying Option B.

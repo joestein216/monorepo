@@ -1,36 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, generateId } from "ai";
 import type { PortfolioContext } from "@/lib/sanity-context";
 import type { PortfolioMessage } from "@/lib/portfolio-tools";
-import type { StarterTopic } from "@/lib/portfolio-topics";
-import { getTurnFollowUps } from "@/lib/portfolio-navigation";
+import { getPromptSuggestions, type PromptSuggestion } from "@/lib/portfolio-navigation";
 import { Overview, TopicNavigation } from "./portfolio-content";
 import { PortfolioResponse } from "./portfolio-response";
 
 const transport = new DefaultChatTransport<PortfolioMessage>({ api: "/api/chat" });
 
 export function PortfolioPrototype({ context, loadError }: { context: PortfolioContext; loadError?: boolean }) {
+  const promptRef = useRef<HTMLTextAreaElement>(null);
+  const restorePromptFocus = useRef(false);
   const [mode, setMode] = useState<"prompt" | "overview">("prompt");
+  const [notice, setNotice] = useState("");
   const [input, setInput] = useState("");
-  const [poppedTopicId, setPoppedTopicId] = useState<string | null>(null);
-  const [poppedTurnId, setPoppedTurnId] = useState<string | null>(null);
-  const { messages, sendMessage, status, error, stop, setMessages, clearError } = useChat<PortfolioMessage>({ transport });
+  const [starterTurns, setStarterTurns] = useState<Record<string, string>>({});
+  const { messages, sendMessage, status, error, stop, setMessages, clearError, regenerate } = useChat<PortfolioMessage>({ transport });
   const busy = status === "submitted" || status === "streaming";
   const conversationState = messages.length === 0 ? "idle" : "active";
-  const suggestions = getTurnFollowUps(messages, poppedTurnId);
+  const suggestions = getPromptSuggestions(context.starterTopics ?? [], messages, starterTurns);
 
-  function send(text: string, topic?: StarterTopic) {
+  useEffect(() => {
+    if (!busy && restorePromptFocus.current) {
+      promptRef.current?.focus();
+      restorePromptFocus.current = false;
+    }
+  }, [busy, notice]);
+
+  function send(text: string, topic?: PromptSuggestion) {
     const prompt = text.trim();
     if (busy || !prompt || prompt.length > 2000) return;
     const turnId = generateId();
-    if (topic) {
-      setPoppedTopicId(topic.id);
-      setPoppedTurnId(turnId);
+    if (topic?.tier === "starter") {
+      setStarterTurns((turns) => ({ ...turns, [topic.id]: turnId }));
     }
     clearError();
+    setNotice("");
     void sendMessage({ id: turnId, role: "user", parts: [{ type: "text", text: prompt }] });
     setInput("");
   }
@@ -38,9 +46,10 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
   function resetConversation() {
     setMessages([]);
     clearError();
+    setNotice("");
     setInput("");
-    setPoppedTopicId(null);
-    setPoppedTurnId(null);
+    setStarterTurns({});
+    promptRef.current?.focus();
   }
 
   return <main data-slot="portfolio-shell" data-conversation-state={conversationState}>
@@ -57,7 +66,7 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
           <fieldset disabled={busy}>
             <legend>Ask a question</legend>
             <p><label htmlFor="portfolio-prompt">Your prompt</label></p>
-            <p><textarea id="portfolio-prompt" name="prompt" data-slot="prompt-input" value={input} maxLength={2000} required
+            <p><textarea ref={promptRef} id="portfolio-prompt" name="prompt" data-slot="prompt-input" value={input} rows={6} cols={40} required
               placeholder="What would you like to explore about Joe’s work? Ask a question or choose a topic below."
               aria-describedby="prompt-keyboard-help"
               onChange={(event) => setInput(event.target.value)}
@@ -71,18 +80,18 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
             <p><button type="submit" disabled={!input.trim()}>Submit</button></p>
           </fieldset>
         </form>
-        <TopicNavigation topics={context.starterTopics ?? []} poppedTopicId={poppedTopicId} suggestions={suggestions} disabled={busy}
-          onTopic={(topic) => send(topic.prompt, topic)} onFollowUp={(suggestion) => send(suggestion.prompt)} />
+        <TopicNavigation items={suggestions} disabled={busy} onSelect={(item) => send(item.prompt, item)} />
       </section>
-      <p role="status" data-slot="conversation-status">{busy ? "Joe’s portfolio assistant is responding…" : "Ready for a question."}</p>
-      {busy && <p><button type="button" onClick={() => void stop()}>Stop response</button></p>}
-      {error && <p role="alert">{error.message} You can also switch to Overview Mode.</p>}
-      <section aria-label="Responses" data-slot="conversation" aria-live="polite" aria-busy={busy}>
+      <p role="status" data-slot="conversation-status">{busy ? "Joe’s portfolio assistant is responding…" : notice || (messages.length ? "Ready for another question." : "Ready for a question.")}</p>
+      {busy && <p><button type="button" onClick={() => { restorePromptFocus.current = true; void stop(); setNotice("Response stopped. Try again or ask another question."); }}>Stop response</button></p>}
+      {error && <p role="alert">That response didn’t quite come together. Try again or ask another question.</p>}
+      {!busy && (error || notice) && messages.length > 0 && <p><button type="button" onClick={() => { restorePromptFocus.current = true; clearError(); setNotice(""); void regenerate(); }}>Try that question again</button></p>}
+      <section aria-label="Responses" data-slot="conversation" aria-busy={busy}>
         <h2>Conversation</h2>
         {messages.length ? messages.map((message) => <article key={message.id} data-slot="conversation-message">
           <h3>{message.role === "user" ? "You" : "Portfolio assistant"}</h3>
-          <PortfolioResponse message={message} />
-        </article>) : <output>Ask a question or choose a topic.</output>}
+          <PortfolioResponse message={message} streaming={busy && message.id === messages.at(-1)?.id} />
+        </article>) : <p>Ask a question or choose a topic.</p>}
       </section>
       {messages.length > 0 && <p><button type="button" disabled={busy} onClick={resetConversation}>Start a new conversation</button></p>}
     </section>}

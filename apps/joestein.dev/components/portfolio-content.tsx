@@ -1,27 +1,36 @@
+import { useEffect, useRef } from "react";
 import { PortableText } from "@portabletext/react";
-import type { PortfolioContext } from "@/lib/sanity-context";
+import type { PortfolioData } from "@/lib/portfolio-topics";
 import type { PortfolioReceipt } from "@/lib/portfolio-tools";
-import type { StarterTopic, FollowUpSuggestion } from "@/lib/portfolio-topics";
+import type { PromptSuggestion } from "@/lib/portfolio-navigation";
 
-export function TopicNavigation({ topics, poppedTopicId, suggestions, disabled, onTopic, onFollowUp }: {
-  topics: StarterTopic[];
-  poppedTopicId: string | null;
-  suggestions: FollowUpSuggestion[];
+export function TopicNavigation({ items, disabled, onSelect }: {
+  items: PromptSuggestion[];
   disabled: boolean;
-  onTopic: (topic: StarterTopic) => void;
-  onFollowUp: (suggestion: FollowUpSuggestion) => void;
+  onSelect: (item: PromptSuggestion) => void;
 }) {
-  if (!topics.length) return null;
-  return <nav aria-label="Portfolio topics" data-slot="topic-bladder">
-    <ul data-slot="toc-topics">
-      {topics.map((topic) => <li key={topic.id} data-topic-id={topic.id} data-topic-state={poppedTopicId === topic.id ? "popped" : "ready"}>
-        {poppedTopicId === topic.id && suggestions.length === 3 ? (
-          <ul aria-label={`${topic.label} follow-ups`} data-slot="toc-subtopics">
-            {suggestions.map((suggestion) => <li key={suggestion.prompt}>
-              <button type="button" data-bubble-tier="secondary" disabled={disabled} onClick={() => onFollowUp(suggestion)}>{suggestion.label}</button>
-            </li>)}
-          </ul>
-        ) : <button type="button" data-bubble-tier="primary" disabled={disabled} onClick={() => onTopic(topic)}>{topic.label}</button>}
+  const navRef = useRef<HTMLElement>(null);
+  const pendingFocus = useRef<string | null>(null);
+  useEffect(() => {
+    if (disabled || !pendingFocus.current) return;
+    const nav = navRef.current;
+    const replacement = [...(nav?.querySelectorAll<HTMLLIElement>('li[data-origin-id]') ?? [])]
+      .find((item) => item.dataset.originId === pendingFocus.current);
+    if (!replacement) return;
+    // Replaced buttons can leave focus on body. Respect focus moved elsewhere.
+    if (document.activeElement === document.body) replacement.querySelector("button")?.focus();
+    pendingFocus.current = null;
+  }, [disabled, items]);
+  if (!items.length) return null;
+  return <nav ref={navRef} onBlurCapture={(event) => {
+    if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) pendingFocus.current = null;
+  }} aria-label="Portfolio topics" data-slot="topic-bladder">
+    <ul data-slot="topic-list">
+      {items.map((item) => <li key={item.id} data-slot="topic-item" data-topic-id={item.id}
+        data-tier={item.tier} data-origin-id={item.originTopicId}>
+        <button type="button" disabled={disabled}
+          aria-label={item.tier === "contextual" ? `Follow-up on ${item.originLabel}: ${item.prompt}` : undefined}
+          onClick={() => { pendingFocus.current = item.tier === "starter" ? item.id : null; onSelect(item); }}>{item.prompt}</button>
       </li>)}
     </ul>
   </nav>;
@@ -33,13 +42,13 @@ export function safeUrl(value?: string | null) {
   catch { return undefined; }
 }
 
-function RichText({ value }: { value: NonNullable<PortfolioContext["about"]>["story"] }) {
+function RichText({ value }: { value: NonNullable<PortfolioData["about"]>["story"] }) {
   return value?.length ? <PortableText value={value} components={{ marks: {
     link: ({ value, children }) => safeUrl(value?.href) ? <a href={safeUrl(value?.href)}>{children}</a> : <>{children}</>,
   } }} /> : null;
 }
 
-type TechnologyTags = PortfolioContext["roles"][number]["technologies"];
+type TechnologyTags = PortfolioData["roles"][number]["technologies"];
 function Technologies({ items }: { items: TechnologyTags }) {
   return items?.some(Boolean) ? <ul aria-label="Technologies">{items.map((tech) => tech && <li key={tech._id}>{tech.name}</li>)}</ul> : null;
 }
@@ -63,7 +72,7 @@ export function ReceiptCard({ receipt }: { receipt: PortfolioReceipt }) {
   </article>;
 }
 
-export function AboutSection({ about }: { about: PortfolioContext["about"] }) {
+export function AboutSection({ about }: { about: PortfolioData["about"] }) {
   return <section aria-label="About Joe">
     <h2>{about?.headline ?? "About Joe"}</h2>
     {about ? <>
@@ -86,7 +95,7 @@ export function AboutSection({ about }: { about: PortfolioContext["about"] }) {
   </section>;
 }
 
-export function ProjectsSection({ projects }: { projects: PortfolioContext["projects"] }) {
+export function ProjectsSection({ projects }: { projects: PortfolioData["projects"] }) {
   return <section aria-label="Projects"><h2>Projects</h2>
     {projects.length ? projects.map((project) => <article key={project._id}>
       <h3>{project.title}</h3>
@@ -100,7 +109,7 @@ export function ProjectsSection({ projects }: { projects: PortfolioContext["proj
   </section>;
 }
 
-export function ExperienceSection({ roles, overview = false }: { roles: PortfolioContext["roles"]; overview?: boolean }) {
+export function ExperienceSection({ roles, overview = false }: { roles: PortfolioData["roles"]; overview?: boolean }) {
   return <section aria-label="Experience"><h2>Experience</h2>
     {roles.length ? roles.map((role) => <article key={role._id}>
       <h3>{role.title} at {role.company}</h3>
@@ -119,7 +128,7 @@ export function ExperienceSection({ roles, overview = false }: { roles: Portfoli
   </section>;
 }
 
-type Downloads = NonNullable<PortfolioContext["about"]>["downloads"];
+type Downloads = NonNullable<PortfolioData["about"]>["downloads"];
 export function DownloadsSection({ downloads }: { downloads: Downloads }) {
   return <section aria-label="Downloads"><h2>Downloads</h2>
     {downloads?.length ? <ul>{downloads.map((download) => <li key={download._key}>
@@ -129,7 +138,7 @@ export function DownloadsSection({ downloads }: { downloads: Downloads }) {
   </section>;
 }
 
-export function ContactSection({ contact }: { contact: NonNullable<PortfolioContext["about"]>["contact"] }) {
+export function ContactSection({ contact }: { contact: NonNullable<PortfolioData["about"]>["contact"] }) {
   return <section aria-label="Contact"><h2>Contact</h2>
     {contact ? <address><ul>
       {contact.email && <li><a href={`mailto:${contact.email}`}>{contact.email}</a></li>}
@@ -139,7 +148,7 @@ export function ContactSection({ contact }: { contact: NonNullable<PortfolioCont
   </section>;
 }
 
-export function Overview({ context }: { context: PortfolioContext }) {
+export function Overview({ context }: { context: PortfolioData }) {
   return <>
     <AboutSection about={context.about} />
     <ProjectsSection projects={context.projects} />

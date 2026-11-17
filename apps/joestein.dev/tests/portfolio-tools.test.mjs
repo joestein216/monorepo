@@ -85,18 +85,19 @@ test("receipt input requires honest bounded scores, match reasons, and nonempty 
   assert.equal(receiptsInputSchema.safeParse({ receipts: [{ ...selection("virtualization"), matchReason: " " }] }).success, false);
 });
 
-test("all matches survive hydration and are sorted by descending relevance without a four-item cap", async () => {
+test("receipt schema caps selections at three; execution defensively returns the strongest three valid matches", async () => {
   const context = fixture();
   context.projects = Array.from({ length: 5 }, (_, index) => ({ ...project, _id: `project-${index}` }));
   const scores = [50, 90, 10, 100, 70];
-  const input = receiptsInputSchema.parse({ receipts: [
+  const input = { receipts: [
     ...context.projects.map((item, index) => ({ ...selection(item._id, "project"), relevanceScore: scores[index] })),
     selection("virtualization"),
-  ] });
+  ] };
+  assert.equal(receiptsInputSchema.safeParse(input).success, false);
   const results = await createPortfolioTools(context).showReceipts.execute(input, options);
-  assert.equal(results.length, 6);
-  assert.deepEqual(results.map((item) => item.relevanceScore), [100, 90, 75, 70, 50, 10]);
-  assert.deepEqual(results.map((item) => item.id), ["project-3", "project-1", "virtualization", "project-4", "project-0", "project-2"]);
+  assert.equal(results.length, 3);
+  assert.deepEqual(results.map((item) => item.relevanceScore), [100, 90, 75]);
+  assert.deepEqual(results.map((item) => item.id), ["project-3", "project-1", "virtualization"]);
 });
 
 test("repeated IDs retain the highest-scoring narrative and reason", async () => {
@@ -137,4 +138,39 @@ test("projects and achievements share one ranking and retain their type even whe
   assert.equal(result[0].liveUrl, project.liveUrl);
   assert.equal(result[0].repoUrl, project.repoUrl);
   assert.equal(result[2].roleId, context.roles[0]._id);
+});
+
+test("omitted receipt types are inferred only from exact unambiguous Sanity pointers", async () => {
+  const context = fixture();
+  // Reproduce the logged response shape: no type on any input item and a
+  // guessed project slug alongside valid achievement keys.
+  const withoutType = (id) => { const item = selection(id); delete item.type; return item; };
+  const input = receiptsInputSchema.parse({ receipts: [
+    withoutType("booking"), withoutType("virtualization"), withoutType("delivery"),
+  ] });
+  const results = await createPortfolioTools(context).showReceipts.execute(input, options);
+  assert.deepEqual(results.map(({ id, type }) => ({ id, type })), [
+    { id: "virtualization", type: "achievement" }, { id: "delivery", type: "achievement" },
+  ]);
+  const projects = await createPortfolioTools(context).showReceipts.execute({ receipts: [withoutType("project-1")] }, options);
+  assert.equal(projects[0].type, "project");
+  assert.equal(projects[0].title, project.title);
+  assert.equal(projects[0].liveUrl, project.liveUrl);
+
+  context.projects.push({ ...project, _id: "virtualization" });
+  assert.deepEqual(await createPortfolioTools(context).showReceipts.execute({ receipts: [withoutType("virtualization")] }, options), []);
+  context.roles.push({ ...context.roles[0], _id: "another-role" });
+  assert.deepEqual(await createPortfolioTools(context).showReceipts.execute({ receipts: [withoutType("delivery")] }, options), []);
+});
+
+test("explicit and inferred types deduplicate together, preserving the strongest match", async () => {
+  const item = selection("virtualization");
+  const inferred = { ...item };
+  delete inferred.type;
+  const results = await createPortfolioTools(fixture()).showReceipts.execute({ receipts: [
+    item, { ...inferred, relevanceScore: 95 },
+  ] }, options);
+  assert.equal(results.length, 1);
+  assert.equal(results[0].type, "achievement");
+  assert.equal(results[0].relevanceScore, 95);
 });

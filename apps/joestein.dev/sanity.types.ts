@@ -30,6 +30,11 @@ export type About = {
   _rev: string;
   headline?: string;
   intro?: string;
+  starterQuestions?: Array<{
+    question?: string;
+    _type: "starterQuestion";
+    _key: string;
+  }>;
   story?: Array<{
     children?: Array<{
       marks?: Array<string>;
@@ -313,7 +318,7 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: PORTFOLIO_CONTEXT_QUERY
-// Query: {  "about": *[_type == "about" && _id == "about"][0]{    _id, headline, intro, story, nextRole, advisory, contact,    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}  },  "projects": *[_type == "project"] | order(order asc, title asc){    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,    techStack[]->{_id, name, "slug": slug.current, category, iconKey}  },  "roles": *[_type == "role"] | order(order asc, company asc){    _id, company, title, dateRange, order, roleSummary,    technologies[]->{_id, name, "slug": slug.current, category, iconKey},    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}  },  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}}
+// Query: {  "about": *[_type == "about" && _id == "about"][0]{    _id, headline, intro, story, nextRole, advisory, contact,    starterQuestions[]{_key, question},    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}  },  "projects": *[_type == "project"] | order(order asc, title asc){    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,    techStack[]->{_id, name, "slug": slug.current, category, iconKey}  },  "roles": *[_type == "role"] | order(order asc, company asc){    _id, company, title, dateRange, order, roleSummary,    technologies[]->{_id, name, "slug": slug.current, category, iconKey},    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}  },  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}}
 export type PORTFOLIO_CONTEXT_QUERY_RESULT = {
   about: {
     _id: "about";
@@ -356,6 +361,10 @@ export type PORTFOLIO_CONTEXT_QUERY_RESULT = {
       github?: string;
       linkedin?: string;
     } | null;
+    starterQuestions: Array<{
+      _key: string;
+      question: string | null;
+    }> | null;
     downloads: Array<{
       _key: string;
       label: string | null;
@@ -465,6 +474,6 @@ export type PORTFOLIO_CONTEXT_QUERY_RESULT = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '{\n  "about": *[_type == "about" && _id == "about"][0]{\n    _id, headline, intro, story, nextRole, advisory, contact,\n    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}\n  },\n  "projects": *[_type == "project"] | order(order asc, title asc){\n    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,\n    techStack[]->{_id, name, "slug": slug.current, category, iconKey}\n  },\n  "roles": *[_type == "role"] | order(order asc, company asc){\n    _id, company, title, dateRange, order, roleSummary,\n    technologies[]->{_id, name, "slug": slug.current, category, iconKey},\n    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,\n      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}\n  },\n  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}\n}': PORTFOLIO_CONTEXT_QUERY_RESULT;
+    '{\n  "about": *[_type == "about" && _id == "about"][0]{\n    _id, headline, intro, story, nextRole, advisory, contact,\n    starterQuestions[]{_key, question},\n    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}\n  },\n  "projects": *[_type == "project"] | order(order asc, title asc){\n    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,\n    techStack[]->{_id, name, "slug": slug.current, category, iconKey}\n  },\n  "roles": *[_type == "role"] | order(order asc, company asc){\n    _id, company, title, dateRange, order, roleSummary,\n    technologies[]->{_id, name, "slug": slug.current, category, iconKey},\n    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,\n      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}\n  },\n  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}\n}': PORTFOLIO_CONTEXT_QUERY_RESULT;
   }
 }

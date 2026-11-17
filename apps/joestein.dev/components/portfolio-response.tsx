@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import type { PortfolioMessage, PortfolioReceipt } from "@/lib/portfolio-tools";
 import { DownloadsSection, Overview, ReceiptCard } from "./portfolio-content";
 
-export function PortfolioResponse({ message }: { message: PortfolioMessage }) {
-  const [showAll, setShowAll] = useState(false);
+export function PortfolioResponse({ message, streaming = false }: { message: PortfolioMessage; streaming?: boolean }) {
   const summary = [...new Set(message.parts
     .filter((part) => part.type === "text")
     .map((part) => part.text.trim())
@@ -15,7 +13,7 @@ export function PortfolioResponse({ message }: { message: PortfolioMessage }) {
   const receiptsById = new Map<string, PortfolioReceipt>();
 
   // Keep text above the cards regardless of the order of streamed tool parts.
-  // Preserve every match across tool calls, keeping the strongest duplicate.
+  // Enforce the shared three-receipt budget even across repeated tool calls.
   for (const part of receiptCalls) {
     if (part.state !== "output-available") continue;
     for (const receipt of part.output) {
@@ -27,13 +25,13 @@ export function PortfolioResponse({ message }: { message: PortfolioMessage }) {
     }
   }
   const receipts = [...receiptsById.values()].sort((a, b) => b.relevanceScore - a.relevanceScore);
-  const visibleReceipts = showAll ? receipts : receipts.slice(0, 3);
+  const visibleReceipts = receipts.slice(0, 3);
 
   const pending = receiptCalls.some((part) => part.state === "input-streaming" || part.state === "input-available");
   const failed = receiptCalls.some((part) => part.state === "output-error" || part.state === "output-denied");
 
   return <>
-    <output aria-label={message.role === "user" ? "Your question" : "Summary"}>{summary}</output>
+    <output aria-live="off" aria-label={message.role === "user" ? "Your question" : "Summary"}>{summary}</output>
     {receiptCalls.length > 0 && <section aria-label="Receipts">
       <h4>Receipts</h4>
       <ul aria-label="Receipts">
@@ -41,10 +39,7 @@ export function PortfolioResponse({ message }: { message: PortfolioMessage }) {
           <ReceiptCard receipt={receipt} />
         </li>)}
       </ul>
-      {receipts.length > 3 && <button type="button" aria-expanded={showAll} onClick={() => setShowAll((value) => !value)}>
-        {showAll ? "Show top 3 receipts" : `Show all ${receipts.length} receipts`}
-      </button>}
-      {pending && <p>Finding supporting work…</p>}
+      {pending && <p>{streaming ? "Finding supporting work…" : "The supporting work was not completed. Try again or ask another question."}</p>}
       {failed && <p>The supporting work could not be loaded. Please try again.</p>}
       {!pending && !failed && receipts.length === 0 && <p>No matching supporting work was found.</p>}
     </section>}
@@ -53,7 +48,7 @@ export function PortfolioResponse({ message }: { message: PortfolioMessage }) {
       if (part.state === "output-error" || part.state === "output-denied") {
         return <p key={part.toolCallId}>The requested portfolio section could not be loaded.</p>;
       }
-      if (part.state !== "output-available") return <p key={part.toolCallId}>Loading portfolio section…</p>;
+      if (part.state !== "output-available") return <p key={part.toolCallId}>{streaming ? "Loading portfolio section…" : "The requested section was not completed. Try again or ask another question."}</p>;
       return part.type === "tool-showDownloads"
         ? <DownloadsSection key={part.toolCallId} downloads={part.output} />
         : <Overview key={part.toolCallId} context={part.output} />;

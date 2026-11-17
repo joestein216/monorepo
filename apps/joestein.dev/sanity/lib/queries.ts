@@ -3,6 +3,7 @@ import { defineQuery } from "next-sanity";
 export const PORTFOLIO_CONTEXT_QUERY = defineQuery(`{
   "about": *[_type == "about" && _id == "about"][0]{
     _id, headline, intro, story, nextRole, advisory, contact,
+    starterQuestions[]{_key, question},
     downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}
   },
   "projects": *[_type == "project"] | order(order asc, title asc){

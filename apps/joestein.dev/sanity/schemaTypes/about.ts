@@ -6,6 +6,23 @@ export const about = defineType({
   fields: [
     defineField({ name: "headline", type: "string", validation: (rule) => rule.required() }),
     defineField({ name: "intro", type: "text" }),
+    defineField({
+      name: "starterQuestions",
+      type: "array",
+      description: "Prompt Mode conversation starters, displayed in this order. Drag to reorder. Each question is both the button text and the submitted prompt. Leave empty to hide starter questions; freeform chat remains available.",
+      validation: (rule) => rule.max(8),
+      of: [defineArrayMember({
+        name: "starterQuestion",
+        type: "object",
+        fields: [defineField({
+          name: "question",
+          type: "string",
+          description: "One short question about Joe’s work, usually 5–10 words.",
+          validation: (rule) => rule.required().max(65),
+        })],
+        preview: { select: { title: "question" } },
+      })],
+    }),
     defineField({ name: "story", type: "array", of: [defineArrayMember({ type: "block" })] }),
     defineField({ name: "nextRole", type: "object", fields: [
       defineField({ name: "status", type: "string" }),

@@ -29,7 +29,7 @@ export default defineConfig({
     templates: (templates) => templates.filter((template) => template.schemaType !== "about"),
   },
   document: {
-    actions: (actions, context) => context.schemaType === "about"
+    actions: (actions, context) => context.schemaType === "about" || context.documentId === "page-colophon"
       ? actions.filter(({ action }) => action !== "duplicate" && action !== "delete" && action !== "unpublish")
       : actions,
   },

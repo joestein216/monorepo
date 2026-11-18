@@ -7,13 +7,13 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 30));
 
 test("mobile composer, pending/streaming stages, limits, and click-only disclosures work together", async () => {
   const dom = new JSDOM("<!doctype html><html><body><main id='root'></main></body></html>", { url: "http://localhost", pretendToBeVisual: true });
-  const keys = ["window", "document", "HTMLElement", "Element", "Node", "ShadowRoot", "MutationObserver", "getComputedStyle", "requestAnimationFrame", "cancelAnimationFrame", "ResizeObserver", "IS_REACT_ACT_ENVIRONMENT", "fetch"];
+  const keys = ["window", "self", "document", "HTMLElement", "Element", "Node", "ShadowRoot", "MutationObserver", "getComputedStyle", "requestAnimationFrame", "cancelAnimationFrame", "ResizeObserver", "IS_REACT_ACT_ENVIRONMENT", "fetch"];
   const previous = Object.fromEntries(keys.map((key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
   let mobile = true;
   const viewportListeners = new Set();
   dom.window.matchMedia = (query) => ({ matches: query.includes("max-width") ? mobile : false, addEventListener: (_event, callback) => viewportListeners.add(callback), removeEventListener: (_event, callback) => viewportListeners.delete(callback) });
   const globals = {
-    window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, Element: dom.window.Element,
+    window: dom.window, self: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, Element: dom.window.Element,
     Node: dom.window.Node, ShadowRoot: dom.window.ShadowRoot, MutationObserver: dom.window.MutationObserver,
     getComputedStyle: dom.window.getComputedStyle.bind(dom.window), requestAnimationFrame: dom.window.requestAnimationFrame.bind(dom.window),
     cancelAnimationFrame: dom.window.cancelAnimationFrame.bind(dom.window), ResizeObserver: class { observe() {} unobserve() {} disconnect() {} }, IS_REACT_ACT_ENVIRONMENT: true,

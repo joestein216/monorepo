@@ -15,6 +15,56 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: sanity/extract.json
+export type Page = {
+  _id: string;
+  _type: "page";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  subtitle?: string;
+  eyebrow?: string;
+  body?: Array<
+    | {
+        children?: Array<{
+          marks?: Array<string>;
+          text?: string;
+          _type: "span";
+          _key: string;
+        }>;
+        style?: "normal" | "h2" | "h3" | "h4" | "blockquote";
+        listItem?: "bullet" | "number";
+        markDefs?: Array<{
+          href?: string;
+          _type: "link";
+          _key: string;
+        }>;
+        level?: number;
+        _type: "block";
+        _key: string;
+      }
+    | {
+        caption?: string;
+        code?: string;
+        _type: "mermaidDiagram";
+        _key: string;
+      }
+    | {
+        language?: string;
+        code?: string;
+        _type: "codeBlock";
+        _key: string;
+      }
+  >;
+};
+
+export type Slug = {
+  _type: "slug";
+  current?: string;
+  source?: string;
+};
+
 export type SanityFileAssetReference = {
   _ref: string;
   _type: "reference";
@@ -161,12 +211,6 @@ export type Project = {
   }>;
 };
 
-export type Slug = {
-  _type: "slug";
-  current?: string;
-  source?: string;
-};
-
 export type Technology = {
   _id: string;
   _type: "technology";
@@ -298,12 +342,13 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | Page
+  | Slug
   | SanityFileAssetReference
   | About
   | TechnologyReference
   | Role
   | Project
-  | Slug
   | Technology
   | SanityImagePaletteSwatch
   | SanityImagePalette
@@ -318,8 +363,29 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: PORTFOLIO_CONTEXT_QUERY
-// Query: {  "about": *[_type == "about" && _id == "about"][0]{    _id, headline, intro, story, nextRole, advisory, contact,    starterQuestions[]{_key, question},    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}  },  "projects": *[_type == "project"] | order(order asc, title asc){    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,    techStack[]->{_id, name, "slug": slug.current, category, iconKey}  },  "roles": *[_type == "role"] | order(order asc, company asc){    _id, company, title, dateRange, order, roleSummary,    technologies[]->{_id, name, "slug": slug.current, category, iconKey},    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}  },  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}}
+// Query: {  "colophonSummary": *[_type == "page" && slug.current == "colophon"] | order(_updatedAt desc)[0]{    title, subtitle, "plainText": pt::text(body),    "technicalBlocks": body[_type in ["mermaidDiagram", "codeBlock"]]{_key, _type, caption, language, code}  },  "about": *[_type == "about" && _id == "about"][0]{    _id, headline, intro, story, nextRole, advisory, contact,    starterQuestions[]{_key, question},    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}  },  "projects": *[_type == "project"] | order(order asc, title asc){    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,    techStack[]->{_id, name, "slug": slug.current, category, iconKey}  },  "roles": *[_type == "role"] | order(order asc, company asc){    _id, company, title, dateRange, order, roleSummary,    technologies[]->{_id, name, "slug": slug.current, category, iconKey},    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}  },  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}}
 export type PORTFOLIO_CONTEXT_QUERY_RESULT = {
+  colophonSummary: {
+    title: string | null;
+    subtitle: string | null;
+    plainText: string;
+    technicalBlocks: Array<
+      | {
+          _key: string;
+          _type: "codeBlock";
+          caption: null;
+          language: string | null;
+          code: string | null;
+        }
+      | {
+          _key: string;
+          _type: "mermaidDiagram";
+          caption: string | null;
+          language: null;
+          code: string | null;
+        }
+    > | null;
+  } | null;
   about: {
     _id: "about";
     headline: string | null;
@@ -470,10 +536,55 @@ export type PORTFOLIO_CONTEXT_QUERY_RESULT = {
   }>;
 };
 
+// Source: sanity/lib/queries.ts
+// Variable: COLOPHON_PAGE_QUERY
+// Query: *[_type == "page" && slug.current == "colophon"] | order(_updatedAt desc)[0]{    _id, title, subtitle, eyebrow, "slug": slug.current, body, "plainText": pt::text(body)  }
+export type COLOPHON_PAGE_QUERY_RESULT = {
+  _id: string;
+  title: string | null;
+  subtitle: string | null;
+  eyebrow: string | null;
+  slug: string | null;
+  body: Array<
+    | {
+        children?: Array<{
+          marks?: Array<string>;
+          text?: string;
+          _type: "span";
+          _key: string;
+        }>;
+        style?: "blockquote" | "h2" | "h3" | "h4" | "normal";
+        listItem?: "bullet" | "number";
+        markDefs?: Array<{
+          href?: string;
+          _type: "link";
+          _key: string;
+        }>;
+        level?: number;
+        _type: "block";
+        _key: string;
+      }
+    | {
+        language?: string;
+        code?: string;
+        _type: "codeBlock";
+        _key: string;
+      }
+    | {
+        caption?: string;
+        code?: string;
+        _type: "mermaidDiagram";
+        _key: string;
+      }
+  > | null;
+  plainText: string;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '{\n  "about": *[_type == "about" && _id == "about"][0]{\n    _id, headline, intro, story, nextRole, advisory, contact,\n    starterQuestions[]{_key, question},\n    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}\n  },\n  "projects": *[_type == "project"] | order(order asc, title asc){\n    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,\n    techStack[]->{_id, name, "slug": slug.current, category, iconKey}\n  },\n  "roles": *[_type == "role"] | order(order asc, company asc){\n    _id, company, title, dateRange, order, roleSummary,\n    technologies[]->{_id, name, "slug": slug.current, category, iconKey},\n    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,\n      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}\n  },\n  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}\n}': PORTFOLIO_CONTEXT_QUERY_RESULT;
+    '{\n  "colophonSummary": *[_type == "page" && slug.current == "colophon"] | order(_updatedAt desc)[0]{\n    title, subtitle, "plainText": pt::text(body),\n    "technicalBlocks": body[_type in ["mermaidDiagram", "codeBlock"]]{_key, _type, caption, language, code}\n  },\n  "about": *[_type == "about" && _id == "about"][0]{\n    _id, headline, intro, story, nextRole, advisory, contact,\n    starterQuestions[]{_key, question},\n    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}\n  },\n  "projects": *[_type == "project"] | order(order asc, title asc){\n    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,\n    techStack[]->{_id, name, "slug": slug.current, category, iconKey}\n  },\n  "roles": *[_type == "role"] | order(order asc, company asc){\n    _id, company, title, dateRange, order, roleSummary,\n    technologies[]->{_id, name, "slug": slug.current, category, iconKey},\n    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,\n      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}\n  },\n  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}\n}': PORTFOLIO_CONTEXT_QUERY_RESULT;
+    '\n  *[_type == "page" && slug.current == "colophon"] | order(_updatedAt desc)[0]{\n    _id, title, subtitle, eyebrow, "slug": slug.current, body, "plainText": pt::text(body)\n  }\n': COLOPHON_PAGE_QUERY_RESULT;
   }
 }

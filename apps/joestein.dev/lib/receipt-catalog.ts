@@ -32,6 +32,9 @@ export function getPortfolioPromptData(context: PortfolioData) {
   return {
     about: context.about,
     technologies: context.technologies,
+    // Published editorial architecture notes ground prose without becoming
+    // selectable receipts or changing authoritative ID hydration.
+    colophonSummary: context.colophonSummary ?? null,
     // Role summaries provide career context but expose no selectable parent IDs.
     roles: context.roles.map(({ company, title, dateRange, roleSummary, technologies }) => ({
       company, title, dateRange, roleSummary, technologies,

@@ -10,8 +10,8 @@ test("flat prompt replacement preserves origin, order, turn isolation, reset, an
   const dom = new JSDOM("<!doctype html><html><body><main id='test-root'></main></body></html>", { url: "http://localhost" });
   // Exercise the nonanimated, reduced-motion suggestion path in this suite.
   dom.window.matchMedia = () => ({ matches: true, addEventListener() {}, removeEventListener() {} });
-  const previous = Object.fromEntries(["window", "document", "HTMLElement", "Node", "IS_REACT_ACT_ENVIRONMENT", "fetch"].map((key) => [key, globalThis[key]]));
-  Object.assign(globalThis, { window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, Node: dom.window.Node, IS_REACT_ACT_ENVIRONMENT: true });
+  const previous = Object.fromEntries(["window", "self", "document", "HTMLElement", "Node", "IS_REACT_ACT_ENVIRONMENT", "fetch"].map((key) => [key, globalThis[key]]));
+  Object.assign(globalThis, { window: dom.window, self: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, Node: dom.window.Node, IS_REACT_ACT_ENVIRONMENT: true });
   const requests = [];
   let includeSuggestions = true;
   let responseFailure = false;

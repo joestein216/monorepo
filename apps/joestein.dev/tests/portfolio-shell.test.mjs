@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { JSDOM } from "jsdom";
 import * as React from "react";
+import { rateLimitMessage } from "../lib/chat-stream.ts";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 20));
 
@@ -14,8 +15,11 @@ test("flat prompt replacement preserves origin, order, turn isolation, reset, an
   const requests = [];
   let includeSuggestions = true;
   let responseFailure = false;
+  let quotaFailure = false;
   globalThis.fetch = async (_url, options) => {
     requests.push(JSON.parse(options.body));
+    if (quotaFailure) return new Response(`data: ${JSON.stringify({ type: "start", messageId: "quota-answer" })}\n\ndata: ${JSON.stringify({ type: "error", errorText: rateLimitMessage })}\n\ndata: [DONE]\n\n`,
+      { headers: { "Content-Type": "text/event-stream", "x-vercel-ai-ui-message-stream": "v1" } });
     if (responseFailure) return new Response("Provider failed: internal detail", { status: 503 });
     const count = requests.length;
     const suggestions = Array.from({ length: 3 }, (_, index) => ({ question: `What is turn ${count} detail ${index}?` }));
@@ -106,6 +110,15 @@ test("flat prompt replacement preserves origin, order, turn isolation, reset, an
     assert.equal(requests.at(-1).messages.at(-1).parts[0].text, "Explain Joe’s work.\nInclude trade-offs.");
     assert.equal(textarea.value, "", "completed requests restore the placeholder");
     assert.equal(container.querySelector('[role="alert"]'), null);
+    quotaFailure = true;
+    await React.act(async () => {
+      Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype, "value").set.call(textarea, "Show Joe’s engineering work.");
+      textarea.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+    });
+    await React.act(async () => { textarea.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); await tick(); });
+    assert.ok(container.querySelector('[role="alert"]').textContent.includes(rateLimitMessage));
+    assert.ok(findButton("Try that question again"));
+    quotaFailure = false;
     assert.equal(container.querySelector('[data-slot="conversation-canvas"]').hasAttribute("aria-live"), false);
     assert.ok(container.querySelector('[data-slot="summary-block"]'));
     responseFailure = true;

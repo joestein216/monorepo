@@ -7,14 +7,19 @@ type Options = Omit<Parameters<typeof streamText<Tools>>[0], "prompt" | "message
 
 // Healthy turns take one model step. A clean but incomplete turn gets exactly
 // one completion step, sharing the request's deadline and already streamed output.
-export function streamPortfolioTurn(options: Options, { onError }: { onError: (error: unknown) => string }) {
+export function streamPortfolioTurn(options: Options, { onError, getModelId }: { onError: (error: unknown) => string; getModelId?: () => string | undefined }) {
   return createUIMessageStream<PortfolioMessage>({
     onError,
     execute: async ({ writer }) => {
       const first = streamText({ ...options, stopWhen: isStepCount(1) });
+      let interrupted = false;
       for await (const chunk of first.toUIMessageStream<PortfolioMessage>({ sendReasoning: false, sendFinish: false, onError })) {
+        if (chunk.type === "error" || chunk.type === "abort") interrupted = true;
         writer.write(chunk);
       }
+      // The UI already received the actual provider failure. Awaiting rejected
+      // aggregate results would replace it with a second, generic error.
+      if (interrupted) return;
       const steps = [...await first.steps];
       let finishReason = await first.finishReason;
       let recovered = false;
@@ -38,14 +43,17 @@ export function streamPortfolioTurn(options: Options, { onError }: { onError: (e
           stopWhen: isStepCount(1),
         });
         for await (const chunk of recovery.toUIMessageStream<PortfolioMessage>({ sendReasoning: false, sendStart: false, sendFinish: false, onError })) {
+          if (chunk.type === "error" || chunk.type === "abort") interrupted = true;
           writer.write(chunk);
         }
+        if (interrupted) return;
         steps.push(...await recovery.steps);
         finishReason = await recovery.finishReason;
       }
 
       const results = steps.flatMap((step) => step.toolResults);
       console.info("[Portfolio Turn]:", {
+        model: getModelId?.(),
         steps: steps.length, recovered, hasSummary: hasSummary(steps), finishReason,
         receiptCount: results.reduce((count, result) => count + (result.toolName === "showReceipts" && Array.isArray(result.output) ? result.output.length : 0), 0),
         suggestionCount: results.reduce((count, result) => count + (result.toolName === "suggestFollowUps" && Array.isArray(result.output) ? result.output.length : 0), 0),

@@ -8,6 +8,7 @@ import type { PortfolioMessage } from "@/lib/portfolio-tools";
 import { getPromptSuggestions, type PromptSuggestion } from "@/lib/portfolio-navigation";
 import { PROMPT_CHAR_LIMIT, promptInputSchema, promptLimitState } from "@/lib/prompt-input";
 import { followConversation } from "@/lib/conversation-follow";
+import { rateLimitMessage, recoveryMessage } from "@/lib/chat-stream";
 import { Overview, TopicNavigation } from "./portfolio-content";
 import { PortfolioResponse, ResponseProgress } from "./portfolio-response";
 
@@ -157,7 +158,7 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
           </article>)}
           {busy && messages.at(-1)?.role !== "assistant" && <ResponseProgress />}
         </section>
-        {error && <section data-slot="error-banner" role="alert"><p>That response didn’t quite come together. Try again or ask another question.</p>
+        {error && <section data-slot="error-banner" role="alert"><p>{error.message === rateLimitMessage ? rateLimitMessage : recoveryMessage}</p>
           <button type="button" disabled={busy} onClick={retry}>Try that question again</button></section>}
         {messages.length > 0 && <footer data-slot="conversation-actions"><button type="button" disabled={busy} onClick={resetConversation}>Start a new conversation</button></footer>}
       </section>

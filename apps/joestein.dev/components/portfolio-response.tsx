@@ -3,6 +3,10 @@
 import type { PortfolioMessage, PortfolioReceipt } from "@/lib/portfolio-tools";
 import { DownloadsSection, Overview, ReceiptCard } from "./portfolio-content";
 
+export function ResponseProgress() {
+  return <p data-slot="receipts-status" role="status" aria-live="polite">Pulling receipts…</p>;
+}
+
 export function PortfolioResponse({ message, streaming = false }: { message: PortfolioMessage; streaming?: boolean }) {
   const textParts = message.parts.filter((part) => part.type === "text");
   const proseStreaming = streaming && textParts.some((part) => part.state === "streaming");
@@ -34,9 +38,9 @@ export function PortfolioResponse({ message, streaming = false }: { message: Por
 
   return <>
     {message.role === "user" ? <h2 data-slot="user-query">{summary}</h2> : <p data-slot="summary-block" aria-label="Summary">{summary}{proseStreaming && <span data-slot="stream-cursor" aria-hidden="true" />}</p>}
+    {message.role === "assistant" && streaming && <ResponseProgress />}
     {receiptCalls.length > 0 && <section aria-label="Receipts">
       <h3 data-slot="visually-hidden">Supporting receipts</h3>
-      {pending && streaming && !proseStreaming && <p data-slot="receipts-status" role="status">Pulling matching receipts…</p>}
       <ul aria-label="Receipts" data-slot="receipt-list" role="list">
         {visibleReceipts.map((receipt) => <li key={`${receipt.type}:${receipt.id}`}>
           <ReceiptCard receipt={receipt} />

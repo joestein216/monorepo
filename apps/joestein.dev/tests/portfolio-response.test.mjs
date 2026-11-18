@@ -35,19 +35,26 @@ test("multiple receipt tool calls share a maximum of three ranked cards", () => 
   assert.equal(html.includes("Show all"), false);
 });
 
-test("stream cursor follows actual text state, then yields to receipt hydration status", () => {
+test("request progress stays visible during prose, tool hydration, and recovery gaps", () => {
   const message = { id: "stream", role: "assistant", parts: [
     { type: "text", text: "Joe built this system.", state: "streaming" },
     { type: "tool-showReceipts", toolCallId: "pending", state: "input-streaming" },
   ] };
   const prose = renderToStaticMarkup(React.createElement(PortfolioResponse, { message, streaming: true }));
   assert.ok(prose.includes('data-slot="stream-cursor"'));
-  assert.equal(prose.includes("Pulling matching receipts"), false);
+  assert.ok(prose.includes("Pulling receipts…"));
   message.parts[0].state = "done";
   const tools = renderToStaticMarkup(React.createElement(PortfolioResponse, { message, streaming: true }));
   assert.equal(tools.includes('data-slot="stream-cursor"'), false);
-  assert.ok(tools.includes("Pulling matching receipts…"));
-  assert.ok(tools.indexOf("Pulling matching receipts…") < tools.indexOf('data-slot="receipt-list"'));
+  assert.ok(tools.includes("Pulling receipts…"));
+  assert.ok(tools.indexOf("Pulling receipts…") < tools.indexOf('data-slot="receipt-list"'));
+  // A recovery step can begin after a tool finishes, before any text arrives.
+  message.parts = [{ type: "tool-showReceipts", toolCallId: "done", state: "output-available", input: { receipts: [] }, output: [] }];
+  const recovery = renderToStaticMarkup(React.createElement(PortfolioResponse, { message, streaming: true }));
+  assert.ok(recovery.includes("Pulling receipts…"));
+  message.parts = [];
+  assert.ok(renderToStaticMarkup(React.createElement(PortfolioResponse, { message, streaming: true })).includes("Pulling receipts…"));
+  assert.equal(renderToStaticMarkup(React.createElement(PortfolioResponse, { message, streaming: false })).includes("Pulling receipts…"), false);
 });
 
 

@@ -7,8 +7,9 @@ import type { PortfolioContext } from "@/lib/sanity-context";
 import type { PortfolioMessage } from "@/lib/portfolio-tools";
 import { getPromptSuggestions, type PromptSuggestion } from "@/lib/portfolio-navigation";
 import { PROMPT_CHAR_LIMIT, promptInputSchema, promptLimitState } from "@/lib/prompt-input";
+import { followConversation } from "@/lib/conversation-follow";
 import { Overview, TopicNavigation } from "./portfolio-content";
-import { PortfolioResponse } from "./portfolio-response";
+import { PortfolioResponse, ResponseProgress } from "./portfolio-response";
 
 const transport = new DefaultChatTransport<PortfolioMessage>({ api: "/api/chat" });
 const mobileQuery = "(max-width: 1023px)";
@@ -21,26 +22,65 @@ function mobileSnapshot() { return window.matchMedia?.(mobileQuery).matches ?? f
 const serverSnapshot = () => false;
 
 export function PortfolioPrototype({ context, loadError }: { context: PortfolioContext; loadError?: boolean }) {
+  const shellRef = useRef<HTMLElement>(null);
+  const releasedAttempt = useRef<string | null>(null);
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const restorePromptFocus = useRef(false);
   const [mode, setMode] = useState<"prompt" | "overview">("prompt");
-  const [notice, setNotice] = useState("");
   const [input, setInput] = useState("");
+  const [suggestionTyping, setSuggestionTyping] = useState(false);
+  const [visibleCharacters, setVisibleCharacters] = useState(0);
   const [starterTurns, setStarterTurns] = useState<Record<string, string>>({});
-  const { messages, sendMessage, status, error, stop, setMessages, clearError, regenerate } = useChat<PortfolioMessage>({ transport });
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const { messages, sendMessage, status, error, setMessages, clearError, regenerate } = useChat<PortfolioMessage>({ transport });
   const mobile = useSyncExternalStore(subscribeViewport, mobileSnapshot, serverSnapshot);
   const busy = status === "submitted" || status === "streaming";
   const pending = status === "submitted";
   const conversationState = messages.length === 0 ? "idle" : "active";
   const limitState = promptLimitState(input.length);
   const suggestions = getPromptSuggestions(context.starterTopics ?? [], messages, starterTurns);
+  const questionId = messages.findLast((message) => message.role === "user")?.id;
+
+  useEffect(() => {
+    if (!questionId || mode !== "prompt") return;
+    const attempt = `${questionId}:${retryAttempt}`;
+    if (releasedAttempt.current === attempt) return;
+    const shell = shellRef.current;
+    const questions = shell?.querySelectorAll<HTMLElement>('[data-slot="user-query"]');
+    const question = questions?.[questions.length - 1];
+    const content = shell?.querySelector<HTMLElement>('[data-slot="turn-list"]');
+    const header = shell?.querySelector<HTMLElement>('[data-slot="top-cover"]');
+    const dock = shell?.querySelector<HTMLElement>('[data-slot="prompt-dock"]');
+    if (question && content && header && dock) {
+      return followConversation({ question, content, header, dock,
+        onRelease: () => { releasedAttempt.current = attempt; },
+      });
+    }
+  }, [questionId, retryAttempt, mode]);
+
+  // Reveal the submitted suggestion without delaying its request. Editing the
+  // composer cancels playback; a new draft is never cleared by that request.
+  useEffect(() => {
+    if (!suggestionTyping) return;
+    let started: number | undefined;
+    let frame: number;
+    function reveal(now: number) {
+      started ??= now;
+      const progress = Math.min(1, (now - started) / 550);
+      setVisibleCharacters(Math.ceil(input.length * progress));
+      if (progress < 1) frame = requestAnimationFrame(reveal);
+      else setSuggestionTyping(false);
+    }
+    frame = requestAnimationFrame(reveal);
+    return () => cancelAnimationFrame(frame);
+  }, [suggestionTyping, input]);
 
   useEffect(() => {
     if (restorePromptFocus.current) {
       if (document.activeElement === document.body || document.activeElement === promptRef.current) promptRef.current?.focus();
       restorePromptFocus.current = false;
     }
-  }, [busy, notice, mobile]);
+  }, [busy, mobile]);
 
   function send(text: string, topic?: PromptSuggestion) {
     if (busy || !promptInputSchema.safeParse(text).success) return;
@@ -48,13 +88,17 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
     const turnId = generateId();
     if (topic?.tier === "starter") setStarterTurns((turns) => ({ ...turns, [topic.id]: turnId }));
     clearError();
-    setNotice("");
-    void sendMessage({ id: turnId, role: "user", parts: [{ type: "text", text: text.trim() }] });
-    setInput("");
+    setInput(text);
+    setVisibleCharacters(0);
+    setSuggestionTyping(Boolean(topic) && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+    void sendMessage({ id: turnId, role: "user", parts: [{ type: "text", text: text.trim() }] }).finally(() => {
+      setSuggestionTyping(false);
+      setInput((current) => current === text ? "" : current);
+    });
   }
-  function retry() { restorePromptFocus.current = true; clearError(); setNotice(""); void regenerate(); }
+  function retry() { restorePromptFocus.current = true; setRetryAttempt((attempt) => attempt + 1); clearError(); void regenerate(); }
   function resetConversation() {
-    setMessages([]); clearError(); setNotice(""); setInput(""); setStarterTurns({}); promptRef.current?.focus();
+    setMessages([]); clearError(); setInput(""); setSuggestionTyping(false); setStarterTurns({}); promptRef.current?.focus();
   }
 
   const composer = <section key="composer" data-slot="prompt-composer" aria-label="Ask Joe’s portfolio">
@@ -68,11 +112,11 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
           {limitState === "approaching" && " · Near limit"}{limitState === "exceeded" && " · ! over limit"}
         </span>
       </header>
-      <textarea ref={promptRef} id="portfolio-prompt" name="prompt" data-slot="prompt-textarea" value={input} rows={3}
+      <textarea ref={promptRef} id="portfolio-prompt" name="prompt" data-slot="prompt-textarea" value={suggestionTyping ? input.slice(0, visibleCharacters) : input} rows={3}
         aria-invalid={limitState === "exceeded" ? true : undefined}
         placeholder="Ask about a problem like yours, gauge depth in a tech stack, or paste a job/project brief…"
         aria-describedby="prompt-counter prompt-limit-status prompt-keyboard-help"
-        onChange={(event) => setInput(event.target.value)}
+        onChange={(event) => { setSuggestionTyping(false); setInput(event.target.value); }}
         onKeyDown={(event) => {
           if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); send(input); }
         }} />
@@ -82,8 +126,9 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
       <footer data-slot="composer-actions">
         <small id="prompt-keyboard-help" data-slot="composer-hint">Enter to send · Shift+Enter for newline</small>
         <button type="submit" data-slot="submit-button" disabled={busy || !input.trim() || limitState === "exceeded"}
-          aria-busy={pending} data-pending={pending} aria-label={pending ? "Pulling receipts…" : undefined}>
-          {pending ? <span data-slot="ticker-track" aria-hidden="true"><span>Pulling receipts... · </span><span>Pulling receipts... · </span></span> : "Pull the receipts"}
+          aria-busy={busy} data-pending={busy} aria-label={busy ? "Pulling receipts…" : undefined}>
+          <span data-slot="submit-label" aria-hidden={busy}>Pull the receipts</span>
+          {busy && <span data-slot="ticker-track" aria-hidden="true"><span>Pulling receipts... · </span><span>Pulling receipts... · </span></span>}
         </button>
       </footer>
     </form>
@@ -91,7 +136,7 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
   const navigation = <TopicNavigation key="topics" items={suggestions} disabled={busy} active={conversationState === "active"}
     onSelect={(item) => send(item.prompt, item)} />;
 
-  return <main data-slot="portfolio-shell" data-conversation-state={conversationState} data-request-state={pending ? "pending" : status}>
+  return <main ref={shellRef} data-slot="portfolio-shell" data-conversation-state={conversationState} data-request-state={pending ? "pending" : status}>
     <header data-slot="top-cover" data-surface="cover">
       <section data-slot="top-cover-inner" aria-label="Portfolio header">
         <h1 data-slot="brand-title">Joe Stein</h1>
@@ -108,12 +153,12 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
         <section data-slot="turn-list" aria-label="Conversation turns">
           {messages.map((message) => <article key={message.id} data-slot={message.role === "user" ? "user-turn" : "assistant-turn"}
             aria-busy={message.role === "assistant" ? busy && message.id === messages.at(-1)?.id : undefined}>
-            <PortfolioResponse message={message} streaming={status === "streaming" && message.id === messages.at(-1)?.id} />
+            <PortfolioResponse message={message} streaming={busy && message.id === messages.at(-1)?.id} />
           </article>)}
+          {busy && messages.at(-1)?.role !== "assistant" && <ResponseProgress />}
         </section>
         {error && <section data-slot="error-banner" role="alert"><p>That response didn’t quite come together. Try again or ask another question.</p>
           <button type="button" disabled={busy} onClick={retry}>Try that question again</button></section>}
-        {!busy && notice && <section data-slot="recovery-notice"><p>{notice}</p><button type="button" onClick={retry}>Try that question again</button></section>}
         {messages.length > 0 && <footer data-slot="conversation-actions"><button type="button" disabled={busy} onClick={resetConversation}>Start a new conversation</button></footer>}
       </section>
       <section aria-label="Prompt composer and topics" data-slot="prompt-dock" data-surface={conversationState === "active" ? "cover" : "paper"} data-conversation-state={conversationState}>
@@ -122,8 +167,7 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
           {mobile && conversationState === "active" ? [navigation, composer] : [composer, navigation]}
         </section>
         <footer data-slot="dock-status">
-          <p role="status" aria-live="polite" data-slot="conversation-status">{busy ? "Joe’s portfolio assistant is responding…" : notice || (messages.length ? "Ready for another question." : "Ready for a question.")}</p>
-          {busy && <button type="button" data-slot="stop-button" onClick={() => { restorePromptFocus.current = true; void stop(); setNotice("Response stopped. Try again or ask another question."); }}>Stop response</button>}
+          <p role="status" aria-live="polite" data-slot="conversation-status">{busy ? "Joe’s portfolio assistant is responding…" : (messages.length ? "Ready for another question." : "Ready for a question.")}</p>
         </footer>
       </section>
     </section>}

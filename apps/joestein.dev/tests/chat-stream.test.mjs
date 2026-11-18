@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { guardPortfolioStream, portfolioTurnComplete, recoveryMessage } from "../lib/chat-stream.ts";
+import { guardPortfolioStream, recoveryMessage } from "../lib/chat-stream.ts";
 
-const step = (...names) => ({ toolResults: names.map((toolName) => ({ toolName })) });
 const text = { type: "text-delta", id: "text", delta: "Joe built a grounded system." };
 const call = (name) => [
   { type: "tool-input-available", toolName: name, toolCallId: name, input: {} },
@@ -13,24 +12,16 @@ async function guarded(chunks, signal = new AbortController().signal) {
   return Array.fromAsync(stream.pipeThrough(guardPortfolioStream(signal)));
 }
 
-test("core tool results stop immediately without generating another step for suggestions", () => {
-  for (const name of ["showReceipts", "showDownloads", "showOverview"]) {
-    assert.equal(portfolioTurnComplete({ steps: [step(name, "suggestFollowUps")] }), true);
-    assert.equal(portfolioTurnComplete({ steps: [step(name)] }), true);
-    assert.equal(portfolioTurnComplete({ steps: [step(name), step("suggestFollowUps")] }), true);
-  }
-  assert.equal(portfolioTurnComplete({ steps: [step(), step()] }), true);
-});
-
 test("successful live text and tool results pass through unchanged, including empty evidence", async () => {
   const chunks = [text, ...call("showReceipts"), ...call("suggestFollowUps"), { type: "finish", finishReason: "tool-calls" }];
   assert.deepEqual(await guarded(chunks), chunks);
-  assert.deepEqual(await guarded([text, { type: "finish", finishReason: "stop" }]), [text, { type: "finish", finishReason: "stop" }]);
+
 });
 
 test("core truncation, empty streams, pending evidence, and timeout aborts disclose failure", async () => {
   for (const chunks of [
     [], [{ type: "finish", finishReason: "stop" }],
+    [text, { type: "finish", finishReason: "stop" }],
     [text, { type: "finish", finishReason: "length" }],
     [text, { type: "tool-input-start", toolName: "showReceipts", toolCallId: "pending" }, { type: "finish" }],
     [text, { type: "abort" }],

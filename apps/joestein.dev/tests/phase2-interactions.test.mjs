@@ -11,7 +11,7 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
   const previous = Object.fromEntries(keys.map((key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
   let mobile = true;
   const viewportListeners = new Set();
-  dom.window.matchMedia = () => ({ matches: mobile, addEventListener: (_event, callback) => viewportListeners.add(callback), removeEventListener: (_event, callback) => viewportListeners.delete(callback) });
+  dom.window.matchMedia = (query) => ({ matches: query.includes("max-width") ? mobile : false, addEventListener: (_event, callback) => viewportListeners.add(callback), removeEventListener: (_event, callback) => viewportListeners.delete(callback) });
   const globals = {
     window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, Element: dom.window.Element,
     Node: dom.window.Node, ShadowRoot: dom.window.ShadowRoot, MutationObserver: dom.window.MutationObserver,
@@ -51,6 +51,12 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "true");
     assert.equal(document.querySelector('[data-slot="submit-button"]').getAttribute("aria-busy"), "true");
     assert.ok(document.querySelector('[data-slot="ticker-track"]'));
+    assert.match(document.querySelector('[data-slot="receipts-status"]').textContent, /Pulling receipts/);
+    assert.equal(document.querySelector('[data-slot="stop-button"]'), null);
+    assert.ok(context.starterTopics[0].question.startsWith(textarea.value));
+    assert.ok(textarea.value.length < context.starterTopics[0].question.length);
+    await React.act(async () => { await new Promise(resolve => setTimeout(resolve, 650)); });
+    assert.equal(textarea.value, context.starterTopics[0].question);
     assert.equal(document.querySelector("textarea"), textarea);
     assert.equal(document.querySelector('[data-slot="prompt-dock-inner"]').firstElementChild.dataset.slot, "topic-bladder");
 
@@ -66,15 +72,22 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
       emit({ type: "text-delta", id: "summary", delta: "Joe uses coding agents with clear guardrails." });
     });
     assert.ok(document.querySelector('[data-slot="stream-cursor"]'));
+    assert.ok(document.querySelector('[data-slot="receipts-status"]'));
+    assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "true");
     assert.equal(document.querySelector('[data-slot="assistant-turn"]').getAttribute("aria-busy"), "true");
     await act(() => {
       emit({ type: "text-end", id: "summary" });
       emit({ type: "tool-input-available", toolCallId: "receipts", toolName: "showReceipts", input: { receipts: [] } });
     });
     assert.equal(document.querySelector('[data-slot="stream-cursor"]'), null);
-    assert.match(document.querySelector('[data-slot="receipts-status"]').textContent, /Pulling matching receipts/);
+    assert.match(document.querySelector('[data-slot="receipts-status"]').textContent, /Pulling receipts/);
     await act(() => {
       emit({ type: "tool-output-available", toolCallId: "receipts", output: [receipt] });
+      emit({ type: "finish-step" });
+    });
+    assert.ok(document.querySelector('[data-slot="receipts-status"]'), "progress remains through the recovery gap after core output");
+    await act(() => {
+      emit({ type: "start-step" });
       const suggestions = [{ question: "How does Joe scope work for Codex?" }, { question: "How does Joe review generated code?" }, { question: "How does AGENTS.md guide Joe’s work?" }];
       emit({ type: "tool-input-available", toolCallId: "follow", toolName: "suggestFollowUps", input: { suggestions } });
       emit({ type: "tool-output-available", toolCallId: "follow", output: suggestions });
@@ -141,6 +154,26 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     assert.equal(topics.getAttribute("aria-expanded"), "false");
     assert.ok(document.querySelector('[data-slot="error-banner"][role="alert"]'));
     assert.ok(button("Try that question again"));
+    failNext = false;
+    await act(() => button("Try that question again").click());
+    assert.ok(document.querySelector('[data-slot="receipts-status"]'), "manual retries show progress before any response arrives");
+    assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "true");
+    assert.equal(document.querySelector('[data-slot="stop-button"]'), null);
+    await act(() => {
+      const chunks = [
+        { type: "start", messageId: "retried-answer" }, { type: "start-step" },
+        { type: "text-start", id: "retried-summary" },
+        { type: "text-delta", id: "retried-summary", delta: "Joe builds payment systems." },
+        { type: "text-end", id: "retried-summary" },
+        { type: "tool-input-available", toolName: "showReceipts", toolCallId: "retried-receipts", input: { receipts: [] } },
+        { type: "tool-output-available", toolCallId: "retried-receipts", output: [] },
+        { type: "finish-step" }, { type: "finish", finishReason: "tool-calls" },
+      ];
+      respond(new Response(chunks.map(chunk => `data: ${JSON.stringify(chunk)}\n\n`).join("") + "data: [DONE]\n\n",
+        { headers: { "Content-Type": "text/event-stream", "x-vercel-ai-ui-message-stream": "v1" } }));
+    });
+    assert.equal(document.querySelector('[data-slot="receipts-status"]'), null);
+    assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "false");
     await act(() => button("Overview").click());
     assert.ok(document.querySelector('[data-slot="overview-canvas"]'));
     assert.ok(document.querySelector('[data-slot="top-cover"][data-surface="cover"]'));

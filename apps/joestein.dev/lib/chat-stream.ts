@@ -1,6 +1,7 @@
 import type { UIMessageChunk } from "ai";
 
 export const recoveryMessage = "That response didn’t quite come together. Try again or ask another question.";
+export const rateLimitMessage = "The portfolio assistant is at capacity across its available models. Please wait a moment, then try again.";
 const primaryTools = new Set(["showReceipts", "showDownloads", "showOverview"]);
 
 type PortfolioStep = { text?: string; toolResults: readonly { toolName: string }[] };

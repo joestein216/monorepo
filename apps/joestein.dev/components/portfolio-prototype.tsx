@@ -8,8 +8,10 @@ import type { PortfolioMessage } from "@/lib/portfolio-tools";
 import { getPromptSuggestions, type PromptSuggestion } from "@/lib/portfolio-navigation";
 import { PROMPT_CHAR_LIMIT, promptInputSchema, promptLimitState } from "@/lib/prompt-input";
 import { followConversation } from "@/lib/conversation-follow";
+import { rateLimitMessage, recoveryMessage } from "@/lib/chat-stream";
 import { Overview, TopicNavigation } from "./portfolio-content";
 import { PortfolioResponse, ResponseProgress } from "./portfolio-response";
+import { PortfolioHeader } from "./portfolio-header";
 
 const transport = new DefaultChatTransport<PortfolioMessage>({ api: "/api/chat" });
 const mobileQuery = "(max-width: 1023px)";
@@ -21,12 +23,12 @@ function subscribeViewport(callback: () => void) {
 function mobileSnapshot() { return window.matchMedia?.(mobileQuery).matches ?? false; }
 const serverSnapshot = () => false;
 
-export function PortfolioPrototype({ context, loadError }: { context: PortfolioContext; loadError?: boolean }) {
+export function PortfolioPrototype({ context, loadError, initialMode = "prompt" }: { context: PortfolioContext; loadError?: boolean; initialMode?: "prompt" | "overview" }) {
   const shellRef = useRef<HTMLElement>(null);
   const releasedAttempt = useRef<string | null>(null);
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const restorePromptFocus = useRef(false);
-  const [mode, setMode] = useState<"prompt" | "overview">("prompt");
+  const [mode, setMode] = useState<"prompt" | "overview">(initialMode);
   const [input, setInput] = useState("");
   const [suggestionTyping, setSuggestionTyping] = useState(false);
   const [visibleCharacters, setVisibleCharacters] = useState(0);
@@ -137,15 +139,7 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
     onSelect={(item) => send(item.prompt, item)} />;
 
   return <main ref={shellRef} data-slot="portfolio-shell" data-conversation-state={conversationState} data-request-state={pending ? "pending" : status}>
-    <header data-slot="top-cover" data-surface="cover">
-      <section data-slot="top-cover-inner" aria-label="Portfolio header">
-        <h1 data-slot="brand-title">Joe Stein</h1>
-        <nav aria-label="Portfolio mode" data-slot="mode-switch">
-          <button type="button" aria-pressed={mode === "prompt"} onClick={() => setMode("prompt")}>Prompt</button>
-          <button type="button" aria-pressed={mode === "overview"} onClick={() => setMode("overview")}>Overview</button>
-        </nav>
-      </section>
-    </header>
+    <PortfolioHeader mode={mode} onModeChange={setMode} />
     {loadError && <p data-slot="error-banner" role="alert">Portfolio data could not be loaded. Please refresh to try again.</p>}
     {mode === "overview" ? <section data-slot="overview-canvas" aria-label="Portfolio overview"><Overview context={context} /></section> : <section aria-label="Portfolio assistant" data-slot="prompt-mode">
       <section aria-label="Responses" data-slot="conversation-canvas">
@@ -157,7 +151,7 @@ export function PortfolioPrototype({ context, loadError }: { context: PortfolioC
           </article>)}
           {busy && messages.at(-1)?.role !== "assistant" && <ResponseProgress />}
         </section>
-        {error && <section data-slot="error-banner" role="alert"><p>That response didn’t quite come together. Try again or ask another question.</p>
+        {error && <section data-slot="error-banner" role="alert"><p>{error.message === rateLimitMessage ? rateLimitMessage : recoveryMessage}</p>
           <button type="button" disabled={busy} onClick={retry}>Try that question again</button></section>}
         {messages.length > 0 && <footer data-slot="conversation-actions"><button type="button" disabled={busy} onClick={resetConversation}>Start a new conversation</button></footer>}
       </section>

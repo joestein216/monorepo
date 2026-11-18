@@ -7,6 +7,8 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 20));
 
 test("flat prompt replacement preserves origin, order, turn isolation, reset, and freeform submission", async () => {
   const dom = new JSDOM("<!doctype html><html><body><main id='test-root'></main></body></html>", { url: "http://localhost" });
+  // Exercise the nonanimated, reduced-motion suggestion path in this suite.
+  dom.window.matchMedia = () => ({ matches: true, addEventListener() {}, removeEventListener() {} });
   const previous = Object.fromEntries(["window", "document", "HTMLElement", "Node", "IS_REACT_ACT_ENVIRONMENT", "fetch"].map((key) => [key, globalThis[key]]));
   Object.assign(globalThis, { window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, Node: dom.window.Node, IS_REACT_ACT_ENVIRONMENT: true });
   const requests = [];
@@ -102,6 +104,7 @@ test("flat prompt replacement preserves origin, order, turn isolation, reset, an
     await React.act(async () => { textarea.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); await tick(); });
     assert.equal(requests.length, count + 1);
     assert.equal(requests.at(-1).messages.at(-1).parts[0].text, "Explain Joe’s work.\nInclude trade-offs.");
+    assert.equal(textarea.value, "", "completed requests restore the placeholder");
     assert.equal(container.querySelector('[role="alert"]'), null);
     assert.equal(container.querySelector('[data-slot="conversation-canvas"]').hasAttribute("aria-live"), false);
     assert.ok(container.querySelector('[data-slot="summary-block"]'));

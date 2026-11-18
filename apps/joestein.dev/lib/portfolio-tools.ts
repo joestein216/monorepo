@@ -27,7 +27,7 @@ export function createPortfolioTools(context: PortfolioData) {
   const catalog = new Map(getReceiptCatalog(context).map((record) => [record.id, record]));
   return {
     suggestFollowUps: tool({
-      description: "An optional enhancement to the portfolio response: suggest three short questions that go deeper into the current question using the prose summary just written and its supporting evidence. Each question is the exact visible button text and submitted prompt: one focus, usually 5–10 words, at most 65 characters. Explore a documented mechanism, decision, or outcome within the current subject, rather than unrelated adjacent topics. Prefer questions beyond what the summary already fully answered. Older conversation is background, not the current topic. Suggestions are first-class prompts with contextual origin, not a navigation hierarchy.",
+      description: "Call alongside the core rendering tool in the same step to render three contextual question buttons. Omit only when the portfolio cannot support three useful grounded questions. Suggest three short questions that go deeper into the current question using the prose summary just written and its supporting evidence. Each question is the exact visible button text and submitted prompt: one focus, usually 5–10 words, at most 65 characters. Explore a documented mechanism, decision, or outcome within the current subject, rather than unrelated adjacent topics. Prefer questions beyond what the summary already fully answered. Older conversation is background, not the current topic. Suggestions are first-class prompts with contextual origin, not a navigation hierarchy.",
       inputSchema: followUpsSchema,
       execute: async ({ suggestions }) => suggestions,
     }),

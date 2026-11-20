@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { JSDOM } from "jsdom";
 import { followConversation } from "../lib/conversation-follow.ts";
 
-function setup(reducedMotion = true) {
+function setup(reducedMotion = true, dockPosition = "sticky", headerPosition = "sticky") {
   const dom = new JSDOM("<header></header><section><h2>Question</h2></section><footer></footer>");
   const view = dom.window;
   const previous = globalThis.window;
@@ -37,6 +37,8 @@ function setup(reducedMotion = true) {
   elements.content.getBoundingClientRect = () => ({ bottom: geometry.contentBottom - view.scrollY });
   elements.header.getBoundingClientRect = () => ({ bottom: geometry.headerBottom });
   elements.dock.getBoundingClientRect = () => ({ top: geometry.dockTop });
+  elements.dock.style.position = dockPosition;
+  elements.header.style.position = headerPosition;
   const cleanup = followConversation(elements);
   return { geometry, calls, view, media,
     resize: () => notify(),
@@ -64,6 +66,26 @@ test("follows growth above the tray, stops at the question/header boundary, and 
     s.geometry.contentBottom = 3000;
     s.resize(); s.frame();
     assert.equal(s.calls.length, count, "later receipts cannot push the question offscreen");
+  } finally { s.dispose(); }
+});
+
+test("a normal-flow tray does not count as a viewport obstruction", () => {
+  const s = setup(true, "static");
+  try {
+    s.frame();
+    assert.equal(s.calls.length, 0, "content already fits the visible page");
+    s.geometry.contentBottom = 1000;
+    s.resize(); s.frame();
+    assert.equal(s.view.scrollY, 100, "follow uses the viewport bottom rather than the inline tray top");
+  } finally { s.dispose(); }
+});
+
+test("an inline header does not reserve space after scrolling out of view", () => {
+  const s = setup(true, "sticky", "static");
+  try {
+    s.geometry.contentBottom = 2000;
+    s.frame();
+    assert.equal(s.view.scrollY, 500, "the latest question may reach the viewport top");
   } finally { s.dispose(); }
 });
 

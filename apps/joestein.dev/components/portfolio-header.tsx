@@ -9,7 +9,7 @@ export function PortfolioHeader({ mode, onModeChange, colophon = false }: {
 }) {
   return <header data-slot="top-cover" data-surface="cover">
     <section data-slot="top-cover-inner" aria-label="Portfolio header">
-      {colophon ? <p data-slot="brand-title">Joe Stein</p> : <h1 data-slot="brand-title">Joe Stein</h1>}
+      {colophon ? <p data-slot="brand-title">JOESTEIN.DEV</p> : <h1 data-slot="brand-title">JOESTEIN.DEV</h1>}
       <section data-slot="header-actions" aria-label="Portfolio navigation">
         <Link data-slot="colophon-link" href="/colophon" prefetch={false} aria-current={colophon ? "page" : undefined}>Making of joestein.dev</Link>
         <nav aria-label="Portfolio mode" data-slot="mode-switch">

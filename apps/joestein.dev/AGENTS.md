@@ -55,7 +55,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ### 3. WCAG A+ Accessibility & Agent-Readability
 - **Accessibility Tree = Agent Interface:** Every interactive element must be keyboard-operable, screen-reader friendly, and cleanly exposed in the accessibility tree with unique, descriptive `aria-label` landmarks and sequential heading levels.
-- **Headless Primitives (`Base UI`):** Use Base UI–backed primitives for interactive controls (tabs, tooltips, disclosures) via the `render` prop—never build custom `div` click handlers or hover-only tooltips that hide content from keyboard/agent users.
+- **Headless Primitives (`Base UI`):** Use Base UI–backed primitives for custom interactive controls (tabs, tooltips, disclosures) via the `render` prop—never build custom `div` click handlers or hover-only tooltips that hide content from keyboard/agent users. Prefer native controls where their semantics fit, including the example-prompt `select` with platform-native option handling.
 - **Contrast & Focus Rings:** Primary text must meet WCAG AAA (`7:1+`) and secondary metadata must meet WCAG AA (`4.5:1+`). Never remove `:focus-visible` outlines without replacing them with a visible `--color-focus-ring` indicator.
 
 ---
@@ -122,12 +122,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Phase 2.0 Visual & Interaction Invariants
 
 ### 1. Zero Hover-Only Interactions ("No Hovers Ever")
-- **Click/Tap Disclosures Only:** Never gate content, tooltips, or controls behind `:hover` or pointer-hover triggers. Every secondary disclosure (such as the `(i)` relevance breakdown and mobile `Topics` expansion) must open on explicit click, tap, or keyboard activation (`Enter` / `Space`) and close cleanly on `Escape` or outside click.
+- **Click/Tap Disclosures Only:** Never gate content, tooltips, or controls behind `:hover` or pointer-hover triggers. Popovers such as the `(i)` relevance breakdown must open on explicit click, tap, or keyboard activation and close cleanly on `Escape` or outside click. Inline example-list expansion closes through its toggle or `Escape` rather than acting like a modal popup.
 - **Base UI Configuration:** When using Base UI `<Popover.Root>` or `<Tooltip.Trigger>`, explicitly disable hover activation (`openOnHover={false}`) so touchscreens, keyboards, and browser agents share 100% interaction parity.
 
 ### 2. Inline Streaming & Progressive Status Cues
 - **No Blocking Loaders:** Never render modal spinners or full-screen overlays during generation. Show progress inline at the exact point of activity:
-  1. **Button (`submitted`):** Run the horizontal `Pulling receipts...` stock-ticker scroll inside the disabled submit button (`prefers-reduced-motion` falls back to static text).
+  1. **Button (request in progress):** Use a static `Pulling Receipts...` label and a quiet disabled treatment. Keep both submit and textarea disabled through the full response, including bounded recovery, with the submitted question visible. Do not animate the button label or add composer status/keyboard-hint rows.
   2. **Prose Tail (`streaming` text):** Render an inline blinking block cursor (`data-slot="stream-cursor"`) at the end of the active summary paragraph until text streaming finishes.
   3. **Receipts Transition (`tool-showReceipts` in flight):** Show a quiet inline status line (`Pulling matching receipts…`) directly above the receipts region until `output-available`.
 - **Screen-Reader & Agent Readiness (`aria-busy`):** Set `aria-busy={isTurnStreaming}` on the active assistant turn container and maintain a polite `aria-live="polite"` status region so assistive tech and browser agents wait until streaming settles before reading the final turn.
@@ -140,6 +140,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **Story First, No Synthetic Titles:** Never render a `"Receipt:"` heading on receipt cards. Present the `tailoredNarrative` directly as an editorial quote excerpt, expanding vertically in place via a click-triggered `more...` button when truncated.
 - **Distinct Monospace Hierarchy & `1:1` Gauge:** Style `ul[data-slot="tech-list"]` as a quiet piped footnote (`--color-ink-tech`) distinct from the bottom role/company stamp (`--color-ink-stamp`), with a compact `1:1` monochrome radial score gauge + click-only `(i)` disclosure in the lower right.
 
-### 5. Active Bottom Tray & Unbounded Topic Bladder
-- **No Visible Bladder Label:** Rely on `aria-label="Portfolio topics"` on `<nav>` and shape differentiation (`data-tier="starter"` rectangles vs. `data-tier="contextual"` outlined pills)—never render a visible heading above the bubbles.
-- **Responsive Geometry:** Render a 50/50 split (`prompt-composer` left, fluid unbounded `topic-bladder` right) on desktop (`>= 1024px`), and a single horizontal swipe row of active contextual follow-ups + click-triggered `Topics +` expansion on mobile (`< 1024px`).
+### 5. Phase 2.5 Independent Prompt & Example Widgets
+- **Stable Structure:** Keep one composer and one companion example list mounted in a fixed, logical DOM order. CSS containers control geometry and density; do not move nodes with viewport-driven JavaScript or render mobile/desktop clones.
+- **Native Example Control:** Keep the quiet, labeled native `Example prompts` selector above the textarea in every posture. Both it and companion buttons reveal the selected question in the textarea and automatically submit after the reveal. Reduced motion reveals and submits immediately. Editing before completion cancels the pending auto-submit; switching modes or unmounting also cancels it. Record starter lineage only when that unchanged example is submitted.
+- **Optional Companion:** Use the same flat suggestion collection for the companion buttons and native options. The companion is the first region to disappear when width or height is constrained. Preview four examples, with explicit `Show N more example prompts` / `Show fewer example prompts` controls. Expanded examples may scroll within a bounded list with a visible hint; do not add a second conversation reading scroll surface.
+- **Independent Surfaces:** Composer and companion own their opaque semantic-token surfaces. The active sticky tray uses optional translucent glass with an opaque fallback, including reduced-transparency and forced-colors preferences. Keep examples secondary; no extra visible bladder heading is needed.
+- **Height & Keyboard Safety:** Use named inline-size containers for widget internals and outer height rules for environmental constraints. A small VisualViewport measurement bridge may expose keyboard occlusion as geometry; focus alone is not keyboard detection. Compact decorations first; if controls cannot safely fit, let the tray return to normal document flow.
+- **Quiet Navigation:** Let the top header scroll in document flow. Share a semantic monospace footer with Joe Stein, Making of, and a mode-switch control. Place it beneath the prompt widgets inside their sticky glass tray; on Overview and Colophon it remains in normal flow.
+- **Document Scrolling:** Preserve page scrolling, bounded auto-follow, reduced-motion behavior, and immediate release on user intent. Do not lock the app to a viewport-height shell or introduce a controls/conversation side rail in this phase.

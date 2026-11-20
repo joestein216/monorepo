@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ColophonContent } from "@/components/colophon-content";
 import { PortfolioHeader } from "@/components/portfolio-header";
+import { PortfolioFooter } from "@/components/portfolio-footer";
 import { getColophonPage } from "@/lib/sanity-context";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,5 +16,6 @@ export default async function Colophon() {
   return <main data-slot="colophon-shell">
     <PortfolioHeader colophon />
     <ColophonContent page={page} />
+    <PortfolioFooter colophon />
   </main>;
 }

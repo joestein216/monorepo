@@ -48,19 +48,30 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     const textarea = document.querySelector("textarea");
     assert.equal(textarea.hasAttribute("maxlength"), false);
     await act(() => button(context.starterTopics[0].question).click());
-    assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "true");
-    assert.equal(document.querySelector('[data-slot="submit-button"]').getAttribute("aria-busy"), "true");
-    assert.ok(document.querySelector('[data-slot="ticker-track"]'));
-    assert.match(document.querySelector('[data-slot="receipts-status"]').textContent, /Pulling receipts/);
-    assert.equal(document.querySelector('[data-slot="stop-button"]'), null);
+    assert.equal(requestCount, 0, "the typing reveal precedes submission");
     assert.ok(context.starterTopics[0].question.startsWith(textarea.value));
     assert.ok(textarea.value.length < context.starterTopics[0].question.length);
+    await fill(textarea, "An edited draft");
+    await React.act(async () => { await new Promise(resolve => setTimeout(resolve, 650)); });
+    assert.equal(requestCount, 0, "editing cancels a pending suggestion submission");
+    assert.equal(textarea.value, "An edited draft");
+    await act(() => button(context.starterTopics[0].question).click());
     await React.act(async () => { await new Promise(resolve => setTimeout(resolve, 650)); });
     assert.equal(textarea.value, context.starterTopics[0].question);
+    assert.equal(requestCount, 1, "the example automatically submits after its reveal");
+    assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "true");
+    assert.equal(document.querySelector('[data-slot="submit-button"]').getAttribute("aria-busy"), "true");
+    assert.equal(document.querySelector('[data-slot="ticker-track"]'), null);
+    assert.equal(document.querySelector('[data-slot="submit-button"]').textContent, "Pulling Receipts...");
+    assert.equal(textarea.disabled, true);
+    assert.equal(document.querySelector('[data-slot="composer-hint"]'), null);
+    assert.equal(document.querySelector('[data-slot="conversation-status"]'), null);
+    assert.match(document.querySelector('[data-slot="receipts-status"]').textContent, /Pulling receipts/);
+    assert.equal(document.querySelector('[data-slot="stop-button"]'), null);
     assert.equal(document.querySelector("textarea"), textarea);
-    assert.equal(document.querySelector('[data-slot="prompt-dock-inner"]').firstElementChild.dataset.slot, "topic-bladder");
+    assert.equal(document.querySelector('[data-slot="prompt-dock-inner"]').firstElementChild.dataset.slot, "prompt-composer");
 
-    await fill(textarea, "A draft for the next question.");
+    assert.equal(textarea.value, context.starterTopics[0].question, "the question stays visible while processing");
 
     let controller;
     const encoder = new TextEncoder();
@@ -96,8 +107,9 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     assert.equal(document.querySelector('[data-slot="assistant-turn"]').getAttribute("aria-busy"), "false");
     assert.equal(document.querySelector('[data-slot="receipts-status"]'), null);
     assert.equal(document.querySelector("textarea"), textarea);
-    assert.equal(document.querySelector('nav[aria-label="Portfolio topics"]').querySelectorAll("ul").length, 1);
-    assert.equal(textarea.value, "A draft for the next question.");
+    assert.equal(document.querySelector('nav[aria-label="Example prompts"]').querySelectorAll("ul").length, 1);
+    assert.equal(textarea.value, "");
+    assert.equal(textarea.disabled, false);
     const card = document.querySelector('[data-slot="receipt-card"]');
     assert.equal(card.textContent.includes(narrative), false);
     await act(() => button("more...").click());
@@ -122,16 +134,6 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     });
     assert.equal(info.getAttribute("aria-expanded"), "false");
 
-    const topics = document.querySelector('[data-slot="mobile-topics-toggle"]');
-    assert.equal(topics.getAttribute("aria-controls"), document.querySelector('[data-slot="topic-list"]').id);
-    await act(() => topics.click()); assert.equal(topics.getAttribute("aria-expanded"), "true");
-    await act(() => document.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true })));
-    assert.equal(topics.getAttribute("aria-expanded"), "false");
-    assert.equal(document.activeElement, topics);
-    await act(() => topics.click());
-    await act(() => document.body.dispatchEvent(new dom.window.PointerEvent("pointerdown", { bubbles: true })));
-    assert.equal(topics.getAttribute("aria-expanded"), "false");
-
     await fill(textarea, "a".repeat(10_800));
     assert.match(document.querySelector('[data-slot="composer-counter"]').textContent, /Near limit/);
     await fill(textarea, "a".repeat(12_001));
@@ -149,9 +151,16 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     assert.equal(document.querySelector("textarea"), textarea);
     assert.equal(document.querySelector('[data-slot="prompt-dock-inner"]').firstElementChild.dataset.slot, "prompt-composer");
     failNext = true;
-    await act(() => topics.click());
-    await act(() => button(context.starterTopics[1].question).click());
-    assert.equal(topics.getAttribute("aria-expanded"), "false");
+    const picker = document.querySelector('[data-slot="example-select"]');
+    const beforeSelection = requestCount;
+    await act(() => {
+      picker.focus(); picker.value = "payments";
+      picker.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+    });
+    assert.equal(requestCount, beforeSelection);
+    assert.ok(context.starterTopics[1].question.startsWith(textarea.value));
+    await React.act(async () => { await new Promise(resolve => setTimeout(resolve, 650)); });
+    assert.equal(requestCount, beforeSelection + 1, "native selection also reveals then auto-submits");
     assert.ok(document.querySelector('[data-slot="error-banner"][role="alert"]'));
     assert.ok(button("Try that question again"));
     failNext = false;
@@ -159,6 +168,8 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     assert.ok(document.querySelector('[data-slot="receipts-status"]'), "manual retries show progress before any response arrives");
     assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "true");
     assert.equal(document.querySelector('[data-slot="stop-button"]'), null);
+    assert.equal(textarea.disabled, true);
+    assert.equal(textarea.value, context.starterTopics[1].question, "retry restores the submitted question while loading");
     await act(() => {
       const chunks = [
         { type: "start", messageId: "retried-answer" }, { type: "start-step" },
@@ -174,8 +185,11 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     });
     assert.equal(document.querySelector('[data-slot="receipts-status"]'), null);
     assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "false");
-    await act(() => button("Overview").click());
+    await act(() => button("Switch to overview").click());
     assert.ok(document.querySelector('[data-slot="overview-canvas"]'));
+    assert.equal(document.querySelectorAll('[data-slot="portfolio-footer"]').length, 1);
+    await act(() => button("Switch to prompt").click());
+    assert.ok(document.querySelector('[data-slot="prompt-dock"] [data-slot="portfolio-footer"]'));
     assert.ok(document.querySelector('[data-slot="top-cover"][data-surface="cover"]'));
   } finally {
     await act(() => root.unmount());

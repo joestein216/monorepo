@@ -1,0 +1,54 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { JSDOM } from "jsdom";
+import { observePromptViewport } from "../lib/prompt-viewport.ts";
+
+test("keyboard geometry compacts controls without treating focus or pinch zoom as a keyboard", () => {
+  const dom = new JSDOM('<main><header data-slot="top-cover"></header><section data-slot="prompt-dock"></section><textarea></textarea></main>');
+  const view = dom.window;
+  const previous = globalThis.window;
+  globalThis.window = view;
+  const shell = view.document.querySelector("main");
+  const viewport = new view.EventTarget();
+  Object.assign(viewport, { height: 800, offsetTop: 0, scale: 1 });
+  Object.defineProperty(view, "visualViewport", { value: viewport });
+  Object.defineProperty(view, "innerHeight", { value: 800 });
+  let dockHeight = 240;
+  shell.querySelector("header").getBoundingClientRect = () => ({ height: 60 });
+  shell.querySelector("header").style.position = "sticky";
+  shell.querySelector("section").getBoundingClientRect = () => ({ height: dockHeight });
+  const frames = new Map();
+  let frameId = 0;
+  view.requestAnimationFrame = (callback) => { frames.set(++frameId, callback); return frameId; };
+  view.cancelAnimationFrame = (id) => frames.delete(id);
+  const flush = () => { const pending = [...frames.values()]; frames.clear(); pending.forEach(callback => callback()); };
+  const cleanup = observePromptViewport(shell);
+  try {
+    shell.querySelector("textarea").focus();
+    assert.equal(shell.dataset.viewportConstrained, "false", "focus alone does not compact the UI");
+    viewport.height = 360;
+    viewport.offsetTop = 20;
+    viewport.dispatchEvent(new view.Event("resize"));
+    viewport.dispatchEvent(new view.Event("scroll"));
+    assert.equal(frames.size, 1, "geometry updates are batched");
+    flush();
+    assert.equal(shell.style.getPropertyValue("--viewport-bottom-inset"), "420px");
+    assert.equal(shell.dataset.viewportConstrained, "true");
+    assert.equal(shell.dataset.controlsOverflow, "false");
+    dockHeight = 320;
+    view.dispatchEvent(new view.Event("resize")); flush();
+    assert.equal(shell.dataset.controlsOverflow, "true", "controls that cannot fit return to document flow");
+    viewport.scale = 2;
+    viewport.dispatchEvent(new view.Event("resize")); flush();
+    assert.equal(shell.dataset.viewportConstrained, "false");
+    assert.equal(shell.style.getPropertyValue("--viewport-bottom-inset"), "0px", "do not chase a pinched visual viewport");
+    viewport.dispatchEvent(new view.Event("resize"));
+    cleanup();
+    assert.equal(frames.size, 0);
+    assert.equal(shell.dataset.controlsOverflow, undefined);
+    assert.equal(shell.dataset.viewportConstrained, undefined);
+    assert.equal(shell.style.getPropertyValue("--viewport-bottom-inset"), "");
+    viewport.dispatchEvent(new view.Event("resize"));
+    assert.equal(frames.size, 0, "listeners are removed on cleanup");
+  } finally { cleanup(); dom.window.close(); globalThis.window = previous; }
+});

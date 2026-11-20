@@ -18,7 +18,9 @@ export function followConversation({ question, content, header, dock, onRelease 
   const viewport = window.visualViewport;
 
   function topEdge() {
-    return Math.max(viewport?.offsetTop ?? 0, header.getBoundingClientRect().bottom);
+    const edge = viewport?.offsetTop ?? 0;
+    const position = window.getComputedStyle(header).position;
+    return position === "sticky" || position === "fixed" ? Math.max(edge, header.getBoundingClientRect().bottom) : edge;
   }
   function cancelMotion() {
     if (target !== undefined) window.scrollTo({ top: window.scrollY, behavior: "instant" });
@@ -43,7 +45,9 @@ export function followConversation({ question, content, header, dock, onRelease 
     frame = 0;
     if (!following || !question.isConnected || !content.isConnected) return;
     const top = topEdge();
-    const bottom = Math.min((viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight), dock.getBoundingClientRect().top);
+    const visibleBottom = (viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight);
+    const bottom = window.getComputedStyle(dock).position === "static"
+      ? visibleBottom : Math.min(visibleBottom, dock.getBoundingClientRect().top);
     const remaining = question.getBoundingClientRect().top - top;
     if (remaining <= 0) { relinquish(); return; }
     if (bottom <= top) return; // An expanded tray/keyboard can leave no reading area.

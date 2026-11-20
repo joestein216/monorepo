@@ -7,11 +7,12 @@ import { rateLimitMessage } from "../lib/chat-stream.ts";
 const tick = () => new Promise((resolve) => setTimeout(resolve, 20));
 
 test("flat prompt replacement preserves origin, order, turn isolation, reset, and freeform submission", async () => {
-  const dom = new JSDOM("<!doctype html><html><body><main id='test-root'></main></body></html>", { url: "http://localhost" });
+  const dom = new JSDOM("<!doctype html><html><body><main id='test-root'></main></body></html>", { url: "http://localhost", pretendToBeVisual: true });
   // Exercise the nonanimated, reduced-motion suggestion path in this suite.
   dom.window.matchMedia = () => ({ matches: true, addEventListener() {}, removeEventListener() {} });
-  const previous = Object.fromEntries(["window", "self", "document", "HTMLElement", "Node", "IS_REACT_ACT_ENVIRONMENT", "fetch"].map((key) => [key, globalThis[key]]));
-  Object.assign(globalThis, { window: dom.window, self: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, Node: dom.window.Node, IS_REACT_ACT_ENVIRONMENT: true });
+  const previous = Object.fromEntries(["window", "self", "document", "HTMLElement", "Node", "requestAnimationFrame", "cancelAnimationFrame", "IS_REACT_ACT_ENVIRONMENT", "fetch"].map((key) => [key, globalThis[key]]));
+  Object.assign(globalThis, { window: dom.window, self: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, Node: dom.window.Node,
+    requestAnimationFrame: dom.window.requestAnimationFrame.bind(dom.window), cancelAnimationFrame: dom.window.cancelAnimationFrame.bind(dom.window), IS_REACT_ACT_ENVIRONMENT: true });
   const requests = [];
   let includeSuggestions = true;
   let responseFailure = false;
@@ -45,20 +46,40 @@ test("flat prompt replacement preserves origin, order, turn isolation, reset, an
   const context = { about: null, roles: [], projects: [], technologies: [], starterTopics: Array.from({ length: 8 }, (_, index) => ({ id: `chapter-${index}`, question: `What is chapter ${index}?` })) };
   const click = async (element) => { assert.ok(element); await React.act(async () => { element.click(); await tick(); }); };
   const findButton = (label) => [...container.querySelectorAll("button")].find((button) => button.textContent === label);
+  const chooseAndSend = async (label) => {
+    const before = requests.length;
+    const option = findButton(label);
+    if (option?.closest("li")?.hidden) await click(container.querySelector('[data-slot="examples-toggle"]'));
+    await click(option);
+    assert.equal(requests.length, before + 1, "reduced-motion examples submit immediately without a second click");
+  };
   try {
     await React.act(async () => root.render(React.createElement(PortfolioPrototype, { context })));
     assert.equal(container.querySelector('[data-slot="prompt-dock"]').getAttribute("data-conversation-state"), "idle");
     assert.equal(container.querySelectorAll('[data-slot="topic-item"][data-tier="starter"]').length, 8);
+    assert.equal(container.querySelectorAll('[data-slot="topic-item"]:not([hidden])').length, 4);
+    const toggle = container.querySelector('[data-slot="examples-toggle"]');
+    assert.equal(toggle.textContent, "Show 4 more example prompts");
+    await click(toggle);
+    assert.equal(container.querySelectorAll('[data-slot="topic-item"]:not([hidden])').length, 8);
+    assert.equal(toggle.getAttribute("aria-expanded"), "true");
+    await React.act(async () => {
+      toggle.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      await tick();
+    });
+    assert.equal(toggle.textContent, "Show 4 more example prompts");
+    assert.equal(toggle.getAttribute("aria-expanded"), "false");
+    assert.equal(document.activeElement, toggle);
     const originalTextarea = container.querySelector("textarea");
     findButton("What is chapter 0?").focus();
-    await click(findButton("What is chapter 0?"));
-    assert.equal(document.activeElement, findButton("What is turn 1 detail 0?"));
+    await chooseAndSend("What is chapter 0?");
+    assert.equal(document.activeElement, originalTextarea);
     assert.equal(container.querySelector("textarea"), originalTextarea, "composer node survives engagement");
     assert.equal(requests.at(-1).messages.at(-1).parts[0].text, "What is chapter 0?");
     assert.equal(container.querySelector('[data-slot="prompt-dock"]').getAttribute("data-conversation-state"), "active");
     assert.equal(container.querySelectorAll('[data-slot="topic-item"][data-tier="starter"]').length, 7);
     assert.equal(container.querySelectorAll('[data-slot="topic-item"][data-tier="contextual"]').length, 3);
-    const nav = container.querySelector('nav[aria-label="Portfolio topics"]');
+    const nav = container.querySelector('nav[aria-label="Example prompts"]');
     assert.equal(nav.querySelectorAll("ul").length, 1);
     assert.equal(nav.querySelectorAll("ul ul").length, 0);
     assert.equal(nav.querySelector("ul").children.length, 10);
@@ -70,12 +91,12 @@ test("flat prompt replacement preserves origin, order, turn isolation, reset, an
     assert.deepEqual([...nav.querySelector("ul").children].slice(0, 4).map((item) => item.textContent), [
       "What is turn 1 detail 0?", "What is turn 1 detail 1?", "What is turn 1 detail 2?", "What is chapter 1?",
     ]);
-    await click(findButton("What is turn 1 detail 0?"));
+    await chooseAndSend("What is turn 1 detail 0?");
     assert.equal(requests.at(-1).messages.at(-1).parts[0].text, "What is turn 1 detail 0?");
     assert.equal(nav.querySelectorAll("ul").length, 1);
     assert.ok(findButton("What is turn 1 detail 0?"));
     assert.equal(findButton("What is turn 2 detail 0?"), undefined);
-    await click(findButton("What is chapter 1?"));
+    await chooseAndSend("What is chapter 1?");
     assert.equal(container.querySelectorAll('[data-slot="topic-item"][data-tier="starter"]').length, 6);
     assert.equal(container.querySelectorAll('[data-slot="topic-item"][data-tier="contextual"]').length, 6);
     assert.equal(findButton("What is chapter 0?"), undefined);
@@ -88,12 +109,24 @@ test("flat prompt replacement preserves origin, order, turn isolation, reset, an
     await click(findButton("Start a new conversation"));
     assert.equal(container.querySelector('[data-slot="prompt-dock"]').getAttribute("data-conversation-state"), "idle");
     assert.equal(container.querySelectorAll('[data-slot="topic-item"][data-tier="starter"]').length, 8);
+    const picker = container.querySelector('[data-slot="example-select"]');
+    const beforePicker = requests.length;
+    await React.act(async () => {
+      picker.focus(); picker.value = "chapter-2";
+      picker.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+      await tick();
+    });
+    assert.equal(requests.length, beforePicker + 1, "native examples use the same auto-submit path");
+    assert.equal(requests.at(-1).messages.at(-1).parts[0].text, "What is chapter 2?");
+    assert.equal(container.querySelectorAll('[data-slot="topic-item"][data-tier="starter"]').length, 7);
+    await click(findButton("Start a new conversation"));
     includeSuggestions = false;
-    await click(findButton("What is chapter 2?"));
+    await chooseAndSend("What is chapter 2?");
     assert.equal(container.querySelectorAll('[data-slot="topic-item"][data-tier="starter"]').length, 8);
     assert.equal(container.querySelectorAll('[data-slot="topic-item"][data-tier="contextual"]').length, 0);
     await React.act(async () => root.render(React.createElement(PortfolioPrototype, { context: { ...context, starterTopics: [] }, key: "empty-topics" })));
-    assert.equal(container.querySelector('nav[aria-label="Portfolio topics"]'), null);
+    assert.equal(container.querySelector('nav[aria-label="Example prompts"]'), null);
+    assert.equal(container.querySelector('[data-slot="example-select"]').disabled, true);
     const textarea = container.querySelector("textarea");
     assert.equal(textarea.hasAttribute("maxlength"), false);
     await React.act(async () => {

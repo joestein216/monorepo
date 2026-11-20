@@ -16,16 +16,17 @@ import { PortfolioFooter } from "./portfolio-footer";
 import { PromptComposer } from "./prompt-composer";
 import { ExamplePrompts } from "./example-prompts";
 import { observePromptViewport } from "@/lib/prompt-viewport";
+import { getSitePresentation, type PortfolioMode } from "@/lib/site-presentation";
 
 const transport = new DefaultChatTransport<PortfolioMessage>({ api: "/api/chat" });
-export function PortfolioPrototype({ context, loadError, initialMode = "prompt" }: { context: PortfolioContext; loadError?: boolean; initialMode?: "prompt" | "overview" }) {
+export function PortfolioPrototype({ context, loadError, initialMode = "prompt" }: { context: PortfolioContext; loadError?: boolean; initialMode?: PortfolioMode }) {
   const shellRef = useRef<HTMLElement>(null);
   const releasedAttempt = useRef<string | null>(null);
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const selectRef = useRef<HTMLSelectElement>(null);
   const [selectedSuggestionId, setSelectedSuggestionId] = useState<string | null>(null);
   const restorePromptFocus = useRef(false);
-  const [mode, setMode] = useState<"prompt" | "overview">(initialMode);
+  const [mode, setMode] = useState<PortfolioMode>(initialMode);
   const [input, setInput] = useState("");
   const [suggestionTyping, setSuggestionTyping] = useState(false);
   const [visibleCharacters, setVisibleCharacters] = useState(0);
@@ -35,6 +36,7 @@ export function PortfolioPrototype({ context, loadError, initialMode = "prompt" 
   const busy = status === "submitted" || status === "streaming";
   const pending = status === "submitted";
   const conversationState = messages.length === 0 ? "idle" : "active";
+  const presentation = getSitePresentation(context.siteSettings);
   const suggestions = getPromptSuggestions(context.starterTopics ?? [], messages, starterTurns);
   const questionId = messages.findLast((message) => message.role === "user")?.id;
 
@@ -116,15 +118,15 @@ export function PortfolioPrototype({ context, loadError, initialMode = "prompt" 
     setInput(text);
     void regenerate().finally(() => setInput((current) => current === text ? "" : current));
   }
-  function changeMode(next: "prompt" | "overview") { setSuggestionTyping(false); setSelectedSuggestionId(null); setMode(next); }
+  function changeMode(next: PortfolioMode) { setSuggestionTyping(false); setSelectedSuggestionId(null); setMode(next); }
   function resetConversation() {
     setMessages([]); clearError(); setInput(""); setSuggestionTyping(false); setSelectedSuggestionId(null); setStarterTurns({}); promptRef.current?.focus();
   }
 
   return <main ref={shellRef} data-slot="portfolio-shell" data-conversation-state={conversationState} data-request-state={pending ? "pending" : status}>
-    <PortfolioHeader mode={mode} onModeChange={changeMode} />
+    <PortfolioHeader presentation={presentation} mode={mode} onModeChange={changeMode} />
     {loadError && <p data-slot="error-banner" role="alert">Portfolio data could not be loaded. Please refresh to try again.</p>}
-    {mode === "overview" ? <><section data-slot="overview-canvas" aria-label="Portfolio overview"><Overview context={context} /></section><PortfolioFooter mode={mode} onModeChange={changeMode} /></> : <section aria-label="Portfolio assistant" data-slot="prompt-mode">
+    {mode === "overview" ? <><section data-slot="overview-canvas" aria-label="Portfolio overview"><Overview context={context} /></section><PortfolioFooter presentation={presentation} mode={mode} onModeChange={changeMode} /></> : <section aria-label="Portfolio assistant" data-slot="prompt-mode">
       <section aria-label="Responses" data-slot="conversation-canvas">
         <h2 data-slot="visually-hidden">Conversation</h2>
         <section data-slot="turn-list" aria-label="Conversation turns">
@@ -140,14 +142,14 @@ export function PortfolioPrototype({ context, loadError, initialMode = "prompt" 
       </section>
       <section aria-label="Prompt composer and example prompts" data-slot="prompt-dock" data-surface="paper" data-conversation-state={conversationState}>
         <section data-slot="prompt-dock-inner" aria-label="Conversation controls">
-          <PromptComposer input={input} visibleInput={suggestionTyping ? input.slice(0, visibleCharacters) : input}
+          <PromptComposer copy={presentation.prompt} input={input} visibleInput={suggestionTyping ? input.slice(0, visibleCharacters) : input}
             busy={busy} idle={conversationState === "idle"}
             suggestions={suggestions} promptRef={promptRef} selectRef={selectRef}
             onChange={(value) => { setSuggestionTyping(false); setSelectedSuggestionId(null); setInput(value); }}
             onChoose={choose} onSubmit={() => send(input)} />
           <ExamplePrompts items={suggestions} disabled={busy} selectRef={selectRef} onChoose={choose} />
         </section>
-        <PortfolioFooter mode={mode} onModeChange={changeMode} />
+        <PortfolioFooter presentation={presentation} mode={mode} onModeChange={changeMode} />
       </section>
     </section>}
   </main>;

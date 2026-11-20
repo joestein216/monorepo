@@ -30,7 +30,7 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
   const { createRoot } = await import("react-dom/client");
   const { PortfolioPrototype } = await import("../components/portfolio-prototype.tsx");
   const root = createRoot(document.querySelector("#root"));
-  const context = { about: null, projects: [], roles: [], technologies: [], starterTopics: [
+  const context = { siteSettings: { modes: { prompt: { navigationLabel: "Ask another question" }, overview: { navigationLabel: "Read the overview" } } }, about: null, projects: [], roles: [], technologies: [], starterTopics: [
     { id: "agents", question: "How does Joe work with coding agents?" },
     { id: "payments", question: "How does Joe build payment systems?" },
   ] };
@@ -185,10 +185,10 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     });
     assert.equal(document.querySelector('[data-slot="receipts-status"]'), null);
     assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "false");
-    await act(() => button("Switch to overview").click());
+    await act(() => button("Read the overview").click());
     assert.ok(document.querySelector('[data-slot="overview-canvas"]'));
     assert.equal(document.querySelectorAll('[data-slot="portfolio-footer"]').length, 1);
-    await act(() => button("Switch to prompt").click());
+    await act(() => button("Ask another question").click());
     assert.ok(document.querySelector('[data-slot="prompt-dock"] [data-slot="portfolio-footer"]'));
     assert.ok(document.querySelector('[data-slot="top-cover"][data-surface="cover"]'));
   } finally {

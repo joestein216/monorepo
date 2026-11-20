@@ -1,17 +1,18 @@
 import Link from "next/link";
+import { ModeControl } from "./mode-control";
+import { defaultSitePresentation, type PortfolioMode, type SitePresentation } from "@/lib/site-presentation";
 
-export function PortfolioFooter({ mode, onModeChange, colophon = false }: {
-  mode?: "prompt" | "overview";
-  onModeChange?: (mode: "prompt" | "overview") => void;
+export function PortfolioFooter({ mode, onModeChange, colophon = false, presentation = defaultSitePresentation }: {
+  mode?: PortfolioMode;
+  onModeChange?: (mode: PortfolioMode) => void;
   colophon?: boolean;
+  presentation?: SitePresentation;
 }) {
-  const nextMode = mode === "prompt" ? "overview" : "prompt";
   return <footer data-slot="portfolio-footer">
-    <small>JOESTEIN.DEV</small>
-    <nav aria-label="Footer navigation">
-      <Link href="/colophon" prefetch={false} aria-current={colophon ? "page" : undefined}>making of joestein.dev</Link>
-      {onModeChange ? <button type="button" onClick={() => onModeChange(nextMode)}>{nextMode} mode</button>
-        : <Link href={`/?mode=${nextMode}`} prefetch={false}>Switch to {nextMode}</Link>}
-    </nav>
+    <small>{presentation.brandName}</small>
+    <section data-slot="footer-links" aria-label="Footer navigation">
+      <Link data-slot="colophon-link" href="/colophon" prefetch={false} aria-current={colophon ? "page" : undefined}>{presentation.colophonLabel}</Link>
+      <ModeControl placement="footer" mode={mode} onModeChange={onModeChange} labels={presentation.modes} />
+    </section>
   </footer>;
 }

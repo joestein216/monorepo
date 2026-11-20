@@ -1,18 +1,20 @@
 "use client";
 
 import type { RefObject } from "react";
+import { defaultSitePresentation, type SitePresentation } from "@/lib/site-presentation";
 import type { PromptSuggestion } from "@/lib/portfolio-navigation";
 import { PROMPT_CHAR_LIMIT, promptLimitState } from "@/lib/prompt-input";
 import { ExamplePromptSelect } from "./example-prompts";
 
-export function PromptComposer({ input, visibleInput, busy, idle, suggestions, promptRef, selectRef, onChange, onChoose, onSubmit }: {
+export function PromptComposer({ copy = defaultSitePresentation.prompt, input, visibleInput, busy, idle, suggestions, promptRef, selectRef, onChange, onChoose, onSubmit }: {
+  copy?: SitePresentation["prompt"];
   input: string; visibleInput: string; busy: boolean; idle: boolean;
   suggestions: PromptSuggestion[]; promptRef: RefObject<HTMLTextAreaElement | null>; selectRef: RefObject<HTMLSelectElement | null>;
   onChange: (value: string) => void; onChoose: (item: PromptSuggestion) => void; onSubmit: () => void;
 }) {
   const limitState = promptLimitState(input.length);
   return <section data-slot="prompt-composer" aria-label="Ask Joe’s portfolio">
-    {idle && <h2 data-slot="hero-headline">Ask anything about Joe’s engineering work.</h2>}
+    {idle && <h2 data-slot="hero-headline">{copy.invitation}</h2>}
     <form data-slot="composer-card" data-limit-state={limitState} noValidate onSubmit={(event) => { event.preventDefault(); onSubmit(); }}>
       <label htmlFor="portfolio-prompt" data-slot="visually-hidden">Your question or brief</label>
       <header data-slot="composer-meta">
@@ -24,7 +26,7 @@ export function PromptComposer({ input, visibleInput, busy, idle, suggestions, p
       </header>
       <textarea ref={promptRef} id="portfolio-prompt" name="prompt" data-slot="prompt-textarea" value={visibleInput} rows={3} disabled={busy}
         aria-invalid={limitState === "exceeded" ? true : undefined}
-        placeholder="Ask about a problem like yours, gauge depth in a tech stack, or paste a job/project brief…"
+        placeholder={copy.placeholder}
         aria-describedby="prompt-counter prompt-limit-status"
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={(event) => {
@@ -36,7 +38,7 @@ export function PromptComposer({ input, visibleInput, busy, idle, suggestions, p
       <footer data-slot="composer-actions">
         <button type="submit" data-slot="submit-button" disabled={busy || !input.trim() || limitState === "exceeded"}
           aria-busy={busy} data-pending={busy}>
-          {busy ? "Pulling Receipts..." : "Pull the receipts"}
+          {busy ? copy.pendingLabel : copy.submitLabel}
         </button>
       </footer>
     </form>

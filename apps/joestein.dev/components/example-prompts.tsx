@@ -66,7 +66,6 @@ export function ExamplePrompts({ items, disabled, onChoose, selectRef }: Props &
       {items.length > previewCount && <Collapsible.Trigger ref={trigger} data-slot="examples-toggle" aria-controls={listId}>
         {expanded ? "Show fewer example prompts" : `Show ${items.length - previewCount} more example prompts`}
       </Collapsible.Trigger>}
-      {expanded && items.length > previewCount && <small data-slot="example-scroll-hint">Scroll to browse all example prompts.</small>}
     </Collapsible.Root>
   </section>;
 }

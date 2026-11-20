@@ -1,13 +1,17 @@
 import { defineQuery } from "next-sanity";
 
 export const PORTFOLIO_CONTEXT_QUERY = defineQuery(`{
+  "siteSettings": *[_type == "siteSettings" && _id == "site-settings"][0]{
+    identity{brandName}, modes{prompt{label, navigationLabel}, overview{label, navigationLabel}},
+    navigation{colophonLabel},
+    promptExperience{invitation, placeholder, submitLabel, pendingLabel, starterQuestions[]{_key, question}}
+  },
   "colophonSummary": *[_type == "page" && slug.current == "colophon"] | order(_updatedAt desc)[0]{
     title, subtitle, "plainText": pt::text(body),
     "technicalBlocks": body[_type in ["mermaidDiagram", "codeBlock"]]{_key, _type, caption, language, code}
   },
   "about": *[_type == "about" && _id == "about"][0]{
     _id, headline, intro, story, nextRole, advisory, contact,
-    starterQuestions[]{_key, question},
     downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}
   },
   "projects": *[_type == "project"] | order(order asc, title asc){
@@ -26,5 +30,13 @@ export const PORTFOLIO_CONTEXT_QUERY = defineQuery(`{
 export const COLOPHON_PAGE_QUERY = defineQuery(`
   *[_type == "page" && slug.current == "colophon"] | order(_updatedAt desc)[0]{
     _id, title, subtitle, eyebrow, "slug": slug.current, body, "plainText": pt::text(body)
+  }
+`);
+
+export const SITE_SETTINGS_QUERY = defineQuery(`
+  *[_type == "siteSettings" && _id == "site-settings"][0]{
+    identity{brandName}, modes{prompt{label, navigationLabel}, overview{label, navigationLabel}},
+    navigation{colophonLabel},
+    promptExperience{invitation, placeholder, submitLabel, pendingLabel, starterQuestions[]{_key, question}}
   }
 `);

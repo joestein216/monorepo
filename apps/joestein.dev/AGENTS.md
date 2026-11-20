@@ -77,6 +77,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   names such as `centered`, `collapsed-tray`, or `sidebar-mode`.
 - Keep independent concerns separate: conversation state, request status,
   selection, and presentation should not become one overloaded state machine.
+- Supply component context explicitly through props. Structural placement
+  (`header` / `footer`, exposed as `data-placement`) is independent of application
+  state (`idle` / `active`) and must not be inferred from the DOM or route.
 
 ### Model Relationships According to Their Meaning
 - Distinguish identity, origin, grouping, and hierarchy.
@@ -91,6 +94,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   where practical.
 - Keep editorial content, application behavior, and theme configuration
   independently understandable.
+- Site Settings owns shared identity, navigation labels, and prompt-experience
+  copy. About owns biographical content. Stable mode IDs, supported capabilities,
+  destinations, and transitions remain application-owned; editable labels cannot
+  create new behavior. Pages and delivery interfaces are not implicitly modes.
 
 ### Keep Functional Accessibility in the Core
 - Core components own semantics, keyboard behavior, focus management,

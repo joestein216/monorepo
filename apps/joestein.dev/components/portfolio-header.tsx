@@ -1,26 +1,19 @@
 import Link from "next/link";
+import { ModeControl } from "./mode-control";
+import { defaultSitePresentation, type PortfolioMode, type SitePresentation } from "@/lib/site-presentation";
 
-type Mode = "prompt" | "overview";
-
-export function PortfolioHeader({ mode, onModeChange, colophon = false }: {
-  mode?: Mode;
-  onModeChange?: (mode: Mode) => void;
+export function PortfolioHeader({ mode, onModeChange, colophon = false, presentation = defaultSitePresentation }: {
+  mode?: PortfolioMode;
+  onModeChange?: (mode: PortfolioMode) => void;
   colophon?: boolean;
+  presentation?: SitePresentation;
 }) {
   return <header data-slot="top-cover" data-surface="cover">
     <section data-slot="top-cover-inner" aria-label="Portfolio header">
-      {colophon ? <p data-slot="brand-title">JOESTEIN.DEV</p> : <h1 data-slot="brand-title">JOESTEIN.DEV</h1>}
+      {colophon ? <p data-slot="brand-title">{presentation.brandName}</p> : <h1 data-slot="brand-title">{presentation.brandName}</h1>}
       <section data-slot="header-actions" aria-label="Portfolio navigation">
-        <Link data-slot="colophon-link" href="/colophon" prefetch={false} aria-current={colophon ? "page" : undefined}>Making of joestein.dev</Link>
-        <nav aria-label="Portfolio mode" data-slot="mode-switch">
-          {onModeChange ? <>
-            <button type="button" aria-pressed={mode === "prompt"} onClick={() => onModeChange("prompt")}>Prompt</button>
-            <button type="button" aria-pressed={mode === "overview"} onClick={() => onModeChange("overview")}>Overview</button>
-          </> : <>
-            <Link href="/?mode=prompt" prefetch={false}>Prompt</Link>
-            <Link href="/?mode=overview" prefetch={false}>Overview</Link>
-          </>}
-        </nav>
+        <Link data-slot="colophon-link" href="/colophon" prefetch={false} aria-current={colophon ? "page" : undefined}>{presentation.colophonLabel}</Link>
+        <ModeControl placement="header" mode={mode} onModeChange={onModeChange} labels={presentation.modes} />
       </section>
     </section>
   </header>;

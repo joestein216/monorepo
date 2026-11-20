@@ -9,14 +9,13 @@ const previewCount = 4;
 
 export function ExamplePromptSelect({ items, disabled, onChoose, selectRef }: Props & { selectRef: RefObject<HTMLSelectElement | null> }) {
   const id = useId();
-  const [value, setValue] = useState("");
   return <span data-slot="example-picker">
     <label htmlFor={id} data-slot="visually-hidden">Example prompts</label>
     <select ref={selectRef} id={id} data-slot="example-select" disabled={disabled || !items.length}
-      value={items.some((item) => item.id === value) ? value : ""} aria-describedby={`${id}-help`}
-      onBlur={() => setValue("")} onChange={(event) => {
-        setValue(event.target.value);
+      value="" aria-describedby={`${id}-help`}
+      onChange={(event) => {
         const item = items.find((item) => item.id === event.target.value);
+        event.currentTarget.value = "";
         if (item) onChoose(item);
       }}>
       <option value="">Example prompts</option>

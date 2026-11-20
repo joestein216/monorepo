@@ -158,6 +158,8 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
       picker.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
     });
     assert.equal(requestCount, beforeSelection);
+    assert.equal(picker.value, "", "the picker immediately returns to its neutral label");
+    assert.equal(document.activeElement, textarea, "focus follows the chosen question instead of remaining on the picker");
     assert.ok(context.starterTopics[1].question.startsWith(textarea.value));
     await React.act(async () => { await new Promise(resolve => setTimeout(resolve, 650)); });
     assert.equal(requestCount, beforeSelection + 1, "native selection also reveals then auto-submits");

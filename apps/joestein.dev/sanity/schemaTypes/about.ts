@@ -9,6 +9,9 @@ export const about = defineType({
     defineField({
       name: "starterQuestions",
       type: "array",
+      hidden: true,
+      readOnly: true,
+      deprecated: { reason: "Moved to Site Settings → Prompt Experience. Retained only for deployment compatibility and rollback." },
       description: "Prompt Mode conversation starters, displayed in this order. Drag to reorder. Each question is both the button text and the submitted prompt. Leave empty to hide starter questions; freeform chat remains available.",
       validation: (rule) => rule.max(8),
       of: [defineArrayMember({

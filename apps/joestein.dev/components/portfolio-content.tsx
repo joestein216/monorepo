@@ -1,59 +1,8 @@
-import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { useId, useState, type CSSProperties } from "react";
 import { Popover } from "@base-ui-components/react/popover";
-import { Collapsible } from "@base-ui-components/react/collapsible";
 import { PortableText } from "@portabletext/react";
 import type { PortfolioData } from "@/lib/portfolio-topics";
 import type { PortfolioReceipt } from "@/lib/portfolio-tools";
-import type { PromptSuggestion } from "@/lib/portfolio-navigation";
-
-export function TopicNavigation({ items, disabled, active = false, onSelect }: {
-  items: PromptSuggestion[];
-  disabled: boolean;
-  active?: boolean;
-  onSelect: (item: PromptSuggestion) => void;
-}) {
-  const navRef = useRef<HTMLElement>(null);
-  const toggleRef = useRef<HTMLButtonElement>(null);
-  const listId = useId();
-  const [expanded, setExpanded] = useState(false);
-  useEffect(() => {
-    if (!expanded) return;
-    function outside(event: PointerEvent) {
-      if (!navRef.current?.contains(event.target as Node)) setExpanded(false);
-    }
-    function escape(event: KeyboardEvent) {
-      if (event.key === "Escape") { setExpanded(false); toggleRef.current?.focus(); }
-    }
-    document.addEventListener("pointerdown", outside);
-    document.addEventListener("keydown", escape);
-    return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
-  }, [expanded]);
-  const pendingFocus = useRef<string | null>(null);
-  useEffect(() => {
-    if (disabled || !pendingFocus.current) return;
-    const nav = navRef.current;
-    const replacement = [...(nav?.querySelectorAll<HTMLLIElement>('li[data-origin-id]') ?? [])]
-      .find((item) => item.dataset.originId === pendingFocus.current);
-    if (!replacement) return;
-    // Replaced buttons can leave focus on body. Respect focus moved elsewhere.
-    if (document.activeElement === document.body) replacement.querySelector("button")?.focus();
-    pendingFocus.current = null;
-  }, [disabled, items]);
-  if (!items.length) return null;
-  return <Collapsible.Root open={expanded} onOpenChange={setExpanded} render={<nav ref={navRef} onBlurCapture={(event) => {
-    if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) pendingFocus.current = null;
-  }} aria-label="Portfolio topics" data-slot="topic-bladder" data-active={active} data-expanded={expanded} />}>
-    <Collapsible.Trigger ref={toggleRef} data-slot="mobile-topics-toggle" aria-controls={listId}>Topics {expanded ? "−" : "+"}</Collapsible.Trigger>
-    <ul id={listId} data-slot="topic-list" role="list">
-      {items.map((item) => <li key={item.id} data-slot="topic-item" data-topic-id={item.id}
-        data-tier={item.tier} data-origin-id={item.originTopicId}>
-        <button type="button" disabled={disabled}
-          aria-label={item.tier === "contextual" ? `Follow-up on ${item.originLabel}: ${item.prompt}` : undefined}
-          onClick={() => { pendingFocus.current = item.tier === "starter" ? item.id : null; setExpanded(false); onSelect(item); }}>{item.prompt}</button>
-      </li>)}
-    </ul>
-  </Collapsible.Root>;
-}
 
 export function safeUrl(value?: string | null) {
   if (!value) return undefined;

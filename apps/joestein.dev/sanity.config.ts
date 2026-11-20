@@ -26,10 +26,10 @@ export default defineConfig({
   ],
   schema: {
     types: schemaTypes,
-    templates: (templates) => templates.filter((template) => template.schemaType !== "about"),
+    templates: (templates) => templates.filter((template) => !["about", "siteSettings"].includes(template.schemaType)),
   },
   document: {
-    actions: (actions, context) => context.schemaType === "about" || context.documentId === "page-colophon"
+    actions: (actions, context) => ["about", "siteSettings"].includes(context.schemaType) || context.documentId === "page-colophon"
       ? actions.filter(({ action }) => action !== "duplicate" && action !== "delete" && action !== "unpublish")
       : actions,
   },

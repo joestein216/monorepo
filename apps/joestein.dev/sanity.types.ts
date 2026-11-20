@@ -15,6 +15,41 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: sanity/extract.json
+export type SiteSettings = {
+  _id: string;
+  _type: "siteSettings";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  identity?: {
+    brandName?: string;
+  };
+  modes?: {
+    prompt?: {
+      label?: string;
+      navigationLabel?: string;
+    };
+    overview?: {
+      label?: string;
+      navigationLabel?: string;
+    };
+  };
+  navigation?: {
+    colophonLabel?: string;
+  };
+  promptExperience?: {
+    invitation?: string;
+    placeholder?: string;
+    submitLabel?: string;
+    pendingLabel?: string;
+    starterQuestions?: Array<{
+      question?: string;
+      _type: "starterQuestion";
+      _key: string;
+    }>;
+  };
+};
+
 export type Page = {
   _id: string;
   _type: "page";
@@ -342,6 +377,7 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | SiteSettings
   | Page
   | Slug
   | SanityFileAssetReference
@@ -363,8 +399,36 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: PORTFOLIO_CONTEXT_QUERY
-// Query: {  "colophonSummary": *[_type == "page" && slug.current == "colophon"] | order(_updatedAt desc)[0]{    title, subtitle, "plainText": pt::text(body),    "technicalBlocks": body[_type in ["mermaidDiagram", "codeBlock"]]{_key, _type, caption, language, code}  },  "about": *[_type == "about" && _id == "about"][0]{    _id, headline, intro, story, nextRole, advisory, contact,    starterQuestions[]{_key, question},    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}  },  "projects": *[_type == "project"] | order(order asc, title asc){    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,    techStack[]->{_id, name, "slug": slug.current, category, iconKey}  },  "roles": *[_type == "role"] | order(order asc, company asc){    _id, company, title, dateRange, order, roleSummary,    technologies[]->{_id, name, "slug": slug.current, category, iconKey},    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}  },  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}}
+// Query: {  "siteSettings": *[_type == "siteSettings" && _id == "site-settings"][0]{    identity{brandName}, modes{prompt{label, navigationLabel}, overview{label, navigationLabel}},    navigation{colophonLabel},    promptExperience{invitation, placeholder, submitLabel, pendingLabel, starterQuestions[]{_key, question}}  },  "colophonSummary": *[_type == "page" && slug.current == "colophon"] | order(_updatedAt desc)[0]{    title, subtitle, "plainText": pt::text(body),    "technicalBlocks": body[_type in ["mermaidDiagram", "codeBlock"]]{_key, _type, caption, language, code}  },  "about": *[_type == "about" && _id == "about"][0]{    _id, headline, intro, story, nextRole, advisory, contact,    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}  },  "projects": *[_type == "project"] | order(order asc, title asc){    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,    techStack[]->{_id, name, "slug": slug.current, category, iconKey}  },  "roles": *[_type == "role"] | order(order asc, company asc){    _id, company, title, dateRange, order, roleSummary,    technologies[]->{_id, name, "slug": slug.current, category, iconKey},    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}  },  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}}
 export type PORTFOLIO_CONTEXT_QUERY_RESULT = {
+  siteSettings: {
+    identity: {
+      brandName: string | null;
+    } | null;
+    modes: {
+      prompt: {
+        label: string | null;
+        navigationLabel: string | null;
+      } | null;
+      overview: {
+        label: string | null;
+        navigationLabel: string | null;
+      } | null;
+    } | null;
+    navigation: {
+      colophonLabel: string | null;
+    } | null;
+    promptExperience: {
+      invitation: string | null;
+      placeholder: string | null;
+      submitLabel: string | null;
+      pendingLabel: string | null;
+      starterQuestions: Array<{
+        _key: string;
+        question: string | null;
+      }> | null;
+    } | null;
+  } | null;
   colophonSummary: {
     title: string | null;
     subtitle: string | null;
@@ -427,10 +491,6 @@ export type PORTFOLIO_CONTEXT_QUERY_RESULT = {
       github?: string;
       linkedin?: string;
     } | null;
-    starterQuestions: Array<{
-      _key: string;
-      question: string | null;
-    }> | null;
     downloads: Array<{
       _key: string;
       label: string | null;
@@ -580,11 +640,44 @@ export type COLOPHON_PAGE_QUERY_RESULT = {
   plainText: string;
 } | null;
 
+// Source: sanity/lib/queries.ts
+// Variable: SITE_SETTINGS_QUERY
+// Query: *[_type == "siteSettings" && _id == "site-settings"][0]{    identity{brandName}, modes{prompt{label, navigationLabel}, overview{label, navigationLabel}},    navigation{colophonLabel},    promptExperience{invitation, placeholder, submitLabel, pendingLabel, starterQuestions[]{_key, question}}  }
+export type SITE_SETTINGS_QUERY_RESULT = {
+  identity: {
+    brandName: string | null;
+  } | null;
+  modes: {
+    prompt: {
+      label: string | null;
+      navigationLabel: string | null;
+    } | null;
+    overview: {
+      label: string | null;
+      navigationLabel: string | null;
+    } | null;
+  } | null;
+  navigation: {
+    colophonLabel: string | null;
+  } | null;
+  promptExperience: {
+    invitation: string | null;
+    placeholder: string | null;
+    submitLabel: string | null;
+    pendingLabel: string | null;
+    starterQuestions: Array<{
+      _key: string;
+      question: string | null;
+    }> | null;
+  } | null;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '{\n  "colophonSummary": *[_type == "page" && slug.current == "colophon"] | order(_updatedAt desc)[0]{\n    title, subtitle, "plainText": pt::text(body),\n    "technicalBlocks": body[_type in ["mermaidDiagram", "codeBlock"]]{_key, _type, caption, language, code}\n  },\n  "about": *[_type == "about" && _id == "about"][0]{\n    _id, headline, intro, story, nextRole, advisory, contact,\n    starterQuestions[]{_key, question},\n    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}\n  },\n  "projects": *[_type == "project"] | order(order asc, title asc){\n    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,\n    techStack[]->{_id, name, "slug": slug.current, category, iconKey}\n  },\n  "roles": *[_type == "role"] | order(order asc, company asc){\n    _id, company, title, dateRange, order, roleSummary,\n    technologies[]->{_id, name, "slug": slug.current, category, iconKey},\n    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,\n      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}\n  },\n  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}\n}': PORTFOLIO_CONTEXT_QUERY_RESULT;
+    '{\n  "siteSettings": *[_type == "siteSettings" && _id == "site-settings"][0]{\n    identity{brandName}, modes{prompt{label, navigationLabel}, overview{label, navigationLabel}},\n    navigation{colophonLabel},\n    promptExperience{invitation, placeholder, submitLabel, pendingLabel, starterQuestions[]{_key, question}}\n  },\n  "colophonSummary": *[_type == "page" && slug.current == "colophon"] | order(_updatedAt desc)[0]{\n    title, subtitle, "plainText": pt::text(body),\n    "technicalBlocks": body[_type in ["mermaidDiagram", "codeBlock"]]{_key, _type, caption, language, code}\n  },\n  "about": *[_type == "about" && _id == "about"][0]{\n    _id, headline, intro, story, nextRole, advisory, contact,\n    downloads[]{_key, label, description, "url": file.asset->url, "filename": file.asset->originalFilename}\n  },\n  "projects": *[_type == "project"] | order(order asc, title asc){\n    _id, title, "slug": slug.current, subtitle, order, liveUrl, repoUrl, problem, architectureNotes,\n    techStack[]->{_id, name, "slug": slug.current, category, iconKey}\n  },\n  "roles": *[_type == "role"] | order(order asc, company asc){\n    _id, company, title, dateRange, order, roleSummary,\n    technologies[]->{_id, name, "slug": slug.current, category, iconKey},\n    achievements[]{_key, bullet, deepDive, tracks, includeInDefaultOverview,\n      technologies[]->{_id, name, "slug": slug.current, category, iconKey}}\n  },\n  "technologies": *[_type == "technology"] | order(category asc, name asc){_id, name, "slug": slug.current, category, iconKey}\n}': PORTFOLIO_CONTEXT_QUERY_RESULT;
     '\n  *[_type == "page" && slug.current == "colophon"] | order(_updatedAt desc)[0]{\n    _id, title, subtitle, eyebrow, "slug": slug.current, body, "plainText": pt::text(body)\n  }\n': COLOPHON_PAGE_QUERY_RESULT;
+    '\n  *[_type == "siteSettings" && _id == "site-settings"][0]{\n    identity{brandName}, modes{prompt{label, navigationLabel}, overview{label, navigationLabel}},\n    navigation{colophonLabel},\n    promptExperience{invitation, placeholder, submitLabel, pendingLabel, starterQuestions[]{_key, question}}\n  }\n': SITE_SETTINGS_QUERY_RESULT;
   }
 }

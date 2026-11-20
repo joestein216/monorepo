@@ -105,6 +105,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Themes control presentation while preserving those behaviors and a coherent
   reading and focus order.
 - Essential information and actions must remain available without custom styling.
+- Focus follows the task: submission/retry focuses the current question once
+  with `preventScroll`, independently of bounded auto-follow. Suggestion previews
+  and response completion must not refocus the textarea or reopen a mobile
+  keyboard. An explicit new-conversation action may focus the composer.
 
 ### Establish Deterministic Boundaries Around Generative Systems
 - Treat model output as proposed input to application code.

@@ -37,7 +37,7 @@ export function PortfolioResponse({ message, streaming = false }: { message: Por
   const failed = receiptCalls.some((part) => part.state === "output-error" || part.state === "output-denied");
 
   return <>
-    {message.role === "user" ? <h2 data-slot="user-query">{summary}</h2> : <p data-slot="summary-block" aria-label="Summary">{summary}{proseStreaming && <span data-slot="stream-cursor" aria-hidden="true" />}</p>}
+    {message.role === "user" ? <h2 data-slot="user-query" tabIndex={-1}>{summary}</h2> : <p data-slot="summary-block" aria-label="Summary">{summary}{proseStreaming && <span data-slot="stream-cursor" aria-hidden="true" />}</p>}
     {message.role === "assistant" && streaming && <ResponseProgress />}
     {receiptCalls.length > 0 && <section aria-label="Receipts">
       <h3 data-slot="visually-hidden">Supporting receipts</h3>

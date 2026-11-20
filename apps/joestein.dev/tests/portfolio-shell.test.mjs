@@ -73,7 +73,8 @@ test("flat prompt replacement preserves origin, order, turn isolation, reset, an
     const originalTextarea = container.querySelector("textarea");
     findButton("What is chapter 0?").focus();
     await chooseAndSend("What is chapter 0?");
-    assert.equal(document.activeElement, originalTextarea);
+    assert.equal(document.activeElement, container.querySelector('[data-slot="user-query"]'));
+    assert.equal(document.activeElement.tabIndex, -1, "the reading destination is not an extra Tab stop");
     assert.equal(container.querySelector("textarea"), originalTextarea, "composer node survives engagement");
     assert.equal(requests.at(-1).messages.at(-1).parts[0].text, "What is chapter 0?");
     assert.equal(container.querySelector('[data-slot="prompt-dock"]').getAttribute("data-conversation-state"), "active");

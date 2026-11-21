@@ -235,6 +235,9 @@ export const artistPage = defineType({
               validation: (rule) => rule.required().uri({ scheme: ["https"] }),
             }),
             defineField({ name: "details", title: "Details", type: "string" }),
+            defineField({ name: "streamUrl", title: "Direct audio stream (optional)", type: "url", validation: (rule) => rule.uri({ scheme: ["https"] }) }),
+            defineField({ name: "uploadDate", type: "datetime" }),
+            defineField({ name: "duration", title: "ISO 8601 duration (e.g. PT1H30M)", type: "string", validation: (rule) => rule.regex(/^PT(?=\d)(?:\d+H)?(?:\d+M)?(?:\d+(?:\.\d+)?S)?$/) }),
           ],
           preview: {
             select: { title: "title", subtitle: "provider" },
@@ -271,6 +274,8 @@ export const artistPage = defineType({
               type: "url",
               validation: (rule) => rule.uri({ scheme: ["http", "https"] }),
             }),
+            defineField({ name: "uploadDate", type: "datetime" }),
+            defineField({ name: "duration", title: "ISO 8601 duration (e.g. PT5M)", type: "string", validation: (rule) => rule.regex(/^PT(?=\d)(?:\d+H)?(?:\d+M)?(?:\d+(?:\.\d+)?S)?$/) }),
             defineField({ name: "caption", title: "Caption", type: "text", rows: 2 }),
             defineField({
               name: "poster",

@@ -1,36 +1,38 @@
-import type { MetadataRoute } from "next"
-
-import { getArtistSlugs } from "../sanity/queries/artists"
-import { getAlbumSlugs, getEventSlugs } from "../sanity/queries/site"
-
-const baseUrl = "https://www.djfreakyfrank.com"
-
+import type { MetadataRoute } from "next";
+import { client } from "../sanity/lib/client";
+import { PUBLIC_SITEMAP_QUERY } from "../sanity/lib/queries";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [artistSlugs, eventSlugs, albumSlugs] = await Promise.all([
-    getArtistSlugs(),
-    getEventSlugs(),
-    getAlbumSlugs(),
-  ])
-
+  const base = "https://freakyfrank.com";
+  const entries = await client.fetch(
+    PUBLIC_SITEMAP_QUERY,
+    {},
+    { stega: false, perspective: "published", next: { revalidate: 300 } },
+  );
+  // Records currently have addressable anchors in their catalogs, not detail routes.
+  // Keep the sitemap limited to real pages and use CMS changes for lastModified.
+  const modified = (type: string) =>
+    entries
+      .filter((item) => item._type === type)
+      .map((item) => item._updatedAt)
+      .sort()
+      .at(-1);
   return [
-    { url: baseUrl, changeFrequency: "weekly", priority: 1 },
-    { url: `${baseUrl}/events`, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/albums`, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/artists`, changeFrequency: "weekly", priority: 0.8 },
-    ...eventSlugs.map((slug) => ({
-      url: `${baseUrl}/events/${slug}`,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    })),
-    ...albumSlugs.map((slug) => ({
-      url: `${baseUrl}/albums/${slug}`,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    })),
-    ...artistSlugs.map((slug) => ({
-      url: `${baseUrl}/artists/${slug}`,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    })),
-  ]
+    "/",
+    "/events",
+    "/mixes",
+    "/videos",
+    "/record-store",
+    "/contact",
+    "/epk",
+  ].map((path) => ({
+    url: `${base}${path === "/" ? "" : path}`,
+    changeFrequency: "weekly",
+    priority: path === "/" ? 1 : 0.8,
+    lastModified:
+      path === "/events"
+        ? modified("event")
+        : path === "/record-store"
+          ? modified("recordStoreItem")
+          : undefined,
+  }));
 }

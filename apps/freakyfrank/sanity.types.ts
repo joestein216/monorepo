@@ -275,6 +275,9 @@ export type ArtistPage = {
     sourceUrl?: string;
     embedUrl?: string;
     details?: string;
+    streamUrl?: string;
+    uploadDate?: string;
+    duration?: string;
     _type: "audioEmbed";
     _key: string;
   }>;
@@ -286,6 +289,8 @@ export type ArtistPage = {
       _type: "file";
     };
     externalUrl?: string;
+    uploadDate?: string;
+    duration?: string;
     caption?: string;
     poster?: {
       asset?: SanityImageAssetReference;
@@ -409,6 +414,34 @@ export type SiteSettings = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  heroPortrait?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  heroStatement?: string;
+  crowdImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  recordStoreHeroImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  recordStoreTitle?: string;
+  recordStoreDescription?: string;
+  managementEmail?: string;
+  pressEmail?: string;
   siteTitle?: string;
   siteDescription?: string;
   logo?: {
@@ -452,6 +485,31 @@ export type Link = {
   label?: string;
   href?: string;
   openInNewTab?: boolean;
+};
+
+export type RecordStoreItem = {
+  _id: string;
+  _type: "recordStoreItem";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  category?: "vinyl" | "apparel" | "release";
+  description?: string;
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  price?: number;
+  currency?: string;
+  purchaseUrl?: string;
+  availability?: "in-stock" | "sold-out" | "preorder";
+  sortOrder?: number;
 };
 
 export type SanityImagePaletteSwatch = {
@@ -571,6 +629,7 @@ export type AllSanitySchemaTypes =
   | SiteSettings
   | NavigationItem
   | Link
+  | RecordStoreItem
   | SanityImagePaletteSwatch
   | SanityImagePalette
   | SanityImageDimensions
@@ -579,6 +638,558 @@ export type AllSanitySchemaTypes =
   | SanityAssetSourceData
   | SanityImageAsset
   | Geopoint;
+
+// Source: sanity/lib/queries.ts
+// Variable: PUBLIC_HOME_QUERY
+// Query: {"artist": *[_type == "artistPage" && slug.current == "freaky-frank"][0]{name, positioning, tagline, shortBio, bookingEmail, genres, location, "heroImage": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "primaryLogo": primaryLogo{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "wordmark": wordmark{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, externalLinks[]{_key, label, href}}, "settings": *[_type == "siteSettings"] | order(_updatedAt desc)[0]{siteTitle, siteDescription, heroStatement, "heroPortrait": heroPortrait{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "logo": logo{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "crowdImage": crowdImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "recordStoreHeroImage": recordStoreHeroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, recordStoreTitle, recordStoreDescription, managementEmail, pressEmail, socialLinks[]{_key, label, href}}, "home": *[_type == "homePage"] | order(_updatedAt desc)[0]{heading, introduction, inquiryEmail, socialLinks[]{_key,label,href}}, "upcoming": *[_type == "event" && ((defined(startsAt) && dateTime(startsAt) >= dateTime(now())) || (!defined(startsAt) && eventDate >= $today))] | order(coalesce(startsAt, eventDate) asc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "past": *[_type == "event" && ((defined(startsAt) && dateTime(startsAt) < dateTime(now())) || (!defined(startsAt) && eventDate < $today))] | order(coalesce(startsAt, eventDate) desc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "pending": *[_type == "event" && !defined(startsAt) && !defined(eventDate)] | order(sortOrder asc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "mixes": *[_type == "artistPage" && slug.current == "freaky-frank"][0].audioEmbeds[]{_key, title, provider, sourceUrl, embedUrl, details, streamUrl, uploadDate, duration}, "videos": *[_type == "artistPage" && slug.current == "freaky-frank"][0].videos[]{_key, title, externalUrl, "fileUrl": file.asset->url, caption, uploadDate, duration, "poster": poster{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "items": *[_type == "recordStoreItem"] | order(sortOrder asc, title asc){_id, title, "slug": slug.current, category, description, "image": image{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, price, currency, purchaseUrl, availability}, "updates": *[_type == "photoAlbum"] | order(_createdAt desc)[0...6]{_id,title,summary,"image": coverPhoto->image{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}}
+export type PUBLIC_HOME_QUERY_RESULT = {
+  artist: {
+    name: string | null;
+    positioning: string | null;
+    tagline: string | null;
+    shortBio: string | null;
+    bookingEmail: string | null;
+    genres: Array<string> | null;
+    location: string | null;
+    heroImage: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    primaryLogo: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    wordmark: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    externalLinks: Array<{
+      _key: string;
+      label: string | null;
+      href: string | null;
+    }> | null;
+  } | null;
+  settings: {
+    siteTitle: string | null;
+    siteDescription: string | null;
+    heroStatement: string | null;
+    heroPortrait: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    logo: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    crowdImage: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    recordStoreHeroImage: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    recordStoreTitle: string | null;
+    recordStoreDescription: string | null;
+    managementEmail: string | null;
+    pressEmail: string | null;
+    socialLinks: Array<{
+      _key: string;
+      label: string | null;
+      href: string | null;
+    }> | null;
+  } | null;
+  home: {
+    heading: string | null;
+    introduction: string | null;
+    inquiryEmail: string | null;
+    socialLinks: Array<{
+      _key: string;
+      label: string | null;
+      href: string | null;
+    }> | null;
+  } | null;
+  upcoming: Array<{
+    _id: string;
+    title: string | null;
+    status: "cancelled" | "past" | "tba" | "upcoming" | null;
+    startsAt: string | null;
+    eventDate: string | null;
+    endsAt: string | null;
+    dateDisplay: string | null;
+    venue: string | null;
+    location: string | null;
+    summary: string | null;
+    url: string | null;
+    slug: string | null;
+    image: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+  }>;
+  past: Array<{
+    _id: string;
+    title: string | null;
+    status: "cancelled" | "past" | "tba" | "upcoming" | null;
+    startsAt: string | null;
+    eventDate: string | null;
+    endsAt: string | null;
+    dateDisplay: string | null;
+    venue: string | null;
+    location: string | null;
+    summary: string | null;
+    url: string | null;
+    slug: string | null;
+    image: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+  }>;
+  pending: Array<{
+    _id: string;
+    title: string | null;
+    status: "cancelled" | "past" | "tba" | "upcoming" | null;
+    startsAt: null;
+    eventDate: null;
+    endsAt: string | null;
+    dateDisplay: string | null;
+    venue: string | null;
+    location: string | null;
+    summary: string | null;
+    url: string | null;
+    slug: string | null;
+    image: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+  }>;
+  mixes: Array<{
+    _key: string;
+    title: string | null;
+    provider:
+      "hearthis" | "mixcloud" | "soundcloud" | "spotify" | "youtube" | null;
+    sourceUrl: string | null;
+    embedUrl: string | null;
+    details: string | null;
+    streamUrl: string | null;
+    uploadDate: string | null;
+    duration: string | null;
+  }> | null;
+  videos: Array<{
+    _key: string;
+    title: string | null;
+    externalUrl: string | null;
+    fileUrl: string | null;
+    caption: string | null;
+    uploadDate: string | null;
+    duration: string | null;
+    poster: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+  }> | null;
+  items: Array<{
+    _id: string;
+    title: string | null;
+    slug: string | null;
+    category: "apparel" | "release" | "vinyl" | null;
+    description: string | null;
+    image: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    price: number | null;
+    currency: string | null;
+    purchaseUrl: string | null;
+    availability: "in-stock" | "preorder" | "sold-out" | null;
+  }>;
+  updates: Array<{
+    _id: string;
+    title: string | null;
+    summary: string | null;
+    image: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+  }>;
+};
+
+// Source: sanity/lib/queries.ts
+// Variable: PUBLIC_EVENTS_QUERY
+// Query: {"upcoming": *[_type == "event" && ((defined(startsAt) && dateTime(startsAt) >= dateTime(now())) || (!defined(startsAt) && eventDate >= $today))] | order(coalesce(startsAt, eventDate) asc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "past": *[_type == "event" && ((defined(startsAt) && dateTime(startsAt) < dateTime(now())) || (!defined(startsAt) && eventDate < $today))] | order(coalesce(startsAt, eventDate) desc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "pending": *[_type == "event" && !defined(startsAt) && !defined(eventDate)] | order(sortOrder asc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}}
+export type PUBLIC_EVENTS_QUERY_RESULT = {
+  upcoming: Array<{
+    _id: string;
+    title: string | null;
+    status: "cancelled" | "past" | "tba" | "upcoming" | null;
+    startsAt: string | null;
+    eventDate: string | null;
+    endsAt: string | null;
+    dateDisplay: string | null;
+    venue: string | null;
+    location: string | null;
+    summary: string | null;
+    url: string | null;
+    slug: string | null;
+    image: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+  }>;
+  past: Array<{
+    _id: string;
+    title: string | null;
+    status: "cancelled" | "past" | "tba" | "upcoming" | null;
+    startsAt: string | null;
+    eventDate: string | null;
+    endsAt: string | null;
+    dateDisplay: string | null;
+    venue: string | null;
+    location: string | null;
+    summary: string | null;
+    url: string | null;
+    slug: string | null;
+    image: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+  }>;
+  pending: Array<{
+    _id: string;
+    title: string | null;
+    status: "cancelled" | "past" | "tba" | "upcoming" | null;
+    startsAt: null;
+    eventDate: null;
+    endsAt: string | null;
+    dateDisplay: string | null;
+    venue: string | null;
+    location: string | null;
+    summary: string | null;
+    url: string | null;
+    slug: string | null;
+    image: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+  }>;
+};
+
+// Source: sanity/lib/queries.ts
+// Variable: PUBLIC_MIXES_QUERY
+// Query: *[_type == "artistPage" && slug.current == "freaky-frank"][0].audioEmbeds[]{_key, title, provider, sourceUrl, embedUrl, details, streamUrl, uploadDate, duration}
+export type PUBLIC_MIXES_QUERY_RESULT = Array<{
+  _key: string;
+  title: string | null;
+  provider:
+    "hearthis" | "mixcloud" | "soundcloud" | "spotify" | "youtube" | null;
+  sourceUrl: string | null;
+  embedUrl: string | null;
+  details: string | null;
+  streamUrl: string | null;
+  uploadDate: string | null;
+  duration: string | null;
+}> | null;
+
+// Source: sanity/lib/queries.ts
+// Variable: PUBLIC_VIDEOS_QUERY
+// Query: *[_type == "artistPage" && slug.current == "freaky-frank"][0].videos[]{_key, title, externalUrl, "fileUrl": file.asset->url, caption, uploadDate, duration, "poster": poster{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}
+export type PUBLIC_VIDEOS_QUERY_RESULT = Array<{
+  _key: string;
+  title: string | null;
+  externalUrl: string | null;
+  fileUrl: string | null;
+  caption: string | null;
+  uploadDate: string | null;
+  duration: string | null;
+  poster: {
+    asset: SanityImageAssetReference | null;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
+    alt: string | null;
+    src: string | null;
+    width: number | null;
+    height: number | null;
+  } | null;
+}> | null;
+
+// Source: sanity/lib/queries.ts
+// Variable: PUBLIC_STORE_QUERY
+// Query: {"settings": *[_type == "siteSettings"] | order(_updatedAt desc)[0]{siteTitle, siteDescription, heroStatement, "heroPortrait": heroPortrait{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "logo": logo{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "crowdImage": crowdImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "recordStoreHeroImage": recordStoreHeroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, recordStoreTitle, recordStoreDescription, managementEmail, pressEmail, socialLinks[]{_key, label, href}}, "items": *[_type == "recordStoreItem"] | order(sortOrder asc, title asc){_id, title, "slug": slug.current, category, description, "image": image{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, price, currency, purchaseUrl, availability}}
+export type PUBLIC_STORE_QUERY_RESULT = {
+  settings: {
+    siteTitle: string | null;
+    siteDescription: string | null;
+    heroStatement: string | null;
+    heroPortrait: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    logo: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    crowdImage: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    recordStoreHeroImage: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    recordStoreTitle: string | null;
+    recordStoreDescription: string | null;
+    managementEmail: string | null;
+    pressEmail: string | null;
+    socialLinks: Array<{
+      _key: string;
+      label: string | null;
+      href: string | null;
+    }> | null;
+  } | null;
+  items: Array<{
+    _id: string;
+    title: string | null;
+    slug: string | null;
+    category: "apparel" | "release" | "vinyl" | null;
+    description: string | null;
+    image: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    price: number | null;
+    currency: string | null;
+    purchaseUrl: string | null;
+    availability: "in-stock" | "preorder" | "sold-out" | null;
+  }>;
+};
+
+// Source: sanity/lib/queries.ts
+// Variable: PUBLIC_CONTACT_QUERY
+// Query: {"artist": *[_type == "artistPage" && slug.current == "freaky-frank"][0]{name, positioning, tagline, shortBio, bookingEmail, genres, location, "heroImage": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "primaryLogo": primaryLogo{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "wordmark": wordmark{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, externalLinks[]{_key, label, href}}, "settings": *[_type == "siteSettings"] | order(_updatedAt desc)[0]{siteTitle, siteDescription, heroStatement, "heroPortrait": heroPortrait{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "logo": logo{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "crowdImage": crowdImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "recordStoreHeroImage": recordStoreHeroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, recordStoreTitle, recordStoreDescription, managementEmail, pressEmail, socialLinks[]{_key, label, href}}, "home": *[_type == "homePage"] | order(_updatedAt desc)[0]{heading, introduction, inquiryEmail, socialLinks[]{_key,label,href}}}
+export type PUBLIC_CONTACT_QUERY_RESULT = {
+  artist: {
+    name: string | null;
+    positioning: string | null;
+    tagline: string | null;
+    shortBio: string | null;
+    bookingEmail: string | null;
+    genres: Array<string> | null;
+    location: string | null;
+    heroImage: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    primaryLogo: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    wordmark: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    externalLinks: Array<{
+      _key: string;
+      label: string | null;
+      href: string | null;
+    }> | null;
+  } | null;
+  settings: {
+    siteTitle: string | null;
+    siteDescription: string | null;
+    heroStatement: string | null;
+    heroPortrait: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    logo: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    crowdImage: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    recordStoreHeroImage: {
+      asset: SanityImageAssetReference | null;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      alt: string | null;
+      src: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    recordStoreTitle: string | null;
+    recordStoreDescription: string | null;
+    managementEmail: string | null;
+    pressEmail: string | null;
+    socialLinks: Array<{
+      _key: string;
+      label: string | null;
+      href: string | null;
+    }> | null;
+  } | null;
+  home: {
+    heading: string | null;
+    introduction: string | null;
+    inquiryEmail: string | null;
+    socialLinks: Array<{
+      _key: string;
+      label: string | null;
+      href: string | null;
+    }> | null;
+  } | null;
+};
+
+// Source: sanity/lib/queries.ts
+// Variable: PUBLIC_SITEMAP_QUERY
+// Query: *[_type in ["event", "recordStoreItem"] && defined(slug.current)]{_type, "slug": slug.current, _updatedAt}
+export type PUBLIC_SITEMAP_QUERY_RESULT = Array<
+  | {
+      _type: "event";
+      slug: string | null;
+      _updatedAt: string;
+    }
+  | {
+      _type: "recordStoreItem";
+      slug: string | null;
+      _updatedAt: string;
+    }
+>;
 
 // Source: sanity/queries/artists.ts
 // Variable: artistQuery
@@ -1093,6 +1704,13 @@ export type AlbumSlugsQueryResult = Array<string | null>;
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
+    '{"artist": *[_type == "artistPage" && slug.current == "freaky-frank"][0]{name, positioning, tagline, shortBio, bookingEmail, genres, location, "heroImage": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "primaryLogo": primaryLogo{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "wordmark": wordmark{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, externalLinks[]{_key, label, href}}, "settings": *[_type == "siteSettings"] | order(_updatedAt desc)[0]{siteTitle, siteDescription, heroStatement, "heroPortrait": heroPortrait{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "logo": logo{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "crowdImage": crowdImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "recordStoreHeroImage": recordStoreHeroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, recordStoreTitle, recordStoreDescription, managementEmail, pressEmail, socialLinks[]{_key, label, href}}, "home": *[_type == "homePage"] | order(_updatedAt desc)[0]{heading, introduction, inquiryEmail, socialLinks[]{_key,label,href}}, "upcoming": *[_type == "event" && ((defined(startsAt) && dateTime(startsAt) >= dateTime(now())) || (!defined(startsAt) && eventDate >= $today))] | order(coalesce(startsAt, eventDate) asc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "past": *[_type == "event" && ((defined(startsAt) && dateTime(startsAt) < dateTime(now())) || (!defined(startsAt) && eventDate < $today))] | order(coalesce(startsAt, eventDate) desc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "pending": *[_type == "event" && !defined(startsAt) && !defined(eventDate)] | order(sortOrder asc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "mixes": *[_type == "artistPage" && slug.current == "freaky-frank"][0].audioEmbeds[]{_key, title, provider, sourceUrl, embedUrl, details, streamUrl, uploadDate, duration}, "videos": *[_type == "artistPage" && slug.current == "freaky-frank"][0].videos[]{_key, title, externalUrl, "fileUrl": file.asset->url, caption, uploadDate, duration, "poster": poster{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "items": *[_type == "recordStoreItem"] | order(sortOrder asc, title asc){_id, title, "slug": slug.current, category, description, "image": image{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, price, currency, purchaseUrl, availability}, "updates": *[_type == "photoAlbum"] | order(_createdAt desc)[0...6]{_id,title,summary,"image": coverPhoto->image{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}}': PUBLIC_HOME_QUERY_RESULT;
+    '{"upcoming": *[_type == "event" && ((defined(startsAt) && dateTime(startsAt) >= dateTime(now())) || (!defined(startsAt) && eventDate >= $today))] | order(coalesce(startsAt, eventDate) asc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "past": *[_type == "event" && ((defined(startsAt) && dateTime(startsAt) < dateTime(now())) || (!defined(startsAt) && eventDate < $today))] | order(coalesce(startsAt, eventDate) desc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}, "pending": *[_type == "event" && !defined(startsAt) && !defined(eventDate)] | order(sortOrder asc){_id, title, status, startsAt, eventDate, endsAt, dateDisplay, venue, location, summary, "url": eventUrl, "slug": slug.current, "image": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}}': PUBLIC_EVENTS_QUERY_RESULT;
+    '*[_type == "artistPage" && slug.current == "freaky-frank"][0].audioEmbeds[]{_key, title, provider, sourceUrl, embedUrl, details, streamUrl, uploadDate, duration}': PUBLIC_MIXES_QUERY_RESULT;
+    '*[_type == "artistPage" && slug.current == "freaky-frank"][0].videos[]{_key, title, externalUrl, "fileUrl": file.asset->url, caption, uploadDate, duration, "poster": poster{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}': PUBLIC_VIDEOS_QUERY_RESULT;
+    '{"settings": *[_type == "siteSettings"] | order(_updatedAt desc)[0]{siteTitle, siteDescription, heroStatement, "heroPortrait": heroPortrait{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "logo": logo{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "crowdImage": crowdImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "recordStoreHeroImage": recordStoreHeroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, recordStoreTitle, recordStoreDescription, managementEmail, pressEmail, socialLinks[]{_key, label, href}}, "items": *[_type == "recordStoreItem"] | order(sortOrder asc, title asc){_id, title, "slug": slug.current, category, description, "image": image{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, price, currency, purchaseUrl, availability}}': PUBLIC_STORE_QUERY_RESULT;
+    '{"artist": *[_type == "artistPage" && slug.current == "freaky-frank"][0]{name, positioning, tagline, shortBio, bookingEmail, genres, location, "heroImage": heroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "primaryLogo": primaryLogo{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "wordmark": wordmark{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, externalLinks[]{_key, label, href}}, "settings": *[_type == "siteSettings"] | order(_updatedAt desc)[0]{siteTitle, siteDescription, heroStatement, "heroPortrait": heroPortrait{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "logo": logo{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "crowdImage": crowdImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, "recordStoreHeroImage": recordStoreHeroImage{asset, crop, hotspot, alt, "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}, recordStoreTitle, recordStoreDescription, managementEmail, pressEmail, socialLinks[]{_key, label, href}}, "home": *[_type == "homePage"] | order(_updatedAt desc)[0]{heading, introduction, inquiryEmail, socialLinks[]{_key,label,href}}}': PUBLIC_CONTACT_QUERY_RESULT;
+    '*[_type in ["event", "recordStoreItem"] && defined(slug.current)]{_type, "slug": slug.current, _updatedAt}': PUBLIC_SITEMAP_QUERY_RESULT;
     '*[_type == "artistPage" && slug.current == $slug][0]{\n  "id": _id,\n  name,\n  realName,\n  "slug": slug.current,\n  positioning,\n  tagline,\n  location,\n  activeSince,\n  genres,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  "primaryLogo": primaryLogo {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  "wordmark": wordmark {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  shortBio,\n  "biography": pt::text(biography),\n  careerHighlights[]{label, title, description},\n  collaborations[]{name, with, description, url},\n  audioEmbeds[]{\n    _key, \n    title, \n    provider, \n    sourceUrl, \n    embedUrl, \n    details\n  },\n  videos[]{\n    _key,\n    title,\n    "fileUrl": file.asset->url,\n    externalUrl,\n    caption,\n    "poster": poster {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n    loop\n  },\n  "gallery": gallery[] {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  "events": *[_type == "event" && references(^._id)] {title, organizer, status, startsAt, endsAt, dateDisplay, venue, location, details, "url": eventUrl},\n  bookingEmail,\n  bookingLabel,\n  externalLinks[]{label, href, openInNewTab},\n  epkPackage {\n    "url": asset->url\n  },\n  pressAssets[]{\n    label,\n    format,\n    "url": coalesce(image.asset->url, file.asset->url, externalUrl)\n  },\n  technicalRider{\n    summary,\n    preferredSetup,\n    boothMonitors,\n    mediaFormats,\n    "fileUrl": file.asset->url\n  },\n  showOnArtistIndex,\n  sortOrder,\n  seo{\n    metaTitle,\n    metaDescription,\n    "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n  }\n}': ArtistQueryResult;
     '*[\n  _type == "artistPage" &&\n  defined(slug.current) &&\n  showOnArtistIndex != false\n] | order(sortOrder asc, name asc){\n  name,\n  "slug": slug.current,\n  positioning,\n  shortBio,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  showOnArtistIndex,\n  sortOrder\n}': ArtistCardsQueryResult;
     '*[_type == "artistPage" && defined(slug.current)].slug.current': ArtistSlugsQueryResult;

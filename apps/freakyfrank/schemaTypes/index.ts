@@ -1,4 +1,5 @@
 import { type SchemaTypeDefinition } from 'sanity'
+import { recordStoreItem } from "./recordStoreItem"
 import { link } from "./link"
 import { navigationItem } from "./navigationItem"
 import { portableText } from "./portableText"
@@ -11,5 +12,5 @@ import { photo } from "./photo"
 import { photoAlbum } from "./photoAlbum"
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [link, navigationItem, portableText, seo, siteSettings, artistPage, event, photo, photoAlbum, homePage],
+  types: [recordStoreItem, link, navigationItem, portableText, seo, siteSettings, artistPage, event, photo, photoAlbum, homePage],
 }

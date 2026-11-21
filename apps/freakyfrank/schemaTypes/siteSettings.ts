@@ -5,6 +5,14 @@ export const siteSettings = defineType({
   title: "Site Settings",
   type: "document",
   fields: [
+    defineField({ name: "heroPortrait", type: "image", options: { hotspot: true }, fields: [defineField({ name: "alt", type: "string" })] }),
+    defineField({ name: "heroStatement", type: "text", rows: 3 }),
+    defineField({ name: "crowdImage", title: "Crowd / warehouse background", type: "image", options: { hotspot: true } }),
+    defineField({ name: "recordStoreHeroImage", type: "image", options: { hotspot: true }, fields: [defineField({ name: "alt", type: "string" })] }),
+    defineField({ name: "recordStoreTitle", type: "string" }),
+    defineField({ name: "recordStoreDescription", type: "text", rows: 5 }),
+    defineField({ name: "managementEmail", type: "email" }),
+    defineField({ name: "pressEmail", type: "email" }),
     defineField({
       name: "siteTitle",
       title: "Site title",

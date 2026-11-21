@@ -24,7 +24,7 @@ export function PromptComposer({ copy = defaultSitePresentation.prompt, input, v
           {limitState === "approaching" && " · Near limit"}{limitState === "exceeded" && " · ! over limit"}
         </span>
       </header>
-      <textarea ref={promptRef} id="portfolio-prompt" name="prompt" data-slot="prompt-textarea" value={visibleInput} rows={3} disabled={busy}
+      <textarea ref={promptRef} id="portfolio-prompt" name="prompt" data-slot="prompt-textarea" value={visibleInput} rows={4} disabled={busy}
         aria-invalid={limitState === "exceeded" ? true : undefined}
         placeholder={copy.placeholder}
         aria-describedby="prompt-counter prompt-limit-status"

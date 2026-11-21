@@ -25,7 +25,7 @@ export function PortfolioPrototype({ context, loadError, initialMode = "prompt" 
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const selectRef = useRef<HTMLSelectElement>(null);
   const [selectedSuggestionId, setSelectedSuggestionId] = useState<string | null>(null);
-  const restorePromptFocus = useRef(false);
+  const focusQuestionId = useRef<string | null>(null);
   const [mode, setMode] = useState<PortfolioMode>(initialMode);
   const [input, setInput] = useState("");
   const [suggestionTyping, setSuggestionTyping] = useState(false);
@@ -43,6 +43,18 @@ export function PortfolioPrototype({ context, loadError, initialMode = "prompt" 
   useEffect(() => {
     if (mode === "prompt" && shellRef.current) return observePromptViewport(shellRef.current);
   }, [mode]);
+
+  // A submission starts a reading task. Focus it once without competing with
+  // bounded page scrolling; streaming/completion must never reopen the keyboard.
+  useEffect(() => {
+    if (mode !== "prompt" || !questionId || focusQuestionId.current !== questionId) return;
+    const questions = shellRef.current?.querySelectorAll<HTMLElement>('[data-slot="user-query"]');
+    const question = questions?.[questions.length - 1];
+    if (question) {
+      focusQuestionId.current = null;
+      question.focus({ preventScroll: true });
+    }
+  }, [questionId, retryAttempt, mode]);
 
   useEffect(() => {
     if (!questionId || mode !== "prompt") return;
@@ -79,13 +91,6 @@ export function PortfolioPrototype({ context, loadError, initialMode = "prompt" 
     return () => cancelAnimationFrame(frame);
   }, [suggestionTyping, input, selectedSuggestionId]);
 
-  useEffect(() => {
-    if (!busy && restorePromptFocus.current) {
-      if (document.activeElement === document.body || document.activeElement === promptRef.current) promptRef.current?.focus();
-      restorePromptFocus.current = false;
-    }
-  }, [busy]);
-
   function choose(item: PromptSuggestion) {
     if (busy) return;
     setSelectedSuggestionId(item.id);
@@ -93,15 +98,14 @@ export function PortfolioPrototype({ context, loadError, initialMode = "prompt" 
     setVisibleCharacters(0);
     const animate = !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     setSuggestionTyping(animate);
-    promptRef.current?.focus({ preventScroll: true });
     if (!animate) send(item.prompt, item);
   }
 
   function send(text: string, selectedTopic?: PromptSuggestion) {
     if (busy || !promptInputSchema.safeParse(text).success) return;
-    restorePromptFocus.current = Boolean(document.activeElement?.closest('[data-slot="composer-card"]'));
     const topic = selectedTopic ?? suggestions.find((item) => item.id === selectedSuggestionId && item.prompt === text);
     const turnId = generateId();
+    focusQuestionId.current = turnId;
     if (topic?.tier === "starter") setStarterTurns((turns) => ({ ...turns, [topic.id]: turnId }));
     clearError();
     setInput(text);
@@ -113,13 +117,15 @@ export function PortfolioPrototype({ context, loadError, initialMode = "prompt" 
     });
   }
   function retry() {
-    restorePromptFocus.current = true; setRetryAttempt((attempt) => attempt + 1); clearError();
+    focusQuestionId.current = questionId ?? null;
+    setRetryAttempt((attempt) => attempt + 1); clearError();
     const text = messages.findLast((message) => message.role === "user")?.parts.filter((part) => part.type === "text").map((part) => part.text).join("\n") ?? "";
     setInput(text);
     void regenerate().finally(() => setInput((current) => current === text ? "" : current));
   }
-  function changeMode(next: PortfolioMode) { setSuggestionTyping(false); setSelectedSuggestionId(null); setMode(next); }
+  function changeMode(next: PortfolioMode) { focusQuestionId.current = null; setSuggestionTyping(false); setSelectedSuggestionId(null); setMode(next); }
   function resetConversation() {
+    focusQuestionId.current = null;
     setMessages([]); clearError(); setInput(""); setSuggestionTyping(false); setSelectedSuggestionId(null); setStarterTurns({}); promptRef.current?.focus();
   }
 

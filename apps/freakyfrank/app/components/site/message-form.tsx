@@ -26,7 +26,7 @@ export default function MessageForm() {
       <textarea
         name="message" // <-- This matches formData.get('message') on the server
         required
-        rows={3}
+        rows={4}
         placeholder="type message then click send..."
         className="self-end p-2 text-base border border-[var(--line-dark)] focus:outline-none"
       />

@@ -9,6 +9,12 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
   const dom = new JSDOM("<!doctype html><html><body><main id='root'></main></body></html>", { url: "http://localhost", pretendToBeVisual: true });
   const keys = ["window", "self", "document", "HTMLElement", "Element", "Node", "ShadowRoot", "MutationObserver", "getComputedStyle", "requestAnimationFrame", "cancelAnimationFrame", "ResizeObserver", "IS_REACT_ACT_ENVIRONMENT", "fetch"];
   const previous = Object.fromEntries(keys.map((key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
+  const focusCalls = [];
+  const nativeFocus = dom.window.HTMLElement.prototype.focus;
+  dom.window.HTMLElement.prototype.focus = function(options) {
+    focusCalls.push({ slot: this.dataset.slot, options });
+    nativeFocus.call(this, options);
+  };
   let mobile = true;
   const viewportListeners = new Set();
   dom.window.matchMedia = (query) => ({ matches: query.includes("max-width") ? mobile : false, addEventListener: (_event, callback) => viewportListeners.add(callback), removeEventListener: (_event, callback) => viewportListeners.delete(callback) });
@@ -64,6 +70,10 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     assert.equal(document.querySelector('[data-slot="ticker-track"]'), null);
     assert.equal(document.querySelector('[data-slot="submit-button"]').textContent, "Pulling Receipts...");
     assert.equal(textarea.disabled, true);
+    const activeQuestion = document.querySelector('[data-slot="user-query"]');
+    assert.equal(document.activeElement, activeQuestion);
+    assert.equal(activeQuestion.tabIndex, -1);
+    assert.deepEqual(focusCalls.find(call => call.slot === "user-query").options, { preventScroll: true });
     assert.equal(document.querySelector('[data-slot="composer-hint"]'), null);
     assert.equal(document.querySelector('[data-slot="conversation-status"]'), null);
     assert.match(document.querySelector('[data-slot="receipts-status"]').textContent, /Pulling receipts/);
@@ -86,6 +96,9 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     assert.ok(document.querySelector('[data-slot="receipts-status"]'));
     assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "true");
     assert.equal(document.querySelector('[data-slot="assistant-turn"]').getAttribute("aria-busy"), "true");
+    assert.equal(document.activeElement, activeQuestion, "stream updates leave focus at the reading destination");
+    const readerTarget = button("Read the overview");
+    await act(() => readerTarget.focus());
     await act(() => {
       emit({ type: "text-end", id: "summary" });
       emit({ type: "tool-input-available", toolCallId: "receipts", toolName: "showReceipts", input: { receipts: [] } });
@@ -110,6 +123,8 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     assert.equal(document.querySelector('nav[aria-label="Example prompts"]').querySelectorAll("ul").length, 1);
     assert.equal(textarea.value, "");
     assert.equal(textarea.disabled, false);
+    assert.equal(document.activeElement, readerTarget, "completion never steals focus back from the reader");
+    assert.equal(focusCalls.filter(call => call.slot === "user-query").length, 1);
     const card = document.querySelector('[data-slot="receipt-card"]');
     assert.equal(card.textContent.includes(narrative), false);
     await act(() => button("more...").click());
@@ -159,14 +174,17 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     });
     assert.equal(requestCount, beforeSelection);
     assert.equal(picker.value, "", "the picker immediately returns to its neutral label");
-    assert.equal(document.activeElement, textarea, "focus follows the chosen question instead of remaining on the picker");
+    assert.equal(document.activeElement, picker, "a suggestion preview does not focus the textarea or summon a keyboard");
     assert.ok(context.starterTopics[1].question.startsWith(textarea.value));
     await React.act(async () => { await new Promise(resolve => setTimeout(resolve, 650)); });
     assert.equal(requestCount, beforeSelection + 1, "native selection also reveals then auto-submits");
+    assert.equal(document.activeElement, document.querySelectorAll('[data-slot="user-query"]')[1]);
     assert.ok(document.querySelector('[data-slot="error-banner"][role="alert"]'));
     assert.ok(button("Try that question again"));
     failNext = false;
     await act(() => button("Try that question again").click());
+    const retryQuestion = [...document.querySelectorAll('[data-slot="user-query"]')].at(-1);
+    assert.equal(document.activeElement, retryQuestion, "retry focuses the existing question");
     assert.ok(document.querySelector('[data-slot="receipts-status"]'), "manual retries show progress before any response arrives");
     assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "true");
     assert.equal(document.querySelector('[data-slot="stop-button"]'), null);
@@ -187,6 +205,7 @@ test("mobile composer, pending/streaming stages, limits, and click-only disclosu
     });
     assert.equal(document.querySelector('[data-slot="receipts-status"]'), null);
     assert.equal(document.querySelector('[data-slot="submit-button"]').dataset.pending, "false");
+    assert.equal(document.activeElement, retryQuestion, "retry completion leaves focus in the content");
     await act(() => button("Read the overview").click());
     assert.ok(document.querySelector('[data-slot="overview-canvas"]'));
     assert.equal(document.querySelectorAll('[data-slot="portfolio-footer"]').length, 1);

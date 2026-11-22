@@ -18,6 +18,13 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ---
 
+## Story Execution & Plan-First Workflow
+- **Review Before Coding:** For every story, inspect the relevant files and review downstream impacts on upcoming stories first. Surface any ambiguities, hidden coupling, or better architectural alternatives and **wait for explicit user confirmation** before modifying files.
+- **Maintain Documentation:** Update `apps/tastytechno/README.md` alongside any architectural, setup, environment variable, or workflow changes in each story.
+- **Portfolio / Case-Study Notes:** Capture architectural decisions, diagrams, and trade-offs for the `joestein.dev` Tasty Techno project doc when requested—do not publish "Making Of" pages inside the public `tastytechno` frontend.
+
+---
+
 ## Directory Structure (No `src/` Directory)
 - `app/`: Next.js App Router routes and layouts.
   - `app/(site)/layout.tsx` & `page.tsx`: Public frontend layout and pages. Keep Studio CSS completely isolated from frontend layouts.
@@ -103,9 +110,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ---
 
 ## Verification Checklist
-Before completing any story in `apps/tastytechno`, run from the monorepo root:
-- `pnpm --filter tastytechno typegen` (whenever schemas or queries change)
-- `pnpm --filter tastytechno typecheck`
-- `pnpm --filter tastytechno lint`
-- `pnpm --filter tastytechno build`
-- For `worker/` changes: verify `docker build -t tastytechno-worker ./apps/tastytechno/worker` succeeds cleanly.
+
+Before completing any story in apps/tastytechno, run from the monorepo root:
+- pnpm --filter tastytechno typegen (whenever schemas or queries change)
+- pnpm --filter tastytechno typecheck
+- pnpm --filter tastytechno lint
+- pnpm --filter tastytechno build
+- Verify apps/tastytechno/README.md reflects any setup, schema, or workflow changes made in the story.
+- For worker/ changes: verify docker build -t tastytechno-worker ./apps/tastytechno/worker succeeds cleanly.

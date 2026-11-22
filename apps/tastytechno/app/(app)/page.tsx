@@ -1,3 +1,4 @@
+import { stegaClean } from "@sanity/client/stega"
 import type { Metadata } from "next"
 import Link from "next/link"
 
@@ -14,15 +15,15 @@ export const revalidate = 300
 
 export async function generateMetadata(): Promise<Metadata> {
   const [settings, home, albums] = await Promise.all([
-    getSiteSettings(),
-    getHomePage(),
-    getAlbums(),
+    getSiteSettings({ stega: false }),
+    getHomePage({ stega: false }),
+    getAlbums({ stega: false }),
   ])
 
   const title = home?.seo?.metaTitle?.trim() || `${settings?.siteTitle} | Artists, Events & Underground Culture`
   const description = home?.seo?.metaDescription?.trim() || settings?.siteDescription
   const featuredAlbum =
-    albums.find((album) => album.slug === home?.featuredAlbumSlug) ??
+    albums.find((album) => stegaClean(album.slug) === stegaClean(home?.featuredAlbumSlug)) ??
     albums.find((album) => album.showOnHome === true)
   const socialImage = home?.seo?.openGraphImage ?? featuredAlbum?.coverPhoto?.image
   const socialImageUrl = getOpenGraphImageUrl(socialImage)
@@ -57,11 +58,11 @@ export default async function HomePage() {
     getArtistCards(),
   ])
   const featuredEvent =
-    events.find((event) => event.slug === home?.featuredEventSlug) ??
+    events.find((event) => stegaClean(event.slug) === stegaClean(home?.featuredEventSlug)) ??
     events.find((event) => event.showOnHome === true) ??
     events[0]
   const featuredAlbum =
-    albums.find((album) => album.slug === home?.featuredAlbumSlug) ??
+    albums.find((album) => stegaClean(album.slug) === stegaClean(home?.featuredAlbumSlug)) ??
     albums.find((album) => album.showOnHome === true) ??
     albums[0]
   const featuredArtists = artists.slice(0, 3)
@@ -291,7 +292,7 @@ export default async function HomePage() {
       <SiteFooter inquiryEmail={home?.inquiryEmail} socialLinks={home?.socialLinks} />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(stegaClean(structuredData)).replace(/</g, "\\u003c") }}
       />
     </div>
   )

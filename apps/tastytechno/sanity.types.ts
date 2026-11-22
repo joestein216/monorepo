@@ -1079,6 +1079,61 @@ export type AlbumBySlugQueryResult = {
 // Query: *[_type == "photoAlbum" && defined(slug.current)].slug.current
 export type AlbumSlugsQueryResult = Array<string | null>;
 
+// Source: scripts/import-freaky-frank.ts
+// Variable: IMPORT_EXISTING_ARTIST_QUERY
+// Query: *[_type == "artistPage" && slug.current == $slug]{_id}
+export type IMPORT_EXISTING_ARTIST_QUERY_RESULT = Array<{
+  _id: string;
+}>;
+
+// Source: scripts/seed-tasty-techno-site.ts
+// Variable: SEED_ARTIST_QUERY
+// Query: *[      _type == "artistPage" &&      slug.current == $slug &&      _id in path("*")    ][0]{_id, heroImage}
+export type SEED_ARTIST_QUERY_RESULT = {
+  _id: string;
+  heroImage: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    caption?: string;
+    credit?: string;
+    _type: "image";
+  } | null;
+} | null;
+
+// Source: scripts/seed-tasty-techno-site.ts
+// Variable: SEED_EVENT_QUERY
+// Query: *[_type == "event" && slug.current == $slug && _id in path("*")][0]{      _id,      startsAt,      endsAt,      dateDisplay    }
+export type SEED_EVENT_QUERY_RESULT = {
+  _id: string;
+  startsAt: string | null;
+  endsAt: string | null;
+  dateDisplay: string | null;
+} | null;
+
+// Source: scripts/seed-tasty-techno-site.ts
+// Variable: SEED_PHOTO_QUERY
+// Query: *[      _type == "photo" &&      title == "Freaky Frank at Tasty Techno Chapter One" &&      references($eventId) &&      _id in path("*")    ][0]{_id}
+export type SEED_PHOTO_QUERY_RESULT = {
+  _id: string;
+} | null;
+
+// Source: scripts/seed-tasty-techno-site.ts
+// Variable: SEED_ALBUM_QUERY
+// Query: *[_type == "photoAlbum" && slug.current == $slug && _id in path("*")][0]{_id}
+export type SEED_ALBUM_QUERY_RESULT = {
+  _id: string;
+} | null;
+
+// Source: scripts/seed-tasty-techno-site.ts
+// Variable: SEED_HOME_QUERY
+// Query: *[_type == "homePage" && _id in path("*")] | order(_updatedAt desc)[0]{_id}
+export type SEED_HOME_QUERY_RESULT = {
+  _id: string;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -1094,5 +1149,11 @@ declare module "@sanity/client" {
     '*[_type == "photoAlbum" && defined(slug.current)]\n  | order(sortOrder asc, title asc) {\n  "id": _id,\n  title,\n  "slug": slug.current,\n  summary,\n  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},\n  "coverPhoto": coverPhoto->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n},\n  photos[]{\n    "key": _key,\n    captionOverride,\n    "photo": photo->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n  },\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': AlbumsQueryResult;
     '*[_type == "photoAlbum" && slug.current == $slug][0] {\n  "id": _id,\n  title,\n  "slug": slug.current,\n  summary,\n  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},\n  "coverPhoto": coverPhoto->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n},\n  photos[]{\n    "key": _key,\n    captionOverride,\n    "photo": photo->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n  },\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': AlbumBySlugQueryResult;
     '*[_type == "photoAlbum" && defined(slug.current)].slug.current': AlbumSlugsQueryResult;
+    '*[_type == "artistPage" && slug.current == $slug]{_id}': IMPORT_EXISTING_ARTIST_QUERY_RESULT;
+    '*[\n      _type == "artistPage" &&\n      slug.current == $slug &&\n      _id in path("*")\n    ][0]{_id, heroImage}': SEED_ARTIST_QUERY_RESULT;
+    '*[_type == "event" && slug.current == $slug && _id in path("*")][0]{\n      _id,\n      startsAt,\n      endsAt,\n      dateDisplay\n    }': SEED_EVENT_QUERY_RESULT;
+    '*[\n      _type == "photo" &&\n      title == "Freaky Frank at Tasty Techno Chapter One" &&\n      references($eventId) &&\n      _id in path("*")\n    ][0]{_id}': SEED_PHOTO_QUERY_RESULT;
+    '*[_type == "photoAlbum" && slug.current == $slug && _id in path("*")][0]{_id}': SEED_ALBUM_QUERY_RESULT;
+    '*[_type == "homePage" && _id in path("*")] | order(_updatedAt desc)[0]{_id}': SEED_HOME_QUERY_RESULT;
   }
 }

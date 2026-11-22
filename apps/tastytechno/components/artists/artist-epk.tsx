@@ -1,3 +1,4 @@
+import { stegaClean } from "@sanity/client/stega"
 import Link from "next/link"
 import { ArtistQueryResult } from "../../sanity.types"
 import { type SanityImageValue, getSiteImageUrl } from "../../sanity/queries/image"
@@ -28,6 +29,7 @@ const trustedEmbedHosts = new Set([
 
 function safeHref(value?: string | null) {
   if (!value) return null
+  value = stegaClean(value)
   if (value.startsWith("/") && !value.startsWith("//")) return value
 
   try {
@@ -40,6 +42,7 @@ function safeHref(value?: string | null) {
 
 function safeEmbedUrl(value?: string | null) {
   if (!value) return null
+  value = stegaClean(value)
 
   try {
     const url = new URL(value)
@@ -127,7 +130,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
         `Booking inquiry for ${artist.name}`,
       )}`
     : null
-  const events = artist.events?.filter((event) => event.status !== "cancelled") ?? []
+  const events = artist.events?.filter((event) => stegaClean(event.status) !== "cancelled") ?? []
   const hasTechnicalRider = Boolean(
     artist.technicalRider &&
       (artist.technicalRider.summary ||
@@ -429,7 +432,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                     <article key={`${index}-${event.title}-${event.dateDisplay || event.startsAt}`} className="grid gap-4 py-6 sm:grid-cols-[12rem_1fr_auto] sm:items-start">
                       <div>
                         <p className="font-medium">xxxx</p>
-                        {event.status === "pending" ? (
+                        {stegaClean(event.status) === "pending" ? (
                           <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
                             Details pending
                           </p>

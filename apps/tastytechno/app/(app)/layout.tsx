@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 
 import React from 'react'
 import { draftMode } from 'next/headers'
@@ -16,6 +17,8 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const metadata: Metadata = { metadataBase: new URL("https://www.tastytechno.com") }
 
 export default async function StudioLayout({
   children,

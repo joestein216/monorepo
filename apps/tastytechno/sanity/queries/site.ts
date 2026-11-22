@@ -1,5 +1,5 @@
 import { sanityFetch } from '../lib/live';
-import { client } from '../lib/client';
+import { serverClient } from '../lib/server-client';
 import { defineQuery } from 'next-sanity';
 
 const imageProjection = `{
@@ -98,62 +98,68 @@ const albumsQuery = defineQuery(`*[_type == "photoAlbum" && defined(slug.current
 const albumBySlugQuery = defineQuery(`*[_type == "photoAlbum" && slug.current == $slug][0] ${albumProjection}`);
 const albumSlugsQuery = defineQuery(`*[_type == "photoAlbum" && defined(slug.current)].slug.current`);
 
-export const getSiteSettings = async () => {
-  const { data } = await sanityFetch({ 
-    query: siteSettingsQuery 
+export const getSiteSettings = async (options: { stega?: false } = {}) => {
+  const { data } = await sanityFetch({
+    query: siteSettingsQuery,
+    ...options,
   });
 
   return data
 }
 
-export const getHomePage = async () => {
-  const { data } = await sanityFetch({ 
-    query: homePageQuery, 
+export const getHomePage = async (options: { stega?: false } = {}) => {
+  const { data } = await sanityFetch({
+    query: homePageQuery,
+    ...options,
   })
 
   return data
 }
 
-export const getEvents = async () => {
+export const getEvents = async (options: { stega?: false } = {}) => {
   const { data } = await sanityFetch({
     query: eventsQuery,
+    ...options,
   })
 
   return data
 }
 
-export const getEventBySlug = async (slug: string) => {
-  const data = await sanityFetch({ 
-    query: eventBySlugQuery, 
-    params: { slug }, 
+export const getEventBySlug = async (slug: string, options: { stega?: false } = {}) => {
+  const data = await sanityFetch({
+    query: eventBySlugQuery,
+    params: { slug },
+    ...options,
   })
 
   return data
 }
 
 export const getEventSlugs = async () => {
-  return client.fetch(eventSlugsQuery)
+  return serverClient.fetch(eventSlugsQuery)
 }
 
-export const getAlbums = async () => {
-  const { data } = await sanityFetch({ 
-    query: albumsQuery 
+export const getAlbums = async (options: { stega?: false } = {}) => {
+  const { data } = await sanityFetch({
+    query: albumsQuery,
+    ...options,
   })
 
   return data
 }
 
-export const getAlbumBySlug = async (slug: string) => {
-  const { data } = await sanityFetch({ 
-    query: albumBySlugQuery, 
+export const getAlbumBySlug = async (slug: string, options: { stega?: false } = {}) => {
+  const { data } = await sanityFetch({
+    query: albumBySlugQuery,
     params: { slug },
+    ...options,
   })
 
   return data
 }
 
 export const getAlbumSlugs = async () => {
-  return client.fetch(albumSlugsQuery)
+  return serverClient.fetch(albumSlugsQuery)
 }
 
 export type SiteSettings = Awaited<ReturnType<typeof getSiteSettings>>

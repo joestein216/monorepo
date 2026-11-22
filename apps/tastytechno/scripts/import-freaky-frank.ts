@@ -1,8 +1,12 @@
+import type { IMPORT_EXISTING_ARTIST_QUERY_RESULT } from "../sanity.types"
+import { defineQuery } from "next-sanity"
 import { randomUUID } from "node:crypto"
 import { createReadStream } from "node:fs"
 import { basename, resolve } from "node:path"
 
 import { getCliClient } from "sanity/cli"
+
+const IMPORT_EXISTING_ARTIST_QUERY = defineQuery(`*[_type == "artistPage" && slug.current == $slug]{_id}`)
 
 const slug = "freaky-frank"
 const mediaDirectory = resolve(process.cwd(), "public/artists/freaky-frank")
@@ -64,8 +68,7 @@ async function uploadFile(filename: string) {
 }
 
 async function main() {
-  const existing = await client.fetch<Array<{ _id: string }>>(
-    `*[_type == "artistPage" && slug.current == $slug]{_id}`,
+  const existing = await client.fetch<IMPORT_EXISTING_ARTIST_QUERY_RESULT>(IMPORT_EXISTING_ARTIST_QUERY,
     { slug },
   )
 

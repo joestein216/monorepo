@@ -1,3 +1,4 @@
+import { stegaClean } from "@sanity/client/stega"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -21,7 +22,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
   const { slug } = await params
-  const { data } = await getEventBySlug(slug)
+  const { data } = await getEventBySlug(slug, { stega: false })
   if (!data) return { title: "Event not found | Tasty Techno" }
 
   const event = data
@@ -53,7 +54,7 @@ export default async function EventPage({ params }: EventPageProps) {
 
   const socialImage = event.seo?.openGraphImage ?? event.heroImage
   const ogImageUrl = getOpenGraphImageUrl(socialImage)
-  const album = albums.find((candidate) => candidate.relatedEvent?.id === event.id || candidate.relatedEvent?.slug === event.slug)
+  const album = albums.find((candidate) => stegaClean(candidate.relatedEvent?.id) === stegaClean(event.id) || stegaClean(candidate.relatedEvent?.slug) === stegaClean(event.slug))
   const structuredData = event.startsAt || event.eventDate
     ? {
         "@context": "https://schema.org",
@@ -63,9 +64,9 @@ export default async function EventPage({ params }: EventPageProps) {
         startDate: event.startsAt || event.eventDate,
         endDate: event.endsAt || undefined,
         eventStatus:
-          event.status === "cancelled"
+          stegaClean(event.status) === "cancelled"
             ? "https://schema.org/EventCancelled"
-            : event.status === "past"
+            : stegaClean(event.status) === "past"
               ? "https://schema.org/EventCompleted"
               : "https://schema.org/EventScheduled",
         location: event.venue
@@ -192,7 +193,7 @@ export default async function EventPage({ params }: EventPageProps) {
       {structuredData ? (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(stegaClean(structuredData)).replace(/</g, "\\u003c") }}
         />
       ) : null}
     </div>

@@ -20,7 +20,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: AlbumPageProps): Promise<Metadata> {
   const { slug } = await params
-  const album = await getAlbumBySlug(slug)
+  const album = await getAlbumBySlug(slug, { stega: false })
   if (!album) return { title: "Album not found | Tasty Techno" }
 
   const title = album.seo?.metaTitle?.trim() || `${album.title} | Tasty Techno`

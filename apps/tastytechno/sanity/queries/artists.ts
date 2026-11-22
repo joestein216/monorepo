@@ -1,5 +1,5 @@
 import { sanityFetch } from '../lib/live';
-import { client } from '../lib/client';
+import { serverClient } from '../lib/server-client';
 import { defineQuery } from 'next-sanity';
 
 const imageProjection = `{
@@ -84,8 +84,8 @@ const artistCardsQuery = defineQuery(`*[
 
 const artistSlugsQuery = defineQuery(`*[_type == "artistPage" && defined(slug.current)].slug.current`)
 
-export const getArtistBySlug = async (slug: string) => {
-  const { data } = await sanityFetch({ query: artistQuery, params: { slug }, })
+export const getArtistBySlug = async (slug: string, options: { stega?: false } = {}) => {
+  const { data } = await sanityFetch({ query: artistQuery, params: { slug }, ...options })
 
   return data
 }
@@ -97,5 +97,5 @@ export const getArtistCards = async () => {
 }
 
 export const getArtistSlugs = async () => {
-  return client.fetch(artistSlugsQuery)
+  return serverClient.fetch(artistSlugsQuery)
 }

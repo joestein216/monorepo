@@ -3,6 +3,8 @@ import {structureTool} from 'sanity/structure'
 import {presentationTool} from 'sanity/presentation'
 import {visionTool} from '@sanity/vision'
 import {schema} from './schemaTypes'
+import {BackstageTool, canUseBackstage} from './sanity/tools/backstage/BackstageTool'
+import {structure} from './sanity/structure'
 import {resolve} from './sanity/presentation/resolve'
 
 export default defineConfig({
@@ -12,7 +14,7 @@ export default defineConfig({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '5sak3amq',
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'development',
   plugins: [
-    structureTool(),
+    structureTool({structure}),
     presentationTool({
       resolve,
       previewUrl: {
@@ -23,5 +25,16 @@ export default defineConfig({
       },
     }),
     visionTool()],
-  schema
+  tools: (previous, {currentUser}) => canUseBackstage(currentUser)
+    ? [...previous, {name: 'backstage', title: 'Backstage', component: BackstageTool}]
+    : previous,
+  schema: {
+    ...schema,
+    templates: (previous) => previous.filter((template) => template.schemaType !== 'backstageBoard'),
+  },
+  document: {
+    actions: (previous, {schemaType}) => schemaType === 'backstageBoard'
+      ? previous.filter((action) => !['duplicate', 'delete', 'unpublish'].includes(action.action || ''))
+      : previous,
+  },
 })

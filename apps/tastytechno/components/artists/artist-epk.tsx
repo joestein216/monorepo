@@ -1,7 +1,7 @@
 import { stegaClean } from "@sanity/client/stega"
-import Link from "next/link"
 import { ArtistQueryResult } from "../../sanity.types"
 import { type SanityImageValue, getSiteImageUrl } from "../../sanity/queries/image"
+import { SiteHeader } from "../site/site-header"
 import { SanityImage } from "../site/sanity-image"
 
 type ArtistEpkProps = {
@@ -73,7 +73,7 @@ function VideoCard({ video }: { video: ArtistVideo }) {
   const posterUrl = poster ? getSiteImageUrl(poster, { width: 1280, height: 720 }) : undefined
 
   return (
-    <article className="overflow-hidden rounded-md shadow-sm border border-border bg-card">
+    <article data-slot="media-card">
       {localOrHostedFile ? (
         <video
           className="aspect-[9/16] max-h-[38rem] w-full bg-black object-contain"
@@ -142,34 +142,12 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-6 py-5">
-          <Link className="text-sm font-semibold tracking-wide" href="/">
-            Tasty Techno
-          </Link>
-          <nav aria-label="Artist page">
-            <ul className="flex items-center gap-5 text-sm text-muted-foreground">
-              <li>
-                <Link className="hover:text-foreground" href="/artists">
-                  Artists
-                </Link>
-              </li>
-              {bookingHref ? (
-                <li>
-                  <a className="font-medium text-foreground" href={bookingHref}>
-                    Book {artist.name}
-                  </a>
-                </li>
-              ) : null}
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
-      <main>
+      <main id="main-content">
         <section className="border-b border-border" aria-labelledby="artist-name">
           <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-12 md:grid-cols-[minmax(0,1fr)_minmax(20rem,0.72fr)] md:items-center md:py-20">
-            <div>
+            <div data-slot="content-panel">
               {artist.primaryLogo ? (
                 <div className="mb-8 h-24 w-24">
                   <SanityImage
@@ -245,14 +223,12 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
 
             {artist?.heroImage ? (
               <figure>
-                <div className="relative aspect-[3/4] overflow-hidden rounded-md shadow-md border border-border bg-muted">
+                <div data-slot="metal-frame">
                   <SanityImage
                     image={artist.heroImage}
                     alt={artist.heroImage.alt || artist.name}
-                    className="object-cover"
                     sizes="(max-width: 767px) calc(100vw - 3rem), 40vw"
                     priority
-                    fill
                   />
                 </div>
                 {artist.heroImage.caption || artist.heroImage.credit ? (
@@ -431,7 +407,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
                   return (
                     <article key={`${index}-${event.title}-${event.dateDisplay || event.startsAt}`} className="grid gap-4 py-6 sm:grid-cols-[12rem_1fr_auto] sm:items-start">
                       <div>
-                        <p className="font-medium">xxxx</p>
+                        <p className="font-medium">{event.dateDisplay || (event.startsAt ? new Intl.DateTimeFormat("en-US", {dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York"}).format(new Date(stegaClean(event.startsAt))) : "Date to be announced")}</p>
                         {stegaClean(event.status) === "pending" ? (
                           <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
                             Details pending
@@ -508,7 +484,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
 
         <section aria-labelledby="booking-heading">
           <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-2 md:py-20">
-            <div className="rounded-md border border-border bg-card shadow-sm p-7 sm:p-9">
+            <div data-slot="content-panel">
               <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Contact</p>
               <h2 id="booking-heading" className="mt-3 text-3xl font-semibold tracking-tight">
                 Booking
@@ -546,7 +522,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
               ) : null}
             </div>
 
-            <div className="rounded-md border border-border bg-card shadow-sm p-7 sm:p-9">
+            <div data-slot="content-panel">
               <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Media</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight">Press assets</h2>
               {artist.pressAssets?.length ? (
@@ -582,7 +558,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
             </div>
 
             {hasTechnicalRider && artist.technicalRider ? (
-              <div className="rounded-md border border-border bg-card shadow-sm p-7 sm:col-span-2 sm:p-9">
+              <div data-slot="content-panel" className="sm:col-span-2">
                 <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Production</p>
                 <h2 className="mt-3 text-3xl font-semibold tracking-tight">Technical setup</h2>
                 {artist.technicalRider.summary ? (

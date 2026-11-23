@@ -8,7 +8,7 @@ import { EventBySlugQueryResult } from "../../../sanity.types"
 
 export const metadata: Metadata = {
   title: "Events | Tasty Techno",
-  description: "Past events and future chapters from Tasty Techno.",
+  description: "Into: Haven nights, upcoming gatherings, and the events behind us.",
   alternates: { canonical: "/events" },
 }
 
@@ -17,7 +17,7 @@ export const revalidate = 300
 export default async function EventsPage() {
   const [events, home] = await Promise.all([getEvents(), getHomePage()])
 
-  return home && (
+  return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <main id="main-content" className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
@@ -27,7 +27,7 @@ export default async function EventsPage() {
           </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">Events</h1>
           <p className="mt-5 text-lg leading-8 text-muted-foreground">
-            Past events and future chapters from Tasty Techno.
+            Into: Haven nights, upcoming gatherings, and the events behind us.
           </p>
         </header>
 
@@ -39,25 +39,11 @@ export default async function EventsPage() {
             {events.map((event) => (
               <EventCard key={event.slug} event={event as EventBySlugQueryResult} />
             ))}
-            <article className="flex min-h-72 flex-col justify-between rounded-2xl border border-border bg-muted/40 p-7">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  {home.nextChapterLabel}
-                </p>
-                <h3 className="mt-3 text-3xl font-semibold tracking-tight">{home.nextChapterTitle}</h3>
-                <p className="mt-4 leading-7 text-muted-foreground">{home.nextChapterCopy}</p>
-              </div>
-              <a
-                className="mt-8 inline-flex text-sm font-medium underline underline-offset-4"
-                href={`mailto:${home.inquiryEmail}?subject=Tasty%20Techno%20Chapter%20Two`}
-              >
-                Start a conversation
-              </a>
-            </article>
+            {!events.length ? <p data-slot="content-panel">The next event will appear here once it’s announced.</p> : null}
           </div>
         </section>
       </main>
-      <SiteFooter inquiryEmail={home.inquiryEmail} socialLinks={home.socialLinks} />
+      <SiteFooter inquiryEmail={home?.inquiryEmail} socialLinks={home?.socialLinks} />
     </div>
   )
 }

@@ -24,27 +24,25 @@ export function EventCard({ event, featured }: EventCardProps) {
   if (!event) return null
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-border bg-card">
+    <article data-slot="media-card">
       {event.heroImage ? (
         <Link
-          className="relative block bg-muted aspect-[4/3]"
+          data-slot="card-artwork"
           href={`/events/${event.slug}`}
           aria-label={`View ${event.chapterLabel ?? event.title}`}
         >
           <SanityImage
             image={event.heroImage}
             alt={event.heroImage.alt || event.title || "event image"}
-            fill
             sizes={
               featured
                 ? "(max-width: 767px) 100vw, 66vw"
                 : "(max-width: 767px) 100vw, 50vw"
             }
-            className="object-cover"
           />
         </Link>
       ) : null}
-      <div className="p-6 sm:p-7">
+      <div data-slot="card-copy">
         <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
           {event.chapterLabel ?? event.status}
         </p>

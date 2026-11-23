@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = { metadataBase: new URL("https://www.tastytechno.com") }
 
-export default async function StudioLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode
@@ -29,7 +29,7 @@ export default async function StudioLayout({
 
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body>
+      <body data-site-theme="charcoal">
         {children}
 
         <SanityLive />

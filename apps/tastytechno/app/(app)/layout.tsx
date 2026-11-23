@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 
 import React from 'react'
 import { draftMode } from 'next/headers'
@@ -17,7 +18,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default async function StudioLayout({
+export const metadata: Metadata = { metadataBase: new URL("https://www.tastytechno.com") }
+
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode
@@ -26,7 +29,7 @@ export default async function StudioLayout({
 
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body>
+      <body data-site-theme="charcoal">
         {children}
 
         <SanityLive />

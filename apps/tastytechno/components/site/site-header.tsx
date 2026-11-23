@@ -9,7 +9,7 @@ export function SiteHeader() {
       >
         Skip to main content
       </a>
-      <header className="border-b border-border bg-background">
+      <header data-slot="site-header" className="border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
           <Link className="text-sm font-semibold tracking-wide" href="/">
             Tasty Techno

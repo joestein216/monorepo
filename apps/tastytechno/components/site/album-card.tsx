@@ -11,27 +11,25 @@ export function AlbumCard({ album, featured = false }: AlbumCardProps) {
   const cover = album.coverPhoto?.image
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-border bg-card">
+    <article data-slot="media-card">
       {cover ? (
         <Link
-          className="relative block aspect-[4/3] bg-muted"
+          data-slot="card-artwork"
           href={`/albums/${album.slug}`}
           aria-label={`View ${album.title}`}
         >
           <SanityImage
             image={cover}
             alt={cover.alt || album.title}
-            fill
             sizes={
               featured
                 ? "(max-width: 767px) 100vw, 66vw"
                 : "(max-width: 767px) 100vw, 50vw"
             }
-            className="object-cover"
           />
         </Link>
       ) : null}
-      <div className="p-6 sm:p-7">
+      <div data-slot="card-copy">
         <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
           Photo album
         </p>

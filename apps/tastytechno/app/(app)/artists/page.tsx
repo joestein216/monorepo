@@ -1,6 +1,9 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 
+import { SiteHeader } from "../../../components/site/site-header"
+import { SiteFooter } from "../../../components/site/site-footer"
+import { getHomePage } from "../../../sanity/queries/site"
 import { SanityImage } from "../../../components/site/sanity-image"
 import { getArtistCards } from "../../../sanity/queries/artists"
 
@@ -13,20 +16,13 @@ export const metadata: Metadata = {
 export const revalidate = 300
 
 export default async function ArtistsPage() {
-  const artists = await getArtistCards()
+  const [artists, home] = await Promise.all([getArtistCards(), getHomePage()])
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
-          <Link className="text-sm font-semibold tracking-wide" href="/">
-            Tasty Techno
-          </Link>
-          <p className="text-sm text-muted-foreground">Artists</p>
-        </div>
-      </header>
+      <SiteHeader />
 
-      <main className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
+      <main id="main-content" className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
         <div className="max-w-3xl">
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Roster</p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">Tasty Techno artists</h1>
@@ -38,19 +34,17 @@ export default async function ArtistsPage() {
         {artists.length ? (
           <div className="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
             {artists.map((artist) => (
-              <article key={artist.slug} className="overflow-hidden rounded-2xl border border-border bg-card">
+              <article key={artist.slug} data-slot="media-card">
                 {artist.heroImage ? (
-                  <div className="relative aspect-[4/5] bg-muted">
+                  <div data-slot="card-artwork"><div data-slot="metal-frame">
                     <SanityImage
                       image={artist.heroImage}
                       alt={artist.heroImage.alt || artist.name}
-                      fill
                       sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 50vw, 33vw"
-                      className="object-cover"
                     />
-                  </div>
+                  </div></div>
                 ) : null}
-                <div className="p-6">
+                <div data-slot="card-copy">
                   {artist.positioning ? (
                     <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
                       {artist.positioning}
@@ -74,6 +68,7 @@ export default async function ArtistsPage() {
           </p>
         )}
       </main>
+      <SiteFooter inquiryEmail={home?.inquiryEmail} socialLinks={home?.socialLinks} />
     </div>
   )
 }

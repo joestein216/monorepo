@@ -20,7 +20,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: AlbumPageProps): Promise<Metadata> {
   const { slug } = await params
-  const album = await getAlbumBySlug(slug)
+  const album = await getAlbumBySlug(slug, { stega: false })
   if (!album) return { title: "Album not found | Tasty Techno" }
 
   const title = album.seo?.metaTitle?.trim() || `${album.title} | Tasty Techno`
@@ -48,10 +48,11 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
   if (!album) notFound()
 
   return (
-    home && <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <main id="main-content">
         <header className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
+          <div data-slot="content-panel">
           <Link className="text-sm text-muted-foreground underline underline-offset-4" href="/albums">
             Photo albums
           </Link>
@@ -70,6 +71,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
               View the related event
             </Link>
           ) : null}
+          </div>
         </header>
 
         <section aria-labelledby="photos-heading" className="mx-auto w-full max-w-6xl px-6 pb-20">
@@ -84,12 +86,11 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
 
                 return (
                   <figure key={placement.key} className="mb-6 break-inside-avoid">
-                    <SanityImage
+                    <div data-slot="metal-frame"><SanityImage
                       image={image}
                       alt={image.alt || album.title}
                       sizes="(max-width: 767px) 100vw, 50vw"
-                      className="h-auto w-full rounded-2xl"
-                    />
+                    /></div>
                     {placement.captionOverride || image.caption || image.credit ? (
                       <figcaption className="mt-3 text-sm leading-6 text-muted-foreground">
                         {[placement.captionOverride || image.caption, image.credit].filter(Boolean).join(" · ")}
@@ -106,7 +107,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
           )}
         </section>
       </main>
-      <SiteFooter inquiryEmail={home.inquiryEmail} socialLinks={home.socialLinks} />
+      <SiteFooter inquiryEmail={home?.inquiryEmail} socialLinks={home?.socialLinks} />
     </div>
   )
 }

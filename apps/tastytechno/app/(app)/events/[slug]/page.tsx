@@ -1,3 +1,4 @@
+import { stegaClean } from "@sanity/client/stega"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -21,7 +22,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
   const { slug } = await params
-  const { data } = await getEventBySlug(slug)
+  const { data } = await getEventBySlug(slug, { stega: false })
   if (!data) return { title: "Event not found | Tasty Techno" }
 
   const event = data
@@ -53,7 +54,7 @@ export default async function EventPage({ params }: EventPageProps) {
 
   const socialImage = event.seo?.openGraphImage ?? event.heroImage
   const ogImageUrl = getOpenGraphImageUrl(socialImage)
-  const album = albums.find((candidate) => candidate.relatedEvent?.id === event.id || candidate.relatedEvent?.slug === event.slug)
+  const album = albums.find((candidate) => stegaClean(candidate.relatedEvent?.id) === stegaClean(event.id) || stegaClean(candidate.relatedEvent?.slug) === stegaClean(event.slug))
   const structuredData = event.startsAt || event.eventDate
     ? {
         "@context": "https://schema.org",
@@ -63,9 +64,9 @@ export default async function EventPage({ params }: EventPageProps) {
         startDate: event.startsAt || event.eventDate,
         endDate: event.endsAt || undefined,
         eventStatus:
-          event.status === "cancelled"
+          stegaClean(event.status) === "cancelled"
             ? "https://schema.org/EventCancelled"
-            : event.status === "past"
+            : stegaClean(event.status) === "past"
               ? "https://schema.org/EventCompleted"
               : "https://schema.org/EventScheduled",
         location: event.venue
@@ -92,6 +93,7 @@ export default async function EventPage({ params }: EventPageProps) {
       <main id="main-content">
         <article>
           <header className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
+            <div data-slot="content-panel">
             <Link className="text-sm text-muted-foreground underline underline-offset-4" href="/events">
               Events
             </Link>
@@ -105,9 +107,9 @@ export default async function EventPage({ params }: EventPageProps) {
             {[event.dateDisplay, event.venue, event.location].filter(Boolean).length ? (
               <p className="mt-6 text-sm leading-6 text-muted-foreground">
                 {event.startsAt ? (
-                  <time dateTime={event.startsAt}>{event.dateDisplay ?? event.startsAt}</time>
+                  <time dateTime={stegaClean(event.startsAt)}>{event.dateDisplay ?? event.startsAt}</time>
                 ) : event.eventDate ? (
-                  <time dateTime={event.eventDate}>{event.dateDisplay ?? event.eventDate}</time>
+                  <time dateTime={stegaClean(event.eventDate)}>{event.dateDisplay ?? event.eventDate}</time>
                 ) : (
                   event.dateDisplay
                 )}
@@ -116,20 +118,19 @@ export default async function EventPage({ params }: EventPageProps) {
                   : null}
               </p>
             ) : null}
+            </div>
           </header>
 
           {event.heroImage ? (
             <figure className="mx-auto w-full max-w-6xl px-6">
-              <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-muted">
+              <div data-slot="event-artwork"><div data-slot="metal-frame">
                 <SanityImage
                   image={event.heroImage}
                   alt={event.heroImage.alt || event.title}
-                  fill
                   priority
-                  sizes="(max-width: 1151px) 100vw, 1152px"
-                  className="object-cover"
+                  sizes="(max-width: 767px) 90vw, 480px"
                 />
-              </div>
+              </div></div>
               {event.heroImage.caption || event.heroImage.credit ? (
                 <figcaption className="mt-3 text-sm text-muted-foreground">
                   {[event.heroImage.caption, event.heroImage.credit].filter(Boolean).join(" · ")}
@@ -139,7 +140,7 @@ export default async function EventPage({ params }: EventPageProps) {
           ) : null}
 
           <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-14 md:grid-cols-2 md:py-20">
-            <section aria-labelledby="lineup-heading">
+            <section aria-labelledby="lineup-heading" data-slot="content-panel">
               <h2 id="lineup-heading" className="text-2xl font-semibold tracking-tight">
                 Lineup
               </h2>
@@ -163,9 +164,9 @@ export default async function EventPage({ params }: EventPageProps) {
               )}
             </section>
 
-            <aside aria-labelledby="event-links-heading">
+            <aside aria-labelledby="event-links-heading" data-slot="content-panel">
               <h2 id="event-links-heading" className="text-2xl font-semibold tracking-tight">
-                Explore this chapter
+                Around this night
               </h2>
               <div className="mt-6 flex flex-col items-start gap-4">
                 {album ? (
@@ -192,7 +193,7 @@ export default async function EventPage({ params }: EventPageProps) {
       {structuredData ? (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(stegaClean(structuredData)).replace(/</g, "\\u003c") }}
         />
       ) : null}
     </div>

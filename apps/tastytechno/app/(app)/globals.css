@@ -2,13 +2,112 @@
 @import "@repo/ui/styles.css";
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
 
-/* Site-owned brand token overrides belong here. */
-:root {
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+/* Public route-group theme. Studio has a separate layout and never receives this attribute. */
+body[data-site-theme="charcoal"] {
+  --color-surface: oklch(0.17 0.006 260);
+  --color-surface-elevated: oklch(0.235 0.006 260);
+  --color-foreground: oklch(0.96 0.006 85);
+  --color-text-muted: oklch(0.78 0.008 85);
+  --color-border: oklch(0.38 0.008 260);
+  --color-accent: oklch(0.37 0.12 25);
+  --color-on-accent: oklch(0.99 0.002 85);
+  --color-focus-ring: oklch(0.85 0.06 65);
+  --background: var(--color-surface);
+  --foreground: var(--color-foreground);
+  --card: var(--color-surface-elevated);
+  --card-foreground: var(--color-foreground);
+  --muted: var(--color-surface-elevated);
+  --secondary: var(--color-surface-elevated);
+  --secondary-foreground: var(--color-foreground);
+  --accent: var(--color-surface-elevated);
+  --accent-foreground: var(--color-foreground);
+  --popover: var(--color-surface-elevated);
+  --popover-foreground: var(--color-foreground);
+  --ring: var(--color-focus-ring);
+  --input: var(--color-border);
+  --radius: 0.25rem;
+  color-scheme: dark;
+  background: var(--color-surface);
+  color: var(--color-foreground);
+  font-family: var(--font-geist-sans), sans-serif;
+  --muted-foreground: var(--color-text-muted);
+  --border: var(--color-border);
+  --primary: var(--color-accent);
+  --primary-foreground: var(--color-on-accent);
+  --space-1: 0.25rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 3rem;
+  --space-section: clamp(3rem, 7vw, 6rem);
+  --space-panel: clamp(1.5rem, 3vw, 2.5rem);
+  --panel-shadow: 0 1rem 3rem oklch(0 0 0 / 20%);
+  --home-depth: radial-gradient(ellipse at 10% 35%, oklch(0.3 0.045 25 / 22%), transparent 60%), radial-gradient(ellipse at 85% 55%, oklch(0.4 0.015 250 / 15%), transparent 65%);
+  --space-gutter: clamp(1.25rem, 4vw, 3rem);
+  --content-max: 80rem;
+  --measure-copy: 62ch;
+  --portrait-max: 30rem;
+  --image-hero-max: 44rem;
+  --control-min: 2.75rem;
+  --focus-width: 0.1875rem;
+  --radius-control: 0.25rem;
+  --text-display: clamp(3.5rem, 8vw, 7rem);
+  --text-heading: clamp(2.25rem, 5vw, 4rem);
+  --text-subheading: clamp(1.75rem, 3vw, 2.5rem);
+  --text-introduction: clamp(1.125rem, 2vw, 1.375rem);
+  --text-small: 0.875rem;
+  --tracking-heading: -0.045em;
+  --tracking-label: 0.12em;
+  --color-scene-surface: oklch(0.16 0.015 280);
+  --color-scene-foreground: oklch(0.99 0 0);
+  --color-scene-muted: oklch(0.9 0.01 85);
+  --color-scene-panel: var(--color-surface-elevated);
+  --color-scene-shade: oklch(0.12 0.01 280 / 88%);
+  --scene-back-travel: 4rem;
+  --scene-middle-travel: 1.5rem;
+  --portrait-frame-width: 0.75rem;
+  --portrait-metal-edge: oklch(0.33 0.012 250);
+  --portrait-metal-inner: oklch(0.22 0.01 250);
+  --portrait-metal-brush: repeating-linear-gradient(0deg, oklch(1 0 0 / 5%) 0, oklch(1 0 0 / 5%) 0.0625rem, oklch(0 0 0 / 9%) 0.0625rem, oklch(0 0 0 / 9%) 0.125rem);
+  --portrait-metal-base: linear-gradient(125deg, oklch(0.53 0.015 250), oklch(0.35 0.012 250) 24%, oklch(0.49 0.015 250) 48%, oklch(0.32 0.012 250) 72%, oklch(0.46 0.015 250));
+  --portrait-frame-shadow: inset 0 0 0 0.0625rem oklch(1 0 0 / 20%), 0 0.5rem 1.5rem oklch(0 0 0 / 45%);
 }
 
-.dark {
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+body[data-site-theme="charcoal"] :is(a, button, input, summary, select, textarea):focus-visible {
+  outline: var(--focus-width) solid var(--color-focus-ring);
+  outline-offset: var(--space-1);
 }
+body[data-site-theme="charcoal"] :is(h1, h2, h3) { text-wrap: balance; }
+body[data-site-theme="charcoal"] :is(a, p, dd) { overflow-wrap: anywhere; }
+body[data-site-theme="charcoal"] [data-slot="content-panel"] {
+  padding: var(--space-panel);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  box-shadow: var(--panel-shadow);
+  border-radius: var(--radius-control);
+}
+body[data-site-theme="charcoal"] [data-slot="metal-frame"] {
+  padding: var(--portrait-frame-width);
+  background: var(--portrait-metal-brush), var(--portrait-metal-base);
+  border: 1px solid var(--portrait-metal-edge);
+  box-shadow: var(--portrait-frame-shadow);
+  border-radius: var(--radius-control);
+}
+body[data-site-theme="charcoal"] [data-slot="metal-frame"] img {
+  width: 100%; height: auto; display: block;
+  border: 1px solid var(--portrait-metal-inner);
+  border-radius: 0;
+}
+body[data-site-theme="charcoal"] [data-slot="media-card"] {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-elevated);
+  overflow: hidden;
+}
+body[data-site-theme="charcoal"] [data-slot="card-copy"] { padding: var(--space-panel); }
+body[data-site-theme="charcoal"] [data-slot="card-artwork"] { display: block; padding: var(--space-4); background: var(--color-surface); }
+body[data-site-theme="charcoal"] [data-slot="card-artwork"] img { display: block; width: 100%; height: auto; }
+body[data-site-theme="charcoal"] [data-slot="event-artwork"] { max-width: var(--portrait-max); margin-inline: auto; }
+body[data-site-theme="charcoal"] [data-slot="site-header"] nav a { display: inline-flex; align-items: center; min-height: var(--control-min); }
+body[data-site-theme="charcoal"] [data-slot="artist-copy"] { min-width: 0; }

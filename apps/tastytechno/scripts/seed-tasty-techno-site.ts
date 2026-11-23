@@ -1,6 +1,32 @@
+import type { SEED_ARTIST_QUERY_RESULT, SEED_EVENT_QUERY_RESULT, SEED_PHOTO_QUERY_RESULT, SEED_ALBUM_QUERY_RESULT, SEED_HOME_QUERY_RESULT } from "../sanity.types"
+import { defineQuery } from "next-sanity"
 import { randomUUID } from "node:crypto"
 
 import { getCliClient } from "sanity/cli"
+
+const SEED_ARTIST_QUERY = defineQuery(`*[
+      _type == "artistPage" &&
+      slug.current == $slug &&
+      _id in path("*")
+    ][0]{_id, heroImage}`)
+
+const SEED_EVENT_QUERY = defineQuery(`*[_type == "event" && slug.current == $slug && _id in path("*")][0]{
+      _id,
+      startsAt,
+      endsAt,
+      dateDisplay
+    }`)
+
+const SEED_PHOTO_QUERY = defineQuery(`*[
+      _type == "photo" &&
+      title == "Freaky Frank at Tasty Techno Chapter One" &&
+      references($eventId) &&
+      _id in path("*")
+    ][0]{_id}`)
+
+const SEED_ALBUM_QUERY = defineQuery(`*[_type == "photoAlbum" && slug.current == $slug && _id in path("*")][0]{_id}`)
+
+const SEED_HOME_QUERY = defineQuery(`*[_type == "homePage" && _id in path("*")] | order(_updatedAt desc)[0]{_id}`)
 
 const eventSlug = "tasty-techno-chapter-one"
 const albumSlug = "tasty-techno-chapter-one"
@@ -21,15 +47,7 @@ function keyedReference(id: string, key: string) {
 }
 
 async function main() {
-  const frank = await client.fetch<{
-    _id: string
-    heroImage?: Record<string, unknown> & { asset?: { _ref?: string } }
-  } | null>(
-    `*[
-      _type == "artistPage" &&
-      slug.current == $slug &&
-      _id in path("*")
-    ][0]{_id, heroImage}`,
+  const frank = await client.fetch<SEED_ARTIST_QUERY_RESULT>(SEED_ARTIST_QUERY,
     { slug: frankSlug },
   )
 
@@ -44,18 +62,7 @@ async function main() {
     caption: "Freaky Frank at Tasty Techno Chapter One",
   }
 
-  let event = await client.fetch<{
-    _id: string
-    startsAt?: string
-    endsAt?: string
-    dateDisplay?: string
-  } | null>(
-    `*[_type == "event" && slug.current == $slug && _id in path("*")][0]{
-      _id,
-      startsAt,
-      endsAt,
-      dateDisplay
-    }`,
+  let event = await client.fetch<SEED_EVENT_QUERY_RESULT>(SEED_EVENT_QUERY,
     { slug: eventSlug },
   )
 
@@ -121,13 +128,7 @@ async function main() {
   }
   await eventPatch.commit()
 
-  let photo = await client.fetch<{ _id: string } | null>(
-    `*[
-      _type == "photo" &&
-      title == "Freaky Frank at Tasty Techno Chapter One" &&
-      references($eventId) &&
-      _id in path("*")
-    ][0]{_id}`,
+  let photo = await client.fetch<SEED_PHOTO_QUERY_RESULT>(SEED_PHOTO_QUERY,
     { eventId: event._id },
   )
 
@@ -144,8 +145,7 @@ async function main() {
     })
   }
 
-  let album = await client.fetch<{ _id: string } | null>(
-    `*[_type == "photoAlbum" && slug.current == $slug && _id in path("*")][0]{_id}`,
+  let album = await client.fetch<SEED_ALBUM_QUERY_RESULT>(SEED_ALBUM_QUERY,
     { slug: albumSlug },
   )
 
@@ -176,8 +176,7 @@ async function main() {
     })
   }
 
-  let homePage = await client.fetch<{ _id: string } | null>(
-    `*[_type == "homePage" && _id in path("*")] | order(_updatedAt desc)[0]{_id}`,
+  let homePage = await client.fetch<SEED_HOME_QUERY_RESULT>(SEED_HOME_QUERY,
   )
 
   if (!homePage) {

@@ -17,7 +17,7 @@ export default async function AlbumsPage() {
   const [albums, home] = await Promise.all([getAlbums(), getHomePage()])
 
   return (
-    home && <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <main id="main-content" className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
         <header className="max-w-3xl">
@@ -41,7 +41,7 @@ export default async function AlbumsPage() {
           </div>
         </section>
       </main>
-      <SiteFooter inquiryEmail={home.inquiryEmail} socialLinks={home.socialLinks} />
+      <SiteFooter inquiryEmail={home?.inquiryEmail} socialLinks={home?.socialLinks} />
     </div>
   )
 }

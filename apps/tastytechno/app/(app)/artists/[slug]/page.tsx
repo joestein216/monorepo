@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: ArtistPageProps): Promise<Metadata> {
   const { slug } = await params
-  const artist = await getArtistBySlug(slug)
+  const artist = await getArtistBySlug(slug, { stega: false })
 
   if (!artist) {
     return {

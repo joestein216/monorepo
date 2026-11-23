@@ -872,7 +872,7 @@ export type SiteSettingsQueryResult = {
 
 // Source: sanity/queries/site.ts
 // Variable: homePageQuery
-// Query: *[_type == "homePage"] | order(_updatedAt desc)[0]{  eyebrow,  heading,  introduction,  residency{title, introduction, venue, address},  "featuredArtistSlug": featuredArtist->slug.current,  artistSiteUrl,  "featuredEventSlug": featuredEvent->slug.current,  "featuredAlbumSlug": featuredAlbum->slug.current,  nextChapterLabel,  nextChapterTitle,  nextChapterCopy,  inquiryEmail,  artistBookingEmail,  socialLinks[]{label, href, openInNewTab},  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}}
+// Query: *[_type == "homePage"] | order(_updatedAt desc)[0]{  eyebrow,  heading,  introduction,  residency{title, introduction, venue, address},  "featuredArtistSlug": featuredArtist->slug.current,  artistSiteUrl,  "featuredEventSlug": featuredEvent->slug.current,  "featuredAlbumSlug": featuredAlbum->slug.current,  nextChapterLabel,  nextChapterTitle,  nextChapterCopy,  inquiryEmail,  artistBookingEmail,  socialLinks[]{label, href, openInNewTab},  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "assetMetadata": asset->{    "width": metadata.dimensions.width,    "height": metadata.dimensions.height,    "lqip": metadata.lqip,    "src": url  },  "width": assetMetadata.width,  "height": assetMetadata.height,  "lqip": assetMetadata.lqip,  "src": assetMetadata.src}}}
 export type HomePageQueryResult = {
   eyebrow: string | null;
   heading: string | null;
@@ -908,17 +908,23 @@ export type HomePageQueryResult = {
       alt: string | null;
       caption: null;
       credit: null;
-      width: number | null;
-      height: number | null;
-      lqip: string | null;
-      src: string | null;
+      assetMetadata: {
+        width: number | null;
+        height: number | null;
+        lqip: string | null;
+        src: string | null;
+      } | null;
+      width: null;
+      height: null;
+      lqip: null;
+      src: null;
     } | null;
   } | null;
 } | null;
 
 // Source: sanity/queries/site.ts
 // Variable: eventsQuery
-// Query: *[_type == "event" && defined(slug.current)]  | order(sortOrder asc, coalesce(startsAt, eventDate, "1900-01-01") desc, title asc) {  "id": _id,  title,  chapterLabel,  "slug": slug.current,  organizer,  status,  eventDate,  startsAt,  endsAt,  dateDisplay,  venue,  location,  summary,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url},  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},  eventUrl,  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}}
+// Query: *[_type == "event" && defined(slug.current)]  | order(sortOrder asc, startsAt desc, eventDate desc, title asc) {  "id": _id,  title,  chapterLabel,  "slug": slug.current,  organizer,  status,  eventDate,  startsAt,  endsAt,  dateDisplay,  venue,  location,  summary,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "assetMetadata": asset->{    "width": metadata.dimensions.width,    "height": metadata.dimensions.height,    "lqip": metadata.lqip,    "src": url  },  "width": assetMetadata.width,  "height": assetMetadata.height,  "lqip": assetMetadata.lqip,  "src": assetMetadata.src},  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},  eventUrl,  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "assetMetadata": asset->{    "width": metadata.dimensions.width,    "height": metadata.dimensions.height,    "lqip": metadata.lqip,    "src": url  },  "width": assetMetadata.width,  "height": assetMetadata.height,  "lqip": assetMetadata.lqip,  "src": assetMetadata.src}}}
 export type EventsQueryResult = Array<{
   id: string;
   title: string | null;
@@ -941,10 +947,16 @@ export type EventsQueryResult = Array<{
     alt: string | null;
     caption: string | null;
     credit: string | null;
-    width: number | null;
-    height: number | null;
-    lqip: string | null;
-    src: string | null;
+    assetMetadata: {
+      width: number | null;
+      height: number | null;
+      lqip: string | null;
+      src: string | null;
+    } | null;
+    width: null;
+    height: null;
+    lqip: null;
+    src: null;
   } | null;
   lineup: Array<{
     key: string;
@@ -966,17 +978,23 @@ export type EventsQueryResult = Array<{
       alt: string | null;
       caption: null;
       credit: null;
-      width: number | null;
-      height: number | null;
-      lqip: string | null;
-      src: string | null;
+      assetMetadata: {
+        width: number | null;
+        height: number | null;
+        lqip: string | null;
+        src: string | null;
+      } | null;
+      width: null;
+      height: null;
+      lqip: null;
+      src: null;
     } | null;
   } | null;
 }>;
 
 // Source: sanity/queries/site.ts
 // Variable: eventBySlugQuery
-// Query: *[_type == "event" && slug.current == $slug][0] {  "id": _id,  title,  chapterLabel,  "slug": slug.current,  organizer,  status,  eventDate,  startsAt,  endsAt,  dateDisplay,  venue,  location,  summary,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url},  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},  eventUrl,  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}}
+// Query: *[_type == "event" && slug.current == $slug][0] {  "id": _id,  title,  chapterLabel,  "slug": slug.current,  organizer,  status,  eventDate,  startsAt,  endsAt,  dateDisplay,  venue,  location,  summary,  "heroImage": heroImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "assetMetadata": asset->{    "width": metadata.dimensions.width,    "height": metadata.dimensions.height,    "lqip": metadata.lqip,    "src": url  },  "width": assetMetadata.width,  "height": assetMetadata.height,  "lqip": assetMetadata.lqip,  "src": assetMetadata.src},  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},  eventUrl,  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "assetMetadata": asset->{    "width": metadata.dimensions.width,    "height": metadata.dimensions.height,    "lqip": metadata.lqip,    "src": url  },  "width": assetMetadata.width,  "height": assetMetadata.height,  "lqip": assetMetadata.lqip,  "src": assetMetadata.src}}}
 export type EventBySlugQueryResult = {
   id: string;
   title: string | null;
@@ -999,10 +1017,16 @@ export type EventBySlugQueryResult = {
     alt: string | null;
     caption: string | null;
     credit: string | null;
-    width: number | null;
-    height: number | null;
-    lqip: string | null;
-    src: string | null;
+    assetMetadata: {
+      width: number | null;
+      height: number | null;
+      lqip: string | null;
+      src: string | null;
+    } | null;
+    width: null;
+    height: null;
+    lqip: null;
+    src: null;
   } | null;
   lineup: Array<{
     key: string;
@@ -1024,10 +1048,16 @@ export type EventBySlugQueryResult = {
       alt: string | null;
       caption: null;
       credit: null;
-      width: number | null;
-      height: number | null;
-      lqip: string | null;
-      src: string | null;
+      assetMetadata: {
+        width: number | null;
+        height: number | null;
+        lqip: string | null;
+        src: string | null;
+      } | null;
+      width: null;
+      height: null;
+      lqip: null;
+      src: null;
     } | null;
   } | null;
 } | null;
@@ -1039,7 +1069,7 @@ export type EventSlugsQueryResult = Array<string | null>;
 
 // Source: sanity/queries/site.ts
 // Variable: albumsQuery
-// Query: *[_type == "photoAlbum" && defined(slug.current)]  | order(sortOrder asc, title asc) {  "id": _id,  title,  "slug": slug.current,  summary,  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},  "coverPhoto": coverPhoto->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}},  photos[]{    "key": _key,    captionOverride,    "photo": photo->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}  },  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}}
+// Query: *[_type == "photoAlbum" && defined(slug.current)]  | order(sortOrder asc, title asc) {  "id": _id,  title,  "slug": slug.current,  summary,  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},  "coverPhoto": coverPhoto->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "assetMetadata": asset->{    "width": metadata.dimensions.width,    "height": metadata.dimensions.height,    "lqip": metadata.lqip,    "src": url  },  "width": assetMetadata.width,  "height": assetMetadata.height,  "lqip": assetMetadata.lqip,  "src": assetMetadata.src}},  photos[]{    "key": _key,    captionOverride,    "photo": photo->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "assetMetadata": asset->{    "width": metadata.dimensions.width,    "height": metadata.dimensions.height,    "lqip": metadata.lqip,    "src": url  },  "width": assetMetadata.width,  "height": assetMetadata.height,  "lqip": assetMetadata.lqip,  "src": assetMetadata.src}}  },  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "assetMetadata": asset->{    "width": metadata.dimensions.width,    "height": metadata.dimensions.height,    "lqip": metadata.lqip,    "src": url  },  "width": assetMetadata.width,  "height": assetMetadata.height,  "lqip": assetMetadata.lqip,  "src": assetMetadata.src}}}
 export type AlbumsQueryResult = Array<{
   id: string;
   title: string | null;
@@ -1061,10 +1091,16 @@ export type AlbumsQueryResult = Array<{
       alt: string | null;
       caption: string | null;
       credit: string | null;
-      width: number | null;
-      height: number | null;
-      lqip: string | null;
-      src: string | null;
+      assetMetadata: {
+        width: number | null;
+        height: number | null;
+        lqip: string | null;
+        src: string | null;
+      } | null;
+      width: null;
+      height: null;
+      lqip: null;
+      src: null;
     } | null;
   } | null;
   photos: Array<{
@@ -1081,10 +1117,16 @@ export type AlbumsQueryResult = Array<{
         alt: string | null;
         caption: string | null;
         credit: string | null;
-        width: number | null;
-        height: number | null;
-        lqip: string | null;
-        src: string | null;
+        assetMetadata: {
+          width: number | null;
+          height: number | null;
+          lqip: string | null;
+          src: string | null;
+        } | null;
+        width: null;
+        height: null;
+        lqip: null;
+        src: null;
       } | null;
     } | null;
   }> | null;
@@ -1101,17 +1143,23 @@ export type AlbumsQueryResult = Array<{
       alt: string | null;
       caption: null;
       credit: null;
-      width: number | null;
-      height: number | null;
-      lqip: string | null;
-      src: string | null;
+      assetMetadata: {
+        width: number | null;
+        height: number | null;
+        lqip: string | null;
+        src: string | null;
+      } | null;
+      width: null;
+      height: null;
+      lqip: null;
+      src: null;
     } | null;
   } | null;
 }>;
 
 // Source: sanity/queries/site.ts
 // Variable: albumBySlugQuery
-// Query: *[_type == "photoAlbum" && slug.current == $slug][0] {  "id": _id,  title,  "slug": slug.current,  summary,  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},  "coverPhoto": coverPhoto->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}},  photos[]{    "key": _key,    captionOverride,    "photo": photo->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}  },  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "width": asset->metadata.dimensions.width,  "height": asset->metadata.dimensions.height,  "lqip": asset->metadata.lqip,  "src": asset->url}}}
+// Query: *[_type == "photoAlbum" && slug.current == $slug][0] {  "id": _id,  title,  "slug": slug.current,  summary,  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},  "coverPhoto": coverPhoto->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "assetMetadata": asset->{    "width": metadata.dimensions.width,    "height": metadata.dimensions.height,    "lqip": metadata.lqip,    "src": url  },  "width": assetMetadata.width,  "height": assetMetadata.height,  "lqip": assetMetadata.lqip,  "src": assetMetadata.src}},  photos[]{    "key": _key,    captionOverride,    "photo": photo->{  "id": _id,  title,  "image": image {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "assetMetadata": asset->{    "width": metadata.dimensions.width,    "height": metadata.dimensions.height,    "lqip": metadata.lqip,    "src": url  },  "width": assetMetadata.width,  "height": assetMetadata.height,  "lqip": assetMetadata.lqip,  "src": assetMetadata.src}}  },  showOnHome,  sortOrder,  "seo": seo {  metaTitle,  metaDescription,  "openGraphImage": openGraphImage {  _type,  asset,  crop,  hotspot,  alt,  caption,  credit,  "assetMetadata": asset->{    "width": metadata.dimensions.width,    "height": metadata.dimensions.height,    "lqip": metadata.lqip,    "src": url  },  "width": assetMetadata.width,  "height": assetMetadata.height,  "lqip": assetMetadata.lqip,  "src": assetMetadata.src}}}
 export type AlbumBySlugQueryResult = {
   id: string;
   title: string | null;
@@ -1133,10 +1181,16 @@ export type AlbumBySlugQueryResult = {
       alt: string | null;
       caption: string | null;
       credit: string | null;
-      width: number | null;
-      height: number | null;
-      lqip: string | null;
-      src: string | null;
+      assetMetadata: {
+        width: number | null;
+        height: number | null;
+        lqip: string | null;
+        src: string | null;
+      } | null;
+      width: null;
+      height: null;
+      lqip: null;
+      src: null;
     } | null;
   } | null;
   photos: Array<{
@@ -1153,10 +1207,16 @@ export type AlbumBySlugQueryResult = {
         alt: string | null;
         caption: string | null;
         credit: string | null;
-        width: number | null;
-        height: number | null;
-        lqip: string | null;
-        src: string | null;
+        assetMetadata: {
+          width: number | null;
+          height: number | null;
+          lqip: string | null;
+          src: string | null;
+        } | null;
+        width: null;
+        height: null;
+        lqip: null;
+        src: null;
       } | null;
     } | null;
   }> | null;
@@ -1173,10 +1233,16 @@ export type AlbumBySlugQueryResult = {
       alt: string | null;
       caption: null;
       credit: null;
-      width: number | null;
-      height: number | null;
-      lqip: string | null;
-      src: string | null;
+      assetMetadata: {
+        width: number | null;
+        height: number | null;
+        lqip: string | null;
+        src: string | null;
+      } | null;
+      width: null;
+      height: null;
+      lqip: null;
+      src: null;
     } | null;
   } | null;
 } | null;
@@ -1250,12 +1316,12 @@ declare module "@sanity/client" {
     '*[_type == "artistPage" && defined(slug.current)].slug.current': ArtistSlugsQueryResult;
     '{\n  "board": *[_id == "backstageBoard"][0]{_id, _rev, focusMode, "featuredId": featuredItem._ref},\n  "events": *[_type == "event" && status == "upcoming" && defined(slug.current) && dateTime(coalesce(endsAt, startsAt)) > dateTime(now())] | order(startsAt asc)[0...50]{\n    _id, title, status, startsAt, endsAt, dateDisplay, venue, location, summary, eventUrl,\n    "slug": slug.current,\n    "image": heroImage{asset, crop, hotspot, alt, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height, "lqip": asset->metadata.lqip}\n  },\n  "opportunities": *[_type == "backstageOpportunity"] | order(title asc){\n    _id, title, group, summary, address, nextStep, sourceUrl, sourceCheckedAt, actionUrl, actionLabel\n  }\n}': BackstageQueryResult;
     '*[_type == "siteSettings"] | order(_updatedAt desc)[0]{\n  siteTitle,\n  siteDescription\n}': SiteSettingsQueryResult;
-    '*[_type == "homePage"] | order(_updatedAt desc)[0]{\n  eyebrow,\n  heading,\n  introduction,\n  residency{title, introduction, venue, address},\n  "featuredArtistSlug": featuredArtist->slug.current,\n  artistSiteUrl,\n  "featuredEventSlug": featuredEvent->slug.current,\n  "featuredAlbumSlug": featuredAlbum->slug.current,\n  nextChapterLabel,\n  nextChapterTitle,\n  nextChapterCopy,\n  inquiryEmail,\n  artistBookingEmail,\n  socialLinks[]{label, href, openInNewTab},\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': HomePageQueryResult;
-    '*[_type == "event" && defined(slug.current)]\n  | order(sortOrder asc, coalesce(startsAt, eventDate, "1900-01-01") desc, title asc) {\n  "id": _id,\n  title,\n  chapterLabel,\n  "slug": slug.current,\n  organizer,\n  status,\n  eventDate,\n  startsAt,\n  endsAt,\n  dateDisplay,\n  venue,\n  location,\n  summary,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},\n  eventUrl,\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': EventsQueryResult;
-    '*[_type == "event" && slug.current == $slug][0] {\n  "id": _id,\n  title,\n  chapterLabel,\n  "slug": slug.current,\n  organizer,\n  status,\n  eventDate,\n  startsAt,\n  endsAt,\n  dateDisplay,\n  venue,\n  location,\n  summary,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n},\n  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},\n  eventUrl,\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': EventBySlugQueryResult;
+    '*[_type == "homePage"] | order(_updatedAt desc)[0]{\n  eyebrow,\n  heading,\n  introduction,\n  residency{title, introduction, venue, address},\n  "featuredArtistSlug": featuredArtist->slug.current,\n  artistSiteUrl,\n  "featuredEventSlug": featuredEvent->slug.current,\n  "featuredAlbumSlug": featuredAlbum->slug.current,\n  nextChapterLabel,\n  nextChapterTitle,\n  nextChapterCopy,\n  inquiryEmail,\n  artistBookingEmail,\n  socialLinks[]{label, href, openInNewTab},\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "assetMetadata": asset->{\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height,\n    "lqip": metadata.lqip,\n    "src": url\n  },\n  "width": assetMetadata.width,\n  "height": assetMetadata.height,\n  "lqip": assetMetadata.lqip,\n  "src": assetMetadata.src\n}\n}\n}': HomePageQueryResult;
+    '*[_type == "event" && defined(slug.current)]\n  | order(sortOrder asc, startsAt desc, eventDate desc, title asc) {\n  "id": _id,\n  title,\n  chapterLabel,\n  "slug": slug.current,\n  organizer,\n  status,\n  eventDate,\n  startsAt,\n  endsAt,\n  dateDisplay,\n  venue,\n  location,\n  summary,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "assetMetadata": asset->{\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height,\n    "lqip": metadata.lqip,\n    "src": url\n  },\n  "width": assetMetadata.width,\n  "height": assetMetadata.height,\n  "lqip": assetMetadata.lqip,\n  "src": assetMetadata.src\n},\n  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},\n  eventUrl,\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "assetMetadata": asset->{\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height,\n    "lqip": metadata.lqip,\n    "src": url\n  },\n  "width": assetMetadata.width,\n  "height": assetMetadata.height,\n  "lqip": assetMetadata.lqip,\n  "src": assetMetadata.src\n}\n}\n}': EventsQueryResult;
+    '*[_type == "event" && slug.current == $slug][0] {\n  "id": _id,\n  title,\n  chapterLabel,\n  "slug": slug.current,\n  organizer,\n  status,\n  eventDate,\n  startsAt,\n  endsAt,\n  dateDisplay,\n  venue,\n  location,\n  summary,\n  "heroImage": heroImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "assetMetadata": asset->{\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height,\n    "lqip": metadata.lqip,\n    "src": url\n  },\n  "width": assetMetadata.width,\n  "height": assetMetadata.height,\n  "lqip": assetMetadata.lqip,\n  "src": assetMetadata.src\n},\n  lineup[]{"key": _key, name, role, "artistSlug": artist->slug.current},\n  eventUrl,\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "assetMetadata": asset->{\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height,\n    "lqip": metadata.lqip,\n    "src": url\n  },\n  "width": assetMetadata.width,\n  "height": assetMetadata.height,\n  "lqip": assetMetadata.lqip,\n  "src": assetMetadata.src\n}\n}\n}': EventBySlugQueryResult;
     '*[_type == "event" && defined(slug.current)].slug.current': EventSlugsQueryResult;
-    '*[_type == "photoAlbum" && defined(slug.current)]\n  | order(sortOrder asc, title asc) {\n  "id": _id,\n  title,\n  "slug": slug.current,\n  summary,\n  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},\n  "coverPhoto": coverPhoto->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n},\n  photos[]{\n    "key": _key,\n    captionOverride,\n    "photo": photo->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n  },\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': AlbumsQueryResult;
-    '*[_type == "photoAlbum" && slug.current == $slug][0] {\n  "id": _id,\n  title,\n  "slug": slug.current,\n  summary,\n  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},\n  "coverPhoto": coverPhoto->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n},\n  photos[]{\n    "key": _key,\n    captionOverride,\n    "photo": photo->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n  },\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "width": asset->metadata.dimensions.width,\n  "height": asset->metadata.dimensions.height,\n  "lqip": asset->metadata.lqip,\n  "src": asset->url\n}\n}\n}': AlbumBySlugQueryResult;
+    '*[_type == "photoAlbum" && defined(slug.current)]\n  | order(sortOrder asc, title asc) {\n  "id": _id,\n  title,\n  "slug": slug.current,\n  summary,\n  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},\n  "coverPhoto": coverPhoto->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "assetMetadata": asset->{\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height,\n    "lqip": metadata.lqip,\n    "src": url\n  },\n  "width": assetMetadata.width,\n  "height": assetMetadata.height,\n  "lqip": assetMetadata.lqip,\n  "src": assetMetadata.src\n}\n},\n  photos[]{\n    "key": _key,\n    captionOverride,\n    "photo": photo->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "assetMetadata": asset->{\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height,\n    "lqip": metadata.lqip,\n    "src": url\n  },\n  "width": assetMetadata.width,\n  "height": assetMetadata.height,\n  "lqip": assetMetadata.lqip,\n  "src": assetMetadata.src\n}\n}\n  },\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "assetMetadata": asset->{\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height,\n    "lqip": metadata.lqip,\n    "src": url\n  },\n  "width": assetMetadata.width,\n  "height": assetMetadata.height,\n  "lqip": assetMetadata.lqip,\n  "src": assetMetadata.src\n}\n}\n}': AlbumsQueryResult;
+    '*[_type == "photoAlbum" && slug.current == $slug][0] {\n  "id": _id,\n  title,\n  "slug": slug.current,\n  summary,\n  "relatedEvent": relatedEvent->{"id": _id, title, "slug": slug.current},\n  "coverPhoto": coverPhoto->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "assetMetadata": asset->{\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height,\n    "lqip": metadata.lqip,\n    "src": url\n  },\n  "width": assetMetadata.width,\n  "height": assetMetadata.height,\n  "lqip": assetMetadata.lqip,\n  "src": assetMetadata.src\n}\n},\n  photos[]{\n    "key": _key,\n    captionOverride,\n    "photo": photo->{\n  "id": _id,\n  title,\n  "image": image {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "assetMetadata": asset->{\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height,\n    "lqip": metadata.lqip,\n    "src": url\n  },\n  "width": assetMetadata.width,\n  "height": assetMetadata.height,\n  "lqip": assetMetadata.lqip,\n  "src": assetMetadata.src\n}\n}\n  },\n  showOnHome,\n  sortOrder,\n  "seo": seo {\n  metaTitle,\n  metaDescription,\n  "openGraphImage": openGraphImage {\n  _type,\n  asset,\n  crop,\n  hotspot,\n  alt,\n  caption,\n  credit,\n  "assetMetadata": asset->{\n    "width": metadata.dimensions.width,\n    "height": metadata.dimensions.height,\n    "lqip": metadata.lqip,\n    "src": url\n  },\n  "width": assetMetadata.width,\n  "height": assetMetadata.height,\n  "lqip": assetMetadata.lqip,\n  "src": assetMetadata.src\n}\n}\n}': AlbumBySlugQueryResult;
     '*[_type == "photoAlbum" && defined(slug.current)].slug.current': AlbumSlugsQueryResult;
     '*[_type == "artistPage" && slug.current == $slug]{_id}': IMPORT_EXISTING_ARTIST_QUERY_RESULT;
     '*[\n      _type == "artistPage" &&\n      slug.current == $slug &&\n      _id in path("*")\n    ][0]{_id, heroImage}': SEED_ARTIST_QUERY_RESULT;

@@ -10,10 +10,16 @@ const imageProjection = `{
   alt,
   caption,
   credit,
-  "width": asset->metadata.dimensions.width,
-  "height": asset->metadata.dimensions.height,
-  "lqip": asset->metadata.lqip,
-  "src": asset->url
+  "assetMetadata": asset->{
+    "width": metadata.dimensions.width,
+    "height": metadata.dimensions.height,
+    "lqip": metadata.lqip,
+    "src": url
+  },
+  "width": assetMetadata.width,
+  "height": assetMetadata.height,
+  "lqip": assetMetadata.lqip,
+  "src": assetMetadata.src
 }`
 
 const seoProjection = `{
@@ -92,7 +98,7 @@ const homePageQuery = defineQuery(`*[_type == "homePage"] | order(_updatedAt des
 }`);
 
 const eventsQuery = defineQuery(`*[_type == "event" && defined(slug.current)]
-  | order(sortOrder asc, coalesce(startsAt, eventDate, "1900-01-01") desc, title asc) ${eventProjection}`);
+  | order(sortOrder asc, startsAt desc, eventDate desc, title asc) ${eventProjection}`);
 const eventBySlugQuery = defineQuery(`*[_type == "event" && slug.current == $slug][0] ${eventProjection}`);
 const eventSlugsQuery = defineQuery(`*[_type == "event" && defined(slug.current)].slug.current`);
 

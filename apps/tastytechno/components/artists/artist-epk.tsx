@@ -397,7 +397,7 @@ export function ArtistEpk({ artist }: ArtistEpkProps) {
             <div className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
               <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Schedule</p>
               <h2 id="events-heading" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Upcoming
+                Selected appearances
               </h2>
               <div className="mt-8 divide-y divide-border border-y border-border">
                 {events.map((event, index) => {

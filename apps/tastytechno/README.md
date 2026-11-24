@@ -253,3 +253,15 @@ Image contracts/components, public styling/page replacement, cosmetic route/sche
 folder moves, live-draft relay, and broad dependency upgrades are outside Story 0.
 Existing public pages stay until working replacements exist. No syndication schema,
 Studio action, endpoint, queue, browser adapter, or infrastructure is added here.
+
+## Content review — November 23, 2026
+
+The shared dataset received a content pass: residency and featured references,
+site/share descriptions, meaningful gallery alt text and titles, removal of a test
+caption and obsolete next-chapter placeholder, corrected flyer descriptions, and
+Frank's biography/residency context. Existing album draft ordering was preserved.
+Past artist appearances were marked as past; the EPK heading is now “Selected
+appearances” so retained historical bookings are not advertised as upcoming.
+The heading is a template change and requires a code deployment; Sanity edits
+publish independently. Unknown photo credits, performer identities, rider PDFs,
+and unannounced event details are intentionally not invented.
